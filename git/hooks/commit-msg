@@ -1,0 +1,17 @@
+#!/usr/bin/env sh
+if [ "${COMMIT_PREFIX}" = "" ]; then
+    COMMIT_PREFIX="SBA"
+fi
+branch_name=$(git symbolic-ref --short HEAD | grep -E "^${COMMIT_PREFIX}[-_][0-9]+")
+if [ "${branch_name}" != "" ]; then
+    commit_message=$(head -1 $1 | grep -E "^${COMMIT_PREFIX}[-_][0-9]+ ")
+    if [ ${commit_message}"x" = "x" ]; then
+        echo "WARNING!!! The commit message should be of the format '${branch_name} <Commit Message>'."
+        exec < /dev/tty
+        read -p "Do you still want to commit? (y/Y/n/N) " opt
+        if [ "${opt}" = 'n' ] || [ "${opt}" = 'N' ]; then
+            echo "Aborting !!"
+            exit 1
+        fi
+    fi
+fi
