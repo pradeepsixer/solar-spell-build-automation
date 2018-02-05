@@ -1,4 +1,15 @@
 #!/usr/bin/env sh
+
+# PURPOSE
+#   To warn committers that the commit message is not in the proper format, for an issue branch. This will help
+#   keep the commits in a proper manner.
+#
+# USAGE
+#   Within the root directory of this project, run the following commands:
+#       cp git/hooks/commit-msg .git/hooks/commit-msg
+#       chmod +x .git/hooks/commit-msg
+#
+
 if [ "${COMMIT_PREFIX}" = "" ]; then
     COMMIT_PREFIX="SBA"
 fi
