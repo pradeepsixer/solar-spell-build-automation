@@ -16,7 +16,7 @@ fi
 branch_name=$(git symbolic-ref --short HEAD | grep -E "^${COMMIT_PREFIX}[-_][0-9]+")
 if [ "${branch_name}" != "" ]; then
     commit_message=$(head -1 $1 | grep -E "^${COMMIT_PREFIX}[-_][0-9]+ ")
-    if [ ${commit_message}"x" = "x" ]; then
+    if [ "${commit_message}" = "" ]; then
         echo "WARNING!!! The commit message should be of the format '${branch_name} <Commit Message>'."
         exec < /dev/tty
         read -p "Do you still want to commit? (y/Y/n/N) " opt
