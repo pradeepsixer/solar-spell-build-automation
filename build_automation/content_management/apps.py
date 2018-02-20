@@ -6,5 +6,5 @@ class ContentManagementConfig(AppConfig):
     verbose_name = 'Content Management'
 
     def ready(self):
-        import content_management.signals
+        import content_management.signals  # noqa: F401
         pass

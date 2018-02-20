@@ -28,4 +28,5 @@ class ContentAdmin(admin.ModelAdmin):
                 )
             )
 
+
 admin.site.register(Content, ContentAdmin)
