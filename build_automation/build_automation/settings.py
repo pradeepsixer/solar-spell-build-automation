@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/2.0/ref/settings/
 import os
 
 import environ
+
 env = environ.Env()
 env.read_env()
 
@@ -35,7 +36,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
-    'content_management',
+    'content_management.apps.ContentManagementConfig',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -107,7 +108,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'America/Phoenix'
 
 USE_I18N = True
 
@@ -120,3 +121,8 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/2.0/howto/static-files/
 
 STATIC_URL = '/static/'
+MEDIA_ROOT = env.str('MEDIA_ROOT')
+MEDIA_URL = '/media/'
+
+DEFAULT_FILE_STORAGE = 'content_management.storage.CustomFileStorage'
+FILE_DUPLICATION_MARKER = 'spell-cms-dup'
