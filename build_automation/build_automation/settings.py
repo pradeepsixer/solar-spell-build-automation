@@ -123,3 +123,6 @@ USE_TZ = True
 STATIC_URL = '/static/'
 MEDIA_ROOT = env.str('MEDIA_ROOT')
 MEDIA_URL = '/media/'
+
+DEFAULT_FILE_STORAGE = 'content_management.storage.CustomFileStorage'
+FILE_DUPLICATION_MARKER = 'spell-cms-dup'
