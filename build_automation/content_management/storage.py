@@ -24,7 +24,7 @@ class CustomFileStorage(FileSystemStorage):
 
     def get_available_name(self, name, max_length=None):
         """
-        Modified version of django.core.files.storage.FileSystemStorage class's get_available_name() method.
+        Modified version of django.core.files.storage.Storage class's get_available_name() method.
         Reference: https://github.com/django/django/blob/master/django/core/files/storage.py .
         Added a file duplication marker for the purpose of getting the original file name later.
         ..warning:: If this is changed, so should be the get_original_file_name's implementation.
