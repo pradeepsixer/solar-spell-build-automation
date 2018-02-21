@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from .models import Video, Author, Topic, Content, Tag
+# from .models import Author, Topic, Content, Tag
 from django.http import HttpResponse
 
 
