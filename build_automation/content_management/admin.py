@@ -10,7 +10,7 @@ admin.site.register(GeoTag)
 
 # Define the admin class
 class ContentAdmin(admin.ModelAdmin):
-    list_display = ('title', 'date', 'author')
+    list_display = ('title', 'author', 'content_type', 'geotag', 'date')
 
 
 # Register the admin class with the associated model
