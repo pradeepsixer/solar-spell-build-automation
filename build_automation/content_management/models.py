@@ -1,26 +1,45 @@
 from django.db import models
 from django.urls import reverse #Used to generate URLs by reversing the URL patterns
 
-
 class Content(models.Model):
     """
-    Model representing a piece of content.
+    A content is the representation of a file.
     """
-    title = models.CharField(max_length=200)
-    author = models.ForeignKey('Author', on_delete=models.SET_NULL, null=True)
-    # Foreign Key used because the video may only have one author, but authors can have multiple videos
-    # Author as a string rather than object because it hasn't been declared yet in the file.
-    summary = models.TextField(max_length=1000, help_text="Enter a brief description of the video")
-    topic = models.ManyToManyField('Topic', help_text="Select a topic for this content")
-    content_type = models.CharField(max_length=50)
-    geotag = models.CharField(max_length=50)
-    date = models.DateField(auto_now_add=True)
+    name = models.CharField(max_length=50)
+
+    description = models.TextField()
+
+    # The Actual File
+    content_file = models.FileField("File")
+
+    created_time = models.DateTimeField(
+        "First uploaded on",
+        auto_now_add=True,
+        help_text='Date & Time when the file was uploaded for the first time'
+    )
+
+    last_updated_time = models.DateTimeField(
+        "Last updated on",
+        editable=False,
+        help_text='Date & Time when the file was updated recently'
+    )
+
+    # SHA-256 Checksum of the latest updated file.
+    checksum = models.SlugField(
+        "SHA256 Sum",
+        max_length=65,
+        editable=False,
+        help_text='SHA256 Sum of the file uploaded recently.'
+    )
+
+    content_file_uploaded = False
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.original_file = self.content_file
 
     def __str__(self):
-        """
-        String for representing the Model object.
-        """
-        return self.title
+        return self.name
 
 
 class ContentType(models.Model):
