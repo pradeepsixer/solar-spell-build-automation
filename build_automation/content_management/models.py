@@ -6,6 +6,10 @@ class Content(models.Model):
     A content is the representation of a file.
     """
     name = models.CharField(max_length=50)
+    creator = models.ManyToManyField('Creator', on_delete=models.SET_NULL, null=True)
+    topic = models.ManyToManyField('Topic', help_text="Select a topic for this content")
+    content_type = models.ManyToManyField('Content Type', help_text="What type of content is this?")
+    geotag = models.ManyToManyField('Geotag', help_text="Select a geographic region for this content")
 
     description = models.TextField()
 
