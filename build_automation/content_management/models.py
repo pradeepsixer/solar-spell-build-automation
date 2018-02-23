@@ -1,5 +1,5 @@
 from django.db import models
-
+from django.urls import reverse #Used to generate URLs by reversing the URL patterns
 
 class Content(models.Model):
     """
@@ -40,3 +40,59 @@ class Content(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class ContentType(models.Model):
+    """
+    Model representing a content type (e.g. Video, Audio, Document, etc.).
+    """
+    type = models.CharField(max_length=50, help_text="What kind of content is this? (e.g. Video, Audio, Document, etc.)")
+
+    def __str__(self):
+        return self.type
+
+
+class Topic(models.Model):
+    """
+    Model representing a topic (e.g. Math, Physics, etc.).
+    """
+    topic = models.CharField(max_length=200, help_text="Enter a topic (e.g. Math, Physics, etc.)")
+
+    def __str__(self):
+        return self.topic
+
+
+class Category(models.Model):
+    """
+    Model representing a category (e.g. Voice of America, etc.).
+    """
+    category = models.CharField(max_length=200, help_text="Enter a category (e.g. Voice of America, etc.)")
+
+    def __str__(self):
+        return self.category
+
+
+class GeoTag(models.Model):
+    """
+    Model representing a geotag.
+    """
+    geotag = models.CharField(max_length=200, help_text="Enter a region.")
+
+    def __str__(self):
+        return self.geotag
+
+
+class Author(models.Model):
+    first_name = models.CharField(max_length=100, default="Anon")
+    last_name = models.CharField(max_length=100, default="Anon")
+
+    class Meta:
+        ordering = ["last_name", "first_name"]
+
+    def get_absolute_url(self):
+
+        return reverse('author-detail', args=[str(self.id)])
+
+    def __str__(self):
+
+        return '{0}, {1}'.format(self.last_name, self.first_name)

@@ -3,7 +3,7 @@ from django.urls import reverse
 from django.utils.safestring import mark_safe
 
 from .exceptions import DuplicateContentFileException
-from .models import Content
+from .models import Author, Topic, Content, ContentType, GeoTag, Category
 
 
 class ContentAdmin(admin.ModelAdmin):
@@ -28,5 +28,9 @@ class ContentAdmin(admin.ModelAdmin):
                 )
             )
 
-
+admin.site.register(Author)
+admin.site.register(Topic)
+admin.site.register(ContentType)
+admin.site.register(Category)
+admin.site.register(GeoTag)
 admin.site.register(Content, ContentAdmin)
