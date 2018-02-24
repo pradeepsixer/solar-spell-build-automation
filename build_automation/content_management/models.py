@@ -12,13 +12,12 @@ class Content(models.Model):
     # The Actual File
     content_file = models.FileField("File")
 
-    created_time = models.DateTimeField(
-        "First uploaded on",
-        auto_now_add=True,
-        help_text='Date & Time when the file was uploaded for the first time'
+    updated_time = models.DateTimeField(
+        "Content updated on",
+        help_text='Date & Time when the content was updated recently'
     )
 
-    last_updated_time = models.DateTimeField(
+    last_uploaded_time = models.DateTimeField(
         "Last updated on",
         editable=False,
         help_text='Date & Time when the file was updated recently'

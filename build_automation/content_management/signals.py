@@ -28,7 +28,7 @@ def delete_media_file_on_change(sender, **kwargs):
         if content.checksum != newfile_checksum and duplicate_contents.count() > 0:
             raise DuplicateContentFileException(duplicate_contents.first())
         content.checksum = newfile_checksum  # Assign the new checksum to the model
-        content.last_updated_time = timezone.now()  # Assign the current time to the last updated time.
+        content.last_uploaded_time = timezone.now()  # Assign the current time to the last uploaded time.
 
         # If there is a file existing already, remove it, so that only the new file will be stored.
         if content.original_file is not None and content.pk is not None:
