@@ -1,6 +1,6 @@
-# from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
 from rest_framework import status
 from rest_framework.response import Response
+from rest_framework.reverse import reverse
 from rest_framework.viewsets import ModelViewSet
 
 from .exceptions import DuplicateContentFileException
@@ -14,6 +14,15 @@ class ContentApiViewset(ModelViewSet):
 
     def create(self, request):
         try:
-            super().create(request)
-        except DuplicateContentFileException as dup_exception:
-            return Response(status=status.HTTP_409_CONFLICT)
+            return super().create(request)
+        except DuplicateContentFileException as dup:
+            content_url = reverse('content-detail', args=[dup.content.pk], request=request)
+            data = {
+                'result': 'error',
+                'error': 'DUPLICATE_FILE_UPLOADED',
+                'existing_content': {
+                    'content_url': content_url,
+                    'file_url': request.build_absolute_uri(dup.content.content_file.url)
+                }
+            }
+            return Response(data, status=status.HTTP_409_CONFLICT)
