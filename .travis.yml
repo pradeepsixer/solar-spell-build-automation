@@ -1,0 +1,22 @@
+sudo: false
+language: python
+cache: pip
+python:
+ - "3.5"
+ - "3.6"
+services: postgresql
+matrix:
+  include:
+  - python: 3.6
+    env: TOXENV=flake8
+env:
+ - DJANGO=2.0
+install:
+ - pip install tox-travis codecov
+before_script:
+ - createdb -U postgres solarspell
+ - mv .travis.env build_automation/build_automation/.env
+script:
+ - tox
+after_success:
+ - coverage combine && codecov
