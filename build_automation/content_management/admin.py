@@ -7,8 +7,8 @@ from .models import Content
 
 
 class ContentAdmin(admin.ModelAdmin):
-    readonly_fields = ('created_time', 'last_updated_time',)
-    list_display = ('id', 'name', 'content_file', 'created_time', 'last_updated_time',)
+    readonly_fields = ('last_uploaded_time',)
+    list_display = ('id', 'name', 'content_file', 'updated_time', 'last_uploaded_time',)
 
     def save_model(self, request, obj, form, change):
         if 'content_file' in request.FILES:
