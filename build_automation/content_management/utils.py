@@ -6,6 +6,7 @@ class HashUtil:
     Hash Computation Utility
     """
 
+    @staticmethod
     def calc_sha256(input_file):
         """
         Calculate the SHA-256 checksum for the given file object.
