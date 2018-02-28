@@ -27,9 +27,13 @@ class ContentAdmin(admin.ModelAdmin):
                 )
             )
 
+
+admin.site.register(Content, ContentAdmin)
+
+
 class TagAdmin(admin.ModelAdmin):
     list_display = ('name', 'description', 'parent')
 
 
-admin.site.register(Tag, TagAdmin, Content, ContentAdmin)
+admin.site.register(Tag, TagAdmin)
 
