@@ -1,9 +1,8 @@
 from django.contrib import admin, messages
 from django.urls import reverse
 from django.utils.safestring import mark_safe
-
+from .models import Tag, Content
 from .exceptions import DuplicateContentFileException
-from .models import Content
 
 
 class ContentAdmin(admin.ModelAdmin):
@@ -28,5 +27,9 @@ class ContentAdmin(admin.ModelAdmin):
                 )
             )
 
+class TagAdmin(admin.ModelAdmin):
+    list_display = ('name', 'description', 'parent')
 
-admin.site.register(Content, ContentAdmin)
+
+admin.site.register(Tag, TagAdmin, Content, ContentAdmin)
+
