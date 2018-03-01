@@ -26,7 +26,7 @@ class ContentSerializer(serializers.HyperlinkedModelSerializer):
         content.description = validated_data.get('description', content.description)
         content.content_file = validated_data.get('content_file', content.content_file)
 
-        tag_list = [];
+        tag_list = []
         for tag in validated_data['tag']:
             tag_list.append(tag)
         content.tag.set(tag_list)
