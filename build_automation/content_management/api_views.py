@@ -4,8 +4,8 @@ from rest_framework.reverse import reverse
 from rest_framework.viewsets import ModelViewSet
 
 from .exceptions import DuplicateContentFileException
-from .models import Content
-from .serializers import ContentSerializer
+from .models import Content, Tag
+from .serializers import ContentSerializer, TagSerializer
 
 
 class ContentApiViewset(ModelViewSet):
@@ -41,3 +41,8 @@ class ContentApiViewset(ModelViewSet):
                 }
             }
             return Response(data, status=status.HTTP_409_CONFLICT)
+
+
+class TagViewSet(ModelViewSet):
+    serializer_class = TagSerializer
+    queryset = Tag.objects.all()
