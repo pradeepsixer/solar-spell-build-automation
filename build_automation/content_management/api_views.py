@@ -17,9 +17,9 @@ class ContentApiViewset(ModelViewSet):
     queryset = Content.objects.all()
     serializer_class = ContentSerializer
 
-    def create(self, request):
+    def create(self, request, *args, **kwargs):
         try:
-            return super().create(request)
+            return super().create(request, *args, **kwargs)
         except DuplicateContentFileException as dup:
             content_url = reverse('content-detail', args=[dup.content.pk], request=request)
             data = {
@@ -32,9 +32,9 @@ class ContentApiViewset(ModelViewSet):
             }
             return Response(data, status=status.HTTP_409_CONFLICT)
 
-    def update(self, request, pk=None):
+    def update(self, request, *args, **kwargs):
         try:
-            return super().update(request, pk)
+            return super().update(request, *args, **kwargs)
         except DuplicateContentFileException as dup:
             content_url = reverse('content-detail', args=[dup.content.pk], request=request)
             data = {
