@@ -48,7 +48,6 @@ class Content(models.Model):
 
     tag = models.ManyToManyField(Tag)
 
-
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.original_file = self.content_file

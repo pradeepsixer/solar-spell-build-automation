@@ -3,18 +3,12 @@ from rest_framework import serializers
 from .models import Content, Tag
 
 
-class TagSerializer(serializers.HyperlinkedModelSerializer):
-
-    class Meta:
-        model = Tag
-        fields = ('__all__')
-
 class ContentSerializer(serializers.HyperlinkedModelSerializer):
-    tag_ids = serializers.PrimaryKeyRelatedField(many=True, read_only=False, queryset=Tag.objects.all(),
-                                                    source='tag')
+    tag_ids = serializers.PrimaryKeyRelatedField(many=True, read_only=False, queryset=Tag.objects.all(), source='tag')
+
     def create(self, validated_data):
 
-        tag_list = [];
+        tag_list = []
         for tag in validated_data['tag']:
             tag_list.append(tag)
         del validated_data['tag']
@@ -43,7 +37,7 @@ class ContentSerializer(serializers.HyperlinkedModelSerializer):
 
     class Meta:
         model = Content
-        fields = ('url', 'name', 'description', 'content_file', 'updated_time', 'last_uploaded_time', 'tag_ids' )
+        fields = ('url', 'name', 'description', 'content_file', 'updated_time', 'last_uploaded_time', 'tag_ids')
         extra_kwargs = {
             'url': {'lookup_field': 'pk'},
         }
