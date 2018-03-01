@@ -1,0 +1,13 @@
+[run]
+branch = True
+source = build_automation
+parallel = True
+omit =
+    */wsgi.py
+    */__init__.py
+    */migrations/*
+
+[paths]
+source =
+    build_automation
+    */site-packages
