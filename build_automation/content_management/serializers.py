@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from .models import Content
+from .models import Content, Tag
 
 
 class ContentSerializer(serializers.HyperlinkedModelSerializer):
@@ -24,6 +24,15 @@ class ContentSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Content
         fields = ('url', 'name', 'description', 'content_file', 'updated_time', 'last_uploaded_time')
+        extra_kwargs = {
+            'url': {'lookup_field': 'pk'},
+        }
+
+
+class TagSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Tag
+        fields = ('url', 'name', 'description', 'parent', 'child_tags')
         extra_kwargs = {
             'url': {'lookup_field': 'pk'},
         }
