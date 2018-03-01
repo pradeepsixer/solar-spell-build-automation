@@ -7,6 +7,9 @@ from .exceptions import DuplicateContentFileException
 from .models import Content, Tag
 from .serializers import ContentSerializer, TagSerializer
 
+class TagApiViewset(ModelViewSet):
+    queryset = Content.objects.all()
+    serializer_class = TagSerializer
 
 class ContentApiViewset(ModelViewSet):
     queryset = Content.objects.all()
