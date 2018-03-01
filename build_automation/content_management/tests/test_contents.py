@@ -1,12 +1,17 @@
+import json
 import os
 import shutil
+import tempfile
 from datetime import timedelta
 from unittest.mock import MagicMock, patch
 
 from django.conf import settings
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase, override_settings
+from django.urls import reverse
 from django.utils import timezone
+from rest_framework import status
+from rest_framework.test import APITestCase
 
 from content_management.exceptions import DuplicateContentFileException
 from content_management.models import Content
@@ -172,6 +177,209 @@ class ContentTest(TestCase):
         self.assertTrue(os.path.exists(content1.content_file.path))
         content1.delete()
         self.assertFalse(os.path.exists(content1.content_file.path))
+
+
+@override_settings(MEDIA_ROOT=temp_media_dir, ALLOWED_HOSTS=['testserver'])
+class ContentAPITest(APITestCase):
+    def test_create_content(self):
+        """
+        Creating a new piece of content
+        """
+        url = reverse('content-list')
+        with tempfile.NamedTemporaryFile(suffix='.txt') as content_file:
+            content_file.write(b"The contents of the temporary file.\n")
+            content_file.seek(0)
+            data = {
+                'name': 'Content File',
+                'description': 'File 1',
+                'content_file': content_file,
+                'updated_time': timezone.now(),
+                'tag_ids': []
+            }
+            response = self.client.post(url, data, format='multipart')
+            self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+    def test_update_content_no_file(self):
+        """
+        Test updating an existing content without a file
+        """
+        url = reverse('content-list')
+        with tempfile.NamedTemporaryFile(suffix='.txt') as content_file:
+            content_file.write(b"The contents of the temporary file.\n")
+            content_file.seek(0)
+            data = {
+                'name': 'Content File',
+                'description': 'File 1',
+                'content_file': content_file,
+                'updated_time': timezone.now(),
+                'tag_ids': []
+            }
+            response = self.client.post(url, data, format='multipart')
+            self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        self.assertEqual(Content.objects.count(), 1)
+        content = Content.objects.first()
+        last_uploaded_time = content.last_uploaded_time
+        updated_data = {
+            'name': 'Updated Content Name',
+            'description': 'New description'
+        }
+        url = reverse('content-detail', args=[content.pk])
+        response = self.client.patch(url, updated_data, format='json')
+        content = Content.objects.first()
+        self.assertEqual(last_uploaded_time, content.last_uploaded_time)
+
+    def test_update_content_with_file(self):
+        """
+        Test updating an existing content with a file. The last uploaded time should be updated
+        with the to the last request's time
+        """
+        current_upload_time = timezone.now()
+        last_uploaded_time = current_upload_time - timedelta(days=5)
+        mock_timezone_now = MagicMock(return_value=last_uploaded_time)
+        url = reverse('content-list')
+        with tempfile.NamedTemporaryFile(suffix='.txt') as content_file:
+            content_file.write(b"The contents of the temporary file.\n")
+            content_file.seek(0)
+            data = {
+                'name': 'Content File',
+                'description': 'File 1',
+                'content_file': content_file,
+                'updated_time': timezone.now(),
+                'tag_ids': []
+            }
+
+            with patch('django.utils.timezone.now', mock_timezone_now):
+                response = self.client.post(url, data, format='multipart')
+                self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        self.assertEqual(Content.objects.count(), 1)
+        content = Content.objects.first()
+        self.assertEqual(content.last_uploaded_time, last_uploaded_time)
+
+        # Update content with new data
+        with tempfile.NamedTemporaryFile(suffix='.txt') as content_file:
+            content_file.write(b"The contents of the temporary file.\n")
+            content_file.seek(0)
+            updated_data = {
+                'name': 'Updated Content Name',
+                'description': 'New description',
+                'content_file': content_file
+            }
+
+            mock_timezone_now.return_value = current_upload_time
+            url = reverse('content-detail', args=[content.pk])
+            with patch('django.utils.timezone.now', mock_timezone_now):
+                response = self.client.patch(url, updated_data, format='multipart')
+                self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        self.assertEqual(Content.objects.count(), 1)
+        content = Content.objects.first()
+        self.assertEqual(content.last_uploaded_time, current_upload_time)
+
+    def test_upload_duplicate_file_create(self):
+        """
+        Upload a duplicate file in CREATE operation.
+        """
+        url = reverse('content-list')
+        with tempfile.NamedTemporaryFile(suffix='.txt') as content_file:
+            content_file.write(b"The contents of the temporary file.\n")
+            content_file.seek(0)
+            data = {
+                'name': 'Content File',
+                'description': 'File 1',
+                'content_file': content_file,
+                'updated_time': timezone.now(),
+                'tag_ids': []
+            }
+            response = self.client.post(url, data, format='multipart')
+            self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        self.assertEqual(Content.objects.count(), 1)
+        first_content = Content.objects.first()
+
+        # Duplicate File.
+        with tempfile.NamedTemporaryFile(suffix='.txt') as content_file:
+            content_file.write(b"The contents of the temporary file.\n")
+            content_file.seek(0)
+            data = {
+                'name': 'Content File',
+                'description': 'File 1',
+                'content_file': content_file,
+                'updated_time': timezone.now(),
+                'tag_ids': []
+            }
+            response = self.client.post(url, data, format='multipart')
+            self.assertEqual(response.status_code, status.HTTP_409_CONFLICT)
+            response_payload = json.loads(response.content.decode("utf-8"))
+            self.assertEqual(response_payload['result'], 'error')
+            self.assertEqual(response_payload['error'], 'DUPLICATE_FILE_UPLOADED')
+            self.assertRegex(
+                response_payload['existing_content']['content_url'],
+                '%s$' % reverse('content-detail', args=[first_content.pk])
+            )
+            self.assertRegex(
+                response_payload['existing_content']['file_url'],
+                '%s$' % first_content.content_file.url
+            )
+
+    def test_upload_duplicate_file_upload(self):
+        """
+        Upload a duplicate file in PATCH operation.
+        """
+        url = reverse('content-list')
+        with tempfile.NamedTemporaryFile(suffix='.txt') as content_file:
+            content_file.write(b"The contents of the temporary file.\n")
+            content_file.seek(0)
+            data = {
+                'name': 'Content File',
+                'description': 'File 1',
+                'content_file': content_file,
+                'updated_time': timezone.now()
+            }
+            response = self.client.post(url, data, format='multipart')
+            self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        self.assertEqual(Content.objects.count(), 1)
+        first_content = Content.objects.first()
+
+        with tempfile.NamedTemporaryFile(suffix='.txt') as content_file:
+            content_file.write(b"The contents of the temporary file 2.\n")
+            content_file.seek(0)
+            data = {
+                'name': 'Content File 2',
+                'description': 'File 2',
+                'content_file': content_file,
+                'updated_time': timezone.now()
+            }
+            response = self.client.post(url, data, format='multipart')
+            self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+        self.assertEqual(Content.objects.count(), 2)
+        second_content = Content.objects.filter(name='Content File 2').first()
+
+        # Duplicate File.
+        with tempfile.NamedTemporaryFile(suffix='.txt') as content_file:
+            content_file.write(b"The contents of the temporary file.\n")
+            content_file.seek(0)
+            data = {
+                'content_file': content_file,
+            }
+
+            url = reverse('content-detail', args=[second_content.pk])
+            response = self.client.patch(url, data, format='multipart')
+            self.assertEqual(response.status_code, status.HTTP_409_CONFLICT)
+            response_payload = json.loads(response.content.decode("utf-8"))
+            self.assertEqual(response_payload['result'], 'error')
+            self.assertEqual(response_payload['error'], 'DUPLICATE_FILE_UPLOADED')
+            self.assertRegex(
+                response_payload['existing_content']['content_url'],
+                '%s$' % reverse('content-detail', args=[first_content.pk])
+            )
+            self.assertRegex(
+                response_payload['existing_content']['file_url'],
+                '%s$' % first_content.content_file.url
+            )
 
 
 @override_settings(MEDIA_ROOT=temp_media_dir)
