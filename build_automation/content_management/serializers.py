@@ -21,9 +21,10 @@ class ContentSerializer(serializers.HyperlinkedModelSerializer):
         content.content_file = validated_data.get('content_file', content.content_file)
 
         tag_list = []
-        for tag in validated_data['tag']:
-            tag_list.append(tag)
-        content.tag.set(tag_list)
+        if 'tag' in validated_data:
+            for tag in validated_data['tag']:
+                tag_list.append(tag)
+            content.tag.set(tag_list)
         return self.__create_update(content)
 
     def __create_update(self, content, tag_list=None):
