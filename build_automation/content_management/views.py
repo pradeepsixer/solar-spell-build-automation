@@ -10,5 +10,5 @@ def index(request):
     return render(
         request,
         'index.html',
-        context={'num_content': num_content, 'num_tags': num_tags, 'num_videos':num_videos},
+        context={'num_content': num_content, 'num_tags': num_tags, 'num_videos': num_videos},
     )
