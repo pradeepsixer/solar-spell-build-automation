@@ -22,6 +22,13 @@ class Content(models.Model):
 
     description = models.TextField()
 
+    content_type = (
+        ('v', 'Video'),
+        ('d', 'Document'),
+        ('s', 'Slide Presentation'),
+        ('o', 'Other'),
+    )
+
     # The Actual File
     content_file = models.FileField("File")
 
