@@ -11,3 +11,8 @@ omit =
 source =
     build_automation
     */site-packages
+
+[report]
+exclude_lines =
+    def __str__
+    def get_absolute_url
