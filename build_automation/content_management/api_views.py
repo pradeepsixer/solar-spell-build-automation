@@ -1,4 +1,5 @@
 from rest_framework import status
+from rest_framework import filters
 from rest_framework.response import Response
 from rest_framework.reverse import reverse
 from rest_framework.viewsets import ModelViewSet
@@ -51,3 +52,5 @@ class ContentApiViewset(ModelViewSet):
 class TagViewSet(ModelViewSet):
     serializer_class = TagSerializer
     queryset = Tag.objects.all()
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ('description', 'name')
