@@ -1,6 +1,7 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from .models import Tag, Content
 from django.views import generic
+from . forms import DocumentForm
 
 
 def index(request):
@@ -16,6 +17,19 @@ def index(request):
         context={'num_content': num_content, 'num_tags': num_tags, 'num_videos': num_videos,
                  'num_visits': num_visits},
     )
+
+
+def model_form_upload(request):
+    if request.method == 'POST':
+        form = DocumentForm(request.POST, request.FILES)
+        if form.is_valid():
+            form.save()
+            return redirect('home')
+    else:
+        form = DocumentForm()
+    return render(request, 'core/model_form_upload.html', {
+        'form': form
+    })
 
 
 class ContentListView(generic.ListView):
