@@ -54,3 +54,17 @@ class TagViewSet(ModelViewSet):
     queryset = Tag.objects.all()
     filter_backends = (filters.SearchFilter,)
     search_fields = ('description', 'name')
+
+    def get_queryset(self):
+        ids = set()
+        queryset = Tag.objects.all()
+        search_param = self.request.query_params.get('search', None)
+        if search_param is not None:
+            matching_result = Tag.objects.filter(name__contains=search_param)
+            for res in matching_result:
+                child = res.child_tags.all()
+                for c in child:
+                    ids.add(c)
+                ids.add(matching_result)
+            print(ids)
+        return queryset
