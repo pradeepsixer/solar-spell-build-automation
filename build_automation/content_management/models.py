@@ -1,6 +1,8 @@
 from django.db import models
 from django.urls import reverse  # Used to generate URLs by reversing the URL patterns
 
+from content_management.exceptions import InvalidOperatorException
+
 
 class Tag(models.Model):
     name = models.CharField(max_length=50)
@@ -83,6 +85,12 @@ class FilterCriteria(models.Model):
                 if operator == self.operator:
                     return operator_str
         return None
+
+    def get_operator_id_from_str(self, operator):
+        for (operator_id, operator_str) in self.OPERATOR_CHOICES:
+            if operator_str == operator:
+                return operator_id
+        raise InvalidOperatorException(operator)
 
     def __str__(self):
         if self.left_criteria is not None or self.right_criteria is not None:
