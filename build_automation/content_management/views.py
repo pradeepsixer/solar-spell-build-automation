@@ -7,15 +7,13 @@ from . forms import DocumentForm
 def index(request):
     num_content = Content.objects.all().count()
     num_tags = Tag.objects.all().count()
-    num_videos = Content.objects.filter(status__exact='v').count()
     num_visits = request.session.get('num_visits', 0)
     request.session['num_visits'] = num_visits + 1
 
     return render(
         request,
         'index.html',
-        context={'num_content': num_content, 'num_tags': num_tags, 'num_videos': num_videos,
-                 'num_visits': num_visits},
+        context={'num_content': num_content, 'num_tags': num_tags, 'num_visits': num_visits},
     )
 
 
