@@ -26,5 +26,5 @@ router.register(r'tags', TagViewSet)
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include(router.urls)),
-    path('content_management/', include('content_management.urls')),
 ]
+
