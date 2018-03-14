@@ -1,0 +1,19 @@
+{% extends "base_generic.html" %}
+
+{% block content %}
+<h1>Solar Spell Home</h1>
+
+    <p>Welcome to <em>Solar Spell</em>, this is just a test page so don't freak out.</p>
+
+<h2>Dynamic content</h2>
+
+  <p>The database has the following content counts:</p>
+  <ul>
+    <li><strong>Content:</strong> {{ num_content }}</li>
+    <li><strong>Tags:</strong> {{ num_tags }}</li>
+    <li><strong>Videos:</strong> {{ num_videos }}</li>
+  </ul>
+
+    <p>You have visited this page {{ num_visits }}{% if num_visits == 1 %} time{% else %} times{% endif %}.</p>
+
+{% endblock %}

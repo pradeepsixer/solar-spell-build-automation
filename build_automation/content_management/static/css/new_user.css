@@ -1,0 +1,12 @@
+#username{
+    margin-bottom:5px;
+}
+
+.rise-header{
+    font-family:impact;
+    font-size:250px;
+    color: rgb(59, 89, 152);
+    text-shadow: 5px 5px 5px #333333;
+    margin:auto;
+    text-align: center;
+}

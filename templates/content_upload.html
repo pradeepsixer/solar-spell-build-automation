@@ -1,0 +1,22 @@
+{% extends "base_generic.html" %}
+
+{% block content %}
+<h1>Content Upload</h1>
+
+  <p>This is the temporary content upload page while I figure out what I'm doing.</p>
+
+    {% block content %}
+  <form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Upload</button>
+  </form>
+
+  <p><a href="{% url 'home' %}">Home</a></p>
+
+
+
+
+  <p>You have visited this page {{ num_visits }}{% if num_visits == 1 %} time{% else %} times{% endif %}.</p>
+    <p>This is just to see if it is working YAY?</p>
+{% endblock %}

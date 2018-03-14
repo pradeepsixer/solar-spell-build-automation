@@ -1,0 +1,12 @@
+{% extends "base_generic.html" %}
+
+{% block content %}
+  <h1>Title: {{ content.name }}</h1>
+
+  <p><strong>Name:</strong> <a href="">{{ content.name }}</a></p>
+  <p><strong>Description:</strong> {{ content.description }}</p>
+  <p><strong>Type:</strong> {{ content.content_type }}</p>
+  <p><strong>Tag:</strong> {{ content.tag }}</p>
+
+{% endblock %}
+

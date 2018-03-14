@@ -1,0 +1,20 @@
+{% extends "base_generic.html" %}
+
+{% block content %}
+    <h1>Content List</h1>
+
+    {% if content_list %}
+    <ul>
+
+      {% for content in content_list %}
+      <li>
+        <a href="{{ content.get_absolute_url }}">{{ content.name }}</a> ({{content.description}})
+      </li>
+      {% endfor %}
+
+    </ul>
+    {% else %}
+      <p>There is no content yet.</p>
+    {% endif %}       
+{% endblock %}
+
