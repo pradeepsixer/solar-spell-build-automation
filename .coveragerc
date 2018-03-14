@@ -5,7 +5,10 @@ parallel = True
 omit =
     */wsgi.py
     */__init__.py
+    */admin.py
+    */tests/*
     */migrations/*
+    build_automation/manage.py
 
 [paths]
 source =
