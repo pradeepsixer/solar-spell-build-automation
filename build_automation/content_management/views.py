@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render
 from .models import Tag, Content
 from django.views import generic
 
@@ -24,4 +24,3 @@ class ContentListView(generic.ListView):
 
 class ContentDetailView(generic.DetailView):
     model = Content
-
