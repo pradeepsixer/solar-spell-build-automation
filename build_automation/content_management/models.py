@@ -5,7 +5,7 @@ from content_management.exceptions import InvalidOperatorException
 
 
 class Tag(models.Model):
-    name = models.CharField(max_length=50)
+    name = models.CharField(max_length=50, unique=True)
     description = models.CharField(max_length=200, null=True)
     parent = models.ForeignKey('self', related_name='child_tags', on_delete=models.CASCADE, null=True)
 
@@ -120,8 +120,8 @@ class DirectoryLayout(models.Model):
     """
     The Directory Layout for each build.
     """
-    name = models.CharField(max_length=50)
-    description = models.CharField(max_length=200)
+    name = models.CharField(max_length=50, unique=True)
+    description = models.CharField(max_length=200, null=True)
 
     def __str__(self):
         return "DirectoryLayout[{}]".format(self.name)
