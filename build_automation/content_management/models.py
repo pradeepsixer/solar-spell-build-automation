@@ -81,13 +81,22 @@ class FilterCriteria(models.Model):
     @property
     def operator_str(self):
         if self.operator is not None:
-            for (operator, operator_str) in self.OPERATOR_CHOICES:
+            for (operator, operator_str) in self.OPERATOR_CHOICES:  # pragma: no branch
                 if operator == self.operator:
                     return operator_str
         return None
 
-    def get_operator_id_from_str(self, operator):
-        for (operator_id, operator_str) in self.OPERATOR_CHOICES:
+    @staticmethod
+    def is_valid_operator(operator):
+        try:
+            FilterCriteria.get_operator_id_from_str(operator)
+            return True
+        except InvalidOperatorException:
+            return False
+
+    @staticmethod
+    def get_operator_id_from_str(operator):
+        for (operator_id, operator_str) in FilterCriteria.OPERATOR_CHOICES:
             if operator_str == operator:
                 return operator_id
         raise InvalidOperatorException(operator)
