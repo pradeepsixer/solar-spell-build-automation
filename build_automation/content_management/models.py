@@ -22,13 +22,6 @@ class Content(models.Model):
 
     description = models.TextField()
 
-    content_type = (
-        ('v', 'Video'),
-        ('d', 'Document'),
-        ('s', 'Slide Presentation'),
-        ('o', 'Other'),
-    )
-
     # The Actual File
     content_file = models.FileField("File")
 
@@ -62,8 +55,3 @@ class Content(models.Model):
     def __str__(self):
         return self.name
 
-
-class Document(models.Model):
-    description = models.CharField(max_length=255, blank=True)
-    document = models.FileField(upload_to='documents/')
-    uploaded_at = models.DateTimeField(auto_now_add=True)
