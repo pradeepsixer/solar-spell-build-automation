@@ -52,6 +52,14 @@ class TagSerializer(serializers.ModelSerializer):
         }
 
 class DirectoryLayoutSerializer(serializers.ModelSerializer):
+    name = serializers.CharField(
+        max_length=50, validators=[
+            UniqueValidator(
+            queryset=DirectoryLayout.objects.all(),
+            message=('Duplicate layout exists')
+            )
+        ]
+    )
     class Meta:
         model = DirectoryLayout
         fields = '__all__'
@@ -60,3 +68,10 @@ class DirectorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Directory
         fields = '__all__'
+        validators = [
+            UniqueTogetherValidator(
+                queryset=Directory.objects.all(),
+                fields=('name', 'parent'),
+                message = ('The subdirectory for the parent already exists.')
+            )
+        ]
