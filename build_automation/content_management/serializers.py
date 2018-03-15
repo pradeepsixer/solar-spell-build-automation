@@ -1,6 +1,5 @@
 from rest_framework import serializers
-
-from .models import Content, Tag
+from .models import Content, Tag, Directory, DirectoryLayout, FilterCriteria
 
 
 class ContentSerializer(serializers.HyperlinkedModelSerializer):
@@ -51,3 +50,13 @@ class TagSerializer(serializers.ModelSerializer):
         extra_kwargs = {
             'url': {'lookup_field': 'pk'},
         }
+
+class DirectoryLayoutSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DirectoryLayout
+        fields = '__all__'
+
+class DirectorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Directory
+        fields = '__all__'
