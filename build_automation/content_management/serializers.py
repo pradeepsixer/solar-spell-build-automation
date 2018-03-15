@@ -1,5 +1,7 @@
 from rest_framework import serializers
-from .models import Content, Tag, Directory, DirectoryLayout, FilterCriteria
+from rest_framework.validators import UniqueTogetherValidator, UniqueValidator
+
+from .models import Content, Directory, DirectoryLayout, Tag
 
 
 class ContentSerializer(serializers.HyperlinkedModelSerializer):
@@ -51,18 +53,22 @@ class TagSerializer(serializers.ModelSerializer):
             'url': {'lookup_field': 'pk'},
         }
 
+
 class DirectoryLayoutSerializer(serializers.ModelSerializer):
     name = serializers.CharField(
-        max_length=50, validators=[
+        max_length=50,
+        validators=[
             UniqueValidator(
-            queryset=DirectoryLayout.objects.all(),
-            message=('Duplicate layout exists')
+                queryset=DirectoryLayout.objects.all(),
+                message=('Duplicate layout exists')
             )
         ]
     )
+
     class Meta:
         model = DirectoryLayout
         fields = '__all__'
+
 
 class DirectorySerializer(serializers.ModelSerializer):
     class Meta:
@@ -72,6 +78,6 @@ class DirectorySerializer(serializers.ModelSerializer):
             UniqueTogetherValidator(
                 queryset=Directory.objects.all(),
                 fields=('name', 'parent'),
-                message = ('The subdirectory for the parent already exists.')
+                message=('The subdirectory for the parent already exists.')
             )
         ]
