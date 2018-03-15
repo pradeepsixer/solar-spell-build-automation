@@ -45,6 +45,14 @@ class ContentSerializer(serializers.HyperlinkedModelSerializer):
 
 
 class TagSerializer(serializers.ModelSerializer):
+    name = serializers.CharField(
+        max_length=50, validators=[
+            UniqueValidator(
+            queryset=Tag.objects.all(),
+            message=('Tag already exists')
+            )
+        ]
+    )
     class Meta:
         model = Tag
         fields = ('url', 'name', 'description', 'parent', 'child_tags')
