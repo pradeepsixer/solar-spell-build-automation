@@ -21,7 +21,7 @@ from content_management.api_views import ContentApiViewset, TagViewSet
 
 router = routers.SimpleRouter()
 router.register(r'contents', ContentApiViewset)
-router.register(r'tags', TagViewSet)
+router.register(r'tags', TagViewSet, base_name='tag')
 
 urlpatterns = [
     path('admin/', admin.site.urls),
