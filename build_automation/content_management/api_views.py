@@ -66,9 +66,9 @@ class TagViewSet(ModelViewSet):
 
     def list(self, request, *args, **kwargs):
         tags_set = set()
-        retval = self.get_queryset()
+        all_matches = self.get_queryset()
         include_subtags = self.request.query_params.get('subtags', False)
-        for matching_result in retval:
+        for matching_result in all_matches:
             tags_set.add(matching_result)
             if include_subtags:
                 self.get_child(matching_result, tags_set)
