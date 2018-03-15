@@ -1,5 +1,5 @@
-from rest_framework import status
-from rest_framework import filters
+from django.db.models import Q
+from rest_framework import filters, status
 from rest_framework.response import Response
 from rest_framework.reverse import reverse
 from rest_framework.viewsets import ModelViewSet
@@ -17,6 +17,8 @@ class TagApiViewset(ModelViewSet):
 class ContentApiViewset(ModelViewSet):
     queryset = Content.objects.all()
     serializer_class = ContentSerializer
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ('name', 'description')
 
     def create(self, request, *args, **kwargs):
         try:
@@ -51,20 +53,29 @@ class ContentApiViewset(ModelViewSet):
 
 class TagViewSet(ModelViewSet):
     serializer_class = TagSerializer
-    queryset = Tag.objects.all()
     filter_backends = (filters.SearchFilter,)
     search_fields = ('description', 'name')
 
+    def get_child(self, matching_result, tags_set):
+        children = matching_result.child_tags.all()
+        for child in children:
+            tags_set.add(child)
+            self.get_child(child, tags_set)
+
     def get_queryset(self):
-        ids = set()
         queryset = Tag.objects.all()
         search_param = self.request.query_params.get('search', None)
         if search_param is not None:
-            matching_result = Tag.objects.filter(name__contains=search_param)
-            for res in matching_result:
-                child = res.child_tags.all()
-                for c in child:
-                    ids.add(c)
-                ids.add(matching_result)
-            print(ids)
+            queryset = queryset.filter(Q(name__icontains=search_param) | Q(description__icontains=search_param))
         return queryset
+
+    def list(self, request, *args, **kwargs):
+        tags_set = set()
+        retval = self.get_queryset()
+        include_subtags = self.request.query_params.get('subtags', False)
+        for matching_result in retval:
+            tags_set.add(matching_result)
+            if include_subtags:
+                self.get_child(matching_result, tags_set)
+        serializer = self.get_serializer(tags_set, many=True)
+        return Response(serializer.data)
