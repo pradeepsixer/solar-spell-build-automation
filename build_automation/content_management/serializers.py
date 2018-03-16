@@ -51,7 +51,7 @@ class TagSerializer(serializers.ModelSerializer):
             UniqueValidator(
                 queryset=Tag.objects.all(),
                 message={
-                    'Error': 'DUPLICATE_TAG_NAME'
+                    'error': 'DUPLICATE_TAG_NAME'
                 },
                 lookup='iexact'
             )
