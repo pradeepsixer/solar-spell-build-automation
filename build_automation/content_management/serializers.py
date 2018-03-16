@@ -50,7 +50,10 @@ class TagSerializer(serializers.ModelSerializer):
         max_length=50, validators=[
             UniqueValidator(
                 queryset=Tag.objects.all(),
-                message=('Tag already exists')
+                message={
+                    'Error': 'DUPLICATE_TAG_NAME'
+                },
+                lookup = 'iexact'
             )
         ]
     )
