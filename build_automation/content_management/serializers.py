@@ -53,7 +53,7 @@ class TagSerializer(serializers.ModelSerializer):
                 message={
                     'Error': 'DUPLICATE_TAG_NAME'
                 },
-                lookup = 'iexact'
+                lookup='iexact'
             )
         ]
     )
