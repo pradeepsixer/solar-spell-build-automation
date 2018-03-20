@@ -12,6 +12,7 @@
   <!-- Add additional CSS in static file -->
   {% load static %}
   <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+
 </head>
 
 <body>
@@ -22,8 +23,7 @@
       <div class="col-sm-2">
       {% block sidebar %}
       <ul class="sidebar-nav">
-          {% load static %}<img src="{% static 'images/solar.png' %}",
-                                alt="My image" style="width:555px;height:540px;"/>
+          <img src="{% static 'images/solar.png' %}" alt="Sun" style="width:100px;height:100px;"/>
           <li><a href="{% url 'index' %}">Home</a></li>
           <li><a href="">Content</a></li>
           <li><a href="">Administration</a></li>
