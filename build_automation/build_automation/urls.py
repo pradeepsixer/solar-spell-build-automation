@@ -17,11 +17,12 @@ from django.contrib import admin
 from django.urls import include, path
 from rest_framework import routers
 
-from content_management.api_views import ContentApiViewset, TagViewSet
+from content_management.api_views import ContentApiViewset, TagViewSet, DirectoryCloneApiViewset
 
 router = routers.SimpleRouter()
 router.register(r'contents', ContentApiViewset)
 router.register(r'tags', TagViewSet, base_name='tag')
+router.register(r'dirlayout/(?P<id>\d+)/clone', DirectoryCloneApiViewset, base_name='dirlayout')
 
 urlpatterns = [
     path('admin/', admin.site.urls),
