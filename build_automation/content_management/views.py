@@ -7,4 +7,3 @@ def index(request):
         request,
         'index.html',
     )
-
