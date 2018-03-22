@@ -133,3 +133,5 @@ MEDIA_URL = '/media/'
 
 DEFAULT_FILE_STORAGE = 'content_management.storage.CustomFileStorage'
 FILE_DUPLICATION_MARKER = 'spell-cms-dup'
+
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
