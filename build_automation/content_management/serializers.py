@@ -2,6 +2,7 @@ from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator, UniqueValidator
 
 from .models import Content, Directory, DirectoryLayout, Tag
+from .utils import FilterCriteriaUtil
 
 
 class ContentSerializer(serializers.HyperlinkedModelSerializer):
@@ -71,6 +72,28 @@ class DirectoryLayoutSerializer(serializers.ModelSerializer):
 
 
 class DirectorySerializer(serializers.ModelSerializer):
+    """
+    Create and Update functions to override the value of filter_criteria
+    """
+
+    def create(self, validated_data):
+        temp_FC = FilterCriteriaUtil()
+        temp_data = dict(validated_data)
+        temp_FC_data = temp_FC.create_filter_criteria_from_string('(1 AND 2)')
+        temp_data['filter_criteria'] = temp_FC_data.pop()
+        return Directory.objects.create(**temp_data)
+
+    def update(self, instance, validated_data):
+        temp_FC = FilterCriteriaUtil()
+        instance.name = validated_data.get('name', instance.name)
+        instance.dir_layout_id = validated_data.get('dir_layout_id', instance.dir_layout_id)
+        temp_FC_data = temp_FC.create_filter_criteria_from_string('(2 AND 3)')
+        validated_data['filter_criteria'] = temp_FC_data.pop()
+        instance.filter_criteria = validated_data.get('filter_criteria', instance.filter_criteria)
+        instance.parent = validated_data.get('parent', instance.parent)
+        instance.save()
+        return instance
+
     class Meta:
         model = Directory
         fields = '__all__'
