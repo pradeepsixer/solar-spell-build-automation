@@ -6,7 +6,7 @@ from rest_framework.reverse import reverse
 from rest_framework.viewsets import ModelViewSet, ViewSet
 
 from .exceptions import DuplicateContentFileException
-from .models import Content, DirectoryLayout, Tag
+from .models import Content, Directory, DirectoryLayout, FilterCriteria, Tag
 from .serializers import ContentSerializer, DirectoryLayoutSerializer, TagSerializer
 
 
@@ -82,10 +82,21 @@ class DirectoryCloneApiViewset(ViewSet,CreateModelMixin):
 
     def create(self, request, *args, **kwargs):
         cloned_layout = self.get_queryset()
+        print(cloned_layout.id)
         clone = DirectoryLayout(name=cloned_layout.name + "_clone", description=cloned_layout.description)
         clone.pk = None
         clone.save()
+
+        dir_queryset = Directory.objects.get(dir_layout_id=cloned_layout.id)
+        dir_queryset.pk = None
+        dir_queryset.save()
+
+        filter_queryset = FilterCriteria.objects.get(id=dir_queryset.filter_criteria_id)
+        filter_queryset.pk = None
+        filter_queryset.save()
+
         serializer = DirectoryLayoutSerializer(clone)
+
         return Response(serializer.data)
 
     def get_queryset(self, **kwargs):
