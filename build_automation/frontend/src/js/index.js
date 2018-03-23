@@ -1,7 +1,9 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 
+import DirectoryLayoutComponent from './directory_layout.js';
+
 ReactDOM.render(
-    <h1>SolarSPELL Hello World</h1>,
+    <DirectoryLayoutComponent />,
     document.getElementById('container')
 );

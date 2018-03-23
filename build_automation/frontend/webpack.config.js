@@ -3,7 +3,6 @@ const CopyWebpackPlugin = require('copy-webpack-plugin');
 
 module.exports = {
     entry: './src/js/index.js',
-    mode: 'production',
     node: {
         fs: 'empty'
     },
@@ -35,4 +34,3 @@ module.exports = {
         path: path.resolve(__dirname, 'dist')
     },
 };
-
