@@ -42,7 +42,6 @@ class FilterCriteriaUtil:
         """
         Create the filter criteria from the string specified.
         """
-
         tokens = re.findall(r'((?:\d+)|[()]|(?:OR)|(?:AND)|[\w]+)', input_expression)
         expr_stack = []
         for token in tokens:
@@ -62,7 +61,7 @@ class FilterCriteriaUtil:
                 raise MalformedExpressionException(input_expression)
         if len(expr_stack) != 1:
             raise MalformedExpressionException(input_expression)
-        return expr_stack
+        return expr_stack[0]
 
     def __create_filter_within_braces(self, expression, stack):
         """

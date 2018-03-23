@@ -8,7 +8,7 @@ from rest_framework.viewsets import ModelViewSet, ViewSet
 from .exceptions import DuplicateContentFileException
 from .models import Content, Directory, DirectoryLayout, FilterCriteria, Tag
 from .serializers import ContentSerializer, DirectoryLayoutSerializer, TagSerializer
-
+from .utils import FilterCriteriaUtil
 
 class ContentApiViewset(ModelViewSet):
     queryset = Content.objects.all()
@@ -82,21 +82,20 @@ class DirectoryCloneApiViewset(ViewSet,CreateModelMixin):
 
     def create(self, request, *args, **kwargs):
         cloned_layout = self.get_queryset()
-        print(cloned_layout.id)
         clone = DirectoryLayout(name=cloned_layout.name + "_clone", description=cloned_layout.description)
         clone.pk = None
         clone.save()
 
-        dir_queryset = Directory.objects.get(dir_layout_id=cloned_layout.id)
-        dir_queryset.pk = None
-        dir_queryset.save()
-
-        filter_queryset = FilterCriteria.objects.get(id=dir_queryset.filter_criteria_id)
-        filter_queryset.pk = None
-        filter_queryset.save()
+        filter_criteria_obj = FilterCriteriaUtil()
+        dir_queryset = Directory.objects.filter(dir_layout_id=cloned_layout.id)
+        for dir in dir_queryset:
+            dir.pk = None
+            dir.dir_layout = clone
+            cloned_filter_criteria_str = dir.filter_criteria.get_filter_criteria_string()
+            dir.filter_criteria = filter_criteria_obj.create_filter_criteria_from_string(cloned_filter_criteria_str)
+            dir.save()
 
         serializer = DirectoryLayoutSerializer(clone)
-
         return Response(serializer.data)
 
     def get_queryset(self, **kwargs):

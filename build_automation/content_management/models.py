@@ -115,6 +115,19 @@ class FilterCriteria(models.Model):
         if self.tag is not None:
             return self.tag.name
 
+    def get_filter_criteria_string(self):
+        if self.left_criteria is not None or self.right_criteria is not None:
+            returnstr = "("
+            if self.left_criteria is not None:
+                returnstr += self.left_criteria.get_filter_criteria
+            if self.operator is not None:
+                returnstr += " " + self.operator_str + " "
+            if self.right_criteria is not None:
+                returnstr += self.right_criteria.get_filter_criteria
+            returnstr += ")"
+            return returnstr
+        if self.tag is not None:
+            return str(self.tag.id)
 
 class DirectoryLayout(models.Model):
     """
