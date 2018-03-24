@@ -1,8 +1,8 @@
 from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator, UniqueValidator
 
-from .models import Content, Directory, DirectoryLayout, Tag
-from .utils import FilterCriteriaUtil
+from content_management.models import Content, Directory, DirectoryLayout, FilterCriteria, Tag
+from content_management.utils import FilterCriteriaUtil
 
 
 class ContentSerializer(serializers.HyperlinkedModelSerializer):
@@ -88,27 +88,31 @@ class DirectorySerializer(serializers.ModelSerializer):
     Create and Update functions to override the value of filter_criteria
     """
 
+    filter_criteria = serializers.CharField(max_length=500)
+
     def create(self, validated_data):
-        temp_FC = FilterCriteriaUtil()
-        temp_data = dict(validated_data)
-        temp_FC_data = temp_FC.create_filter_criteria_from_string('(1 AND 2)')
-        temp_data['filter_criteria'] = temp_FC_data.pop()
-        return Directory.objects.create(**temp_data)
+        filtercriteria_util = FilterCriteriaUtil()
+        validated_data_copy = dict(validated_data)
+        filter_criteria_value = filtercriteria_util.create_filter_criteria_from_string(
+            validated_data.get('filter_criteria'))
+        validated_data_copy['filter_criteria'] = filter_criteria_value
+        return Directory.objects.create(**validated_data_copy)
 
     def update(self, instance, validated_data):
-        temp_FC = FilterCriteriaUtil()
         instance.name = validated_data.get('name', instance.name)
         instance.dir_layout_id = validated_data.get('dir_layout_id', instance.dir_layout_id)
-        temp_FC_data = temp_FC.create_filter_criteria_from_string('(2 AND 3)')
-        validated_data['filter_criteria'] = temp_FC_data.pop()
-        instance.filter_criteria = validated_data.get('filter_criteria', instance.filter_criteria)
+        if 'filter_criteria' in validated_data:
+            FilterCriteria.objects.filter(directory=instance).delete()
+            criteria_util = FilterCriteriaUtil()
+            instance.filter_criteria = criteria_util.create_filter_criteria_from_string(
+                validated_data.get('filter_criteria'))
         instance.parent = validated_data.get('parent', instance.parent)
         instance.save()
         return instance
 
     class Meta:
         model = Directory
-        fields = '__all__'
+        fields = ('pk', 'name', 'dir_layout_id', 'filter_criteria', 'parent')
         validators = [
             UniqueTogetherValidator(
                 queryset=Directory.objects.all(),
