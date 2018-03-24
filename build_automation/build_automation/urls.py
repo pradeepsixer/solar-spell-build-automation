@@ -22,8 +22,8 @@ from content_management.api_views import ContentApiViewset, DirectoryLayoutViewS
 router = routers.SimpleRouter()
 router.register(r'contents', ContentApiViewset)
 router.register(r'tags', TagViewSet, base_name='tag')
-router.register(r'directory', DirectoryViewSet)
-router.register(r'dirlayout', DirectoryLayoutViewSet)
+router.register(r'directories', DirectoryViewSet)
+router.register(r'dirlayouts', DirectoryLayoutViewSet)
 
 urlpatterns = [
     path('admin/', admin.site.urls),
