@@ -62,7 +62,7 @@ class FilterCriteriaUtil:
                 raise MalformedExpressionException(input_expression)
         if len(expr_stack) != 1:
             raise MalformedExpressionException(input_expression)
-        return expr_stack
+        return expr_stack.pop()
 
     def __create_filter_within_braces(self, expression, stack):
         """
@@ -73,16 +73,22 @@ class FilterCriteriaUtil:
         if next_token != self.TOKEN_OPEN_PARENTHESIS:
             if not isinstance(first_token, FilterCriteria):
                 raise MalformedExpressionException(expression)
-            new_filter = FilterCriteria(right_criteria=first_token)
+            right_criteria = first_token
+            new_filter = FilterCriteria(right_criteria=right_criteria)
             new_filter.operator = new_filter.get_operator_id_from_str(next_token)
             next_token = stack.pop()
             if not isinstance(next_token, FilterCriteria):
                 raise MalformedExpressionException(expression)
-            new_filter.left_criteria = next_token
+            left_criteria = next_token
+            new_filter.left_criteria = left_criteria
             next_token = stack.pop()
             if next_token != self.TOKEN_OPEN_PARENTHESIS:
                 raise MalformedExpressionException(expression)
             new_filter.save()
+            left_criteria.parent = new_filter
+            left_criteria.save()
+            right_criteria.parent = new_filter
+            right_criteria.save()
             return new_filter
         else:
             return first_token

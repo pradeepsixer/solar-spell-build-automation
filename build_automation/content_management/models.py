@@ -132,8 +132,11 @@ class Directory(models.Model):
     Representation of the directory for each build.
     """
     name = models.CharField(max_length=50)
-    dir_layout_id = models.ForeignKey(DirectoryLayout, related_name='dir_layout', on_delete=models.CASCADE)
-    filter_criteria = models.ForeignKey(FilterCriteria, on_delete=models.SET_NULL, null=True)
+    dir_layout = models.ForeignKey(DirectoryLayout, related_name='directories', on_delete=models.CASCADE)
+    filter_criteria = models.ForeignKey(
+        FilterCriteria, related_name='filter_criteria',
+        on_delete=models.SET_NULL, null=True
+    )
     parent = models.ForeignKey('self', related_name='subdirectories', on_delete=models.CASCADE, null=True)
 
     def __str__(self):
