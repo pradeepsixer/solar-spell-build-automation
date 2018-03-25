@@ -90,8 +90,6 @@ class FilterCriteriaField(serializers.CharField):
 
     def to_representation(self, obj):
         return obj.get_filter_criteria_string()
-
-
 class DirectorySerializer(serializers.ModelSerializer):
     """
     Create and Update functions to override the value of filter_criteria
@@ -121,7 +119,7 @@ class DirectorySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Directory
-        fields = ('pk', 'name', 'dir_layout', 'filter_criteria', 'parent')
+        fields = ('id', 'name', 'dir_layout_id', 'filter_criteria', 'parent')
         validators = [
             UniqueTogetherValidator(
                 queryset=Directory.objects.all(),
