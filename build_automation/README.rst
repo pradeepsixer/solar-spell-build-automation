@@ -4,9 +4,16 @@ Setting up the development environment
 
 1. Installing the requirements
 ##############################
+Django
 ::
 
-     pip install -r requirements.txt
+     pip install -r requirements/dev.txt
+
+Front-end (React)
+::
+    cd frontend
+    npm install
+    (Optionally, add the node_modules/bin/ to PATH Environment Variable)
 
 2. Setup Database
 ##################
