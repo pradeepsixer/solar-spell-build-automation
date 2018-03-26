@@ -1,18 +1,34 @@
-import axios from 'axios';
-import React from 'react';
-
 import {
     Accordion,
     AccordionItem,
     AccordionItemTitle,
     AccordionItemBody,
 } from 'react-accessible-accordion';
+import axios from 'axios';
+// import {default as LodashObject} from 'lodash/fp/object';
+import React from 'react';
+import SortableTree from 'react-sortable-tree';
+
+import DirlayoutInfoBoard from './dirlayout_info_board.js';
+import DirectoryInfoBoard from './directory_info_board.js';
 
 import 'react-accessible-accordion/dist/fancy-example.css';
-
-import SortableTree from 'react-sortable-tree';
 import 'react-sortable-tree/style.css';
+import '../css/style.css';
 
+const BOARD_TYPES = {
+    DIRLAYOUT: 1,
+    DIRECTORY: 2,
+    NONE: 3
+};
+
+
+/*
+ * This component produces two column layout.
+ * Left Column - An accordion of directory layouts. The accordion's body will be the
+ *      corresponding directory layout's directories (in tree format).
+ * Right Column - Display the selected directory layout's / directory's information.
+ */
 class DirectoryLayoutComponent extends React.Component {
     constructor(props) {
         super(props);
@@ -20,8 +36,13 @@ class DirectoryLayoutComponent extends React.Component {
             isLoaded: false,
             errorOccurred: false,
             accordionData: [],
-            treeData: []
-        }
+            treeData: [],
+            infoBoardType: BOARD_TYPES.NONE,
+            infoBoardData: {}
+        };
+        this.handleDirectoryLayoutClick = this.handleDirectoryLayoutClick.bind(this);
+        this.handleDirectoryLeftClick = this.handleDirectoryLeftClick.bind(this);
+        this.handleDirectoryRightClick = this.handleDirectoryRightClick.bind(this);
     }
 
     componentDidMount() {
@@ -55,10 +76,13 @@ class DirectoryLayoutComponent extends React.Component {
             if (layoutDirectories[eachDir.id]) {
                 layoutDirectories[eachDir.id].id = eachDir.id;
                 layoutDirectories[eachDir.id].title = eachDir.name;
+                layoutDirectories[eachDir.id].parent = eachDir.parent;
             } else {
                 layoutDirectories[eachDir.id] = {
                     id: eachDir.id,
                     title: eachDir.name,
+                    description: eachDir.description,
+                    parent: eachDir.parent,
                     children: []
                 };
             }
@@ -123,43 +147,87 @@ class DirectoryLayoutComponent extends React.Component {
             });
     }
 
+    handleDirectoryLayoutClick(dirLayout, evt) {
+        console.log(evt.target);
+        this.setState({
+            infoBoardType: BOARD_TYPES.DIRLAYOUT,
+            infoBoardData: dirLayout
+        });
+    }
+
+    handleDirectoryLeftClick(nodeInfo, evt) {
+        const evtTarget = evt.target;
+
+        /* This is used to determine whether the click event was directed at the tree node,
+         * or at the expand/collapse buttons in the SortableTree. */
+        if (!(evtTarget.className.includes('expandButton') || evtTarget.className.includes('collapseButton'))) {
+            console.log(nodeInfo.node);
+            this.setState({
+                infoBoardType: BOARD_TYPES.DIRECTORY,
+                infoBoardData: nodeInfo.node
+            })
+        }
+    }
+
+    handleDirectoryRightClick(nodeInfo, evt) {
+        const evtTarget = evt.target;
+        /* This is used to determine whether the click event was directed at the tree node,
+        * or at the expand/collapse buttons in the SortableTree. */
+        if (!(evtTarget.className.includes('expandButton') || evtTarget.className.includes('collapseButton'))) {
+            console.log('Need to display the right click menu.');
+        }
+    }
+
     render() {
         var elements = null;
         if (this.state.isLoaded) {
             elements = (
                 <div style={{width: '100%'}}>
-                <div style={{width: '30%'}}>
-                <Accordion>
-                {
-                    this.state.accordionData.map(eachDirLayout =>
-                        <AccordionItem key={eachDirLayout.id}>
-                        <AccordionItemTitle>
-                        <h3> { eachDirLayout.name } </h3>
-                        </AccordionItemTitle>
-                        <AccordionItemBody>
+                    <div style={{width: '30%', cssFloat: 'left', display: 'inline'}}>
+                        <Accordion>
                             {
-                                this.state.treeData[eachDirLayout.id].treeData.length > 0 ?
-                                <SortableTree
-                                    treeData={this.state.treeData[eachDirLayout.id].treeData}
-                                    onChange={newTreeData=> {
-                                        var currentTreeData = this.state.treeData;
-                                        currentTreeData[eachDirLayout.id].treeData = newTreeData;
-                                        this.setState({ treeData: currentTreeData })}
-                                    }
-                                    generateNodeProps={rowInfo => ({onClick: (evt) => {console.log('Left Click on ', rowInfo, evt);}, onContextMenu: (evt) => {console.log('Right Click on ', rowInfo, evt.target);}})}
-                                />
-                                : <input type="button" value="Create a directory" />
+                                this.state.accordionData.map(eachDirLayout =>
+                                    <AccordionItem key={eachDirLayout.id}>
+                                    <AccordionItemTitle>
+                                    <h3 onClick={evt => this.handleDirectoryLayoutClick(eachDirLayout, evt)}> { eachDirLayout.name } </h3>
+                                    </AccordionItemTitle>
+                                    <AccordionItemBody>
+                                        {
+                                            this.state.treeData[eachDirLayout.id].treeData.length > 0 ?
+                                            <SortableTree
+                                                treeData={this.state.treeData[eachDirLayout.id].treeData}
+                                                onChange={newTreeData=> {
+                                                    var currentTreeData = this.state.treeData;
+                                                    currentTreeData[eachDirLayout.id].treeData = newTreeData;
+                                                    this.setState({ treeData: currentTreeData })}
+                                                }
+                                                generateNodeProps={nodeInfo => ({
+                                                    onClick: (evt) => this.handleDirectoryLeftClick(nodeInfo, evt),
+                                                    onContextMenu: (evt) => this.handleDirectoryRightClick(nodeInfo, evt)
+                                                })}
+                                            />
+                                            : <input type="button" value="Create a directory" />
+                                        }
+                                        </AccordionItemBody>
+                                        </AccordionItem>
+                                )
                             }
-                            </AccordionItemBody>
-                            </AccordionItem>
-                        )
-                    }
-                    </Accordion>
-                    </div>
-                    <div style={{width: '40%'}}>
-                    </div>
-                    <div style={{width: '30%'}}>
-                    </div>
+                            </Accordion>
+                        </div>
+                        {
+                            this.state.infoBoardType == BOARD_TYPES.DIRLAYOUT &&
+                                <DirlayoutInfoBoard boardData={this.state.infoBoardData} />
+                        }
+                        {
+                            this.state.infoBoardType == BOARD_TYPES.DIRECTORY &&
+                                <DirectoryInfoBoard boardData={this.state.infoBoardData} />
+                        }
+                        {
+                            this.state.infoBoardType == BOARD_TYPES.NONE &&
+                                <div style={{width: '60%', cssFloat: 'right'}}>
+                                Nothing to show here.
+                                </div>
+                        }
                     </div>
                 );
         } else {
