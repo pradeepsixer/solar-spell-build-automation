@@ -1,3 +1,2 @@
-environ
 -r base.txt
 Django==2.0.2
