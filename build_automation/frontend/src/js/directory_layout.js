@@ -48,6 +48,8 @@ class DirectoryLayoutComponent extends React.Component {
         this.handleDirectoryLeftClick = this.handleDirectoryLeftClick.bind(this);
         this.handleDirectoryRightClick = this.handleDirectoryRightClick.bind(this);
         this.createDirectoryLayout = this.createDirectoryLayout.bind(this);
+        this.saveDirLayoutCallback = this.saveDirLayoutCallback.bind(this);
+        this.deleteDirLayoutCallback = this.deleteDirLayoutCallback.bind(this);
     }
 
     componentDidMount() {
@@ -106,6 +108,8 @@ class DirectoryLayoutComponent extends React.Component {
             }
         });
 
+        const retval = {};
+
         Object.keys(directoryLayoutInfo).forEach(eachLayoutId => {
             const currentLayoutInfo = directoryLayoutInfo[eachLayoutId];
             const layoutDirectories = currentLayoutInfo.directories;
@@ -114,10 +118,10 @@ class DirectoryLayoutComponent extends React.Component {
             topLevelDirectories.forEach(topLevelDirId => {
                 treeData.push(layoutDirectories[topLevelDirId]);
             })
-            delete currentLayoutInfo.directories;
-            delete currentLayoutInfo.topLevelDirectories;
+            retval[eachLayoutId] = treeData;
         });
-        return directoryLayoutInfo;
+
+        return retval;
     };
 
     loadData() {
@@ -136,28 +140,24 @@ class DirectoryLayoutComponent extends React.Component {
                     dirLayouts.forEach(eachDirLayout => {
                         eachDirLayout.isOpen = false;
                     });
-                    console.log(transformedData);
                     currInstance.setState((prevState, props) => ({
                         isLoaded: true,
                         accordionData: dirLayouts,
                         treeData: transformedData
                     }));
                 }).catch(function(error) {
-                    console.error('Error has occurred when trying to get the directories');
-                    console.log(error);
+                    console.error('Error has occurred when trying to get the directories', error);
                 })
 
             })
             .catch(function(error) {
-                console.error('Error has occurred when trying to get the directory layouts.');
-                console.log(error);
+                console.error('Error has occurred when trying to get the directory layouts.', error);
             });
     };
 
     handleDirectoryLayoutClick(targetDirLayout, evt) {
         this.setState((prevState, props) => {
             const newState = {
-                isLoaded: true,
                 accordionData: prevState.accordionData,
                 infoBoardType: BOARD_TYPES.DIRLAYOUT,
                 infoBoardData: targetDirLayout
@@ -193,12 +193,16 @@ class DirectoryLayoutComponent extends React.Component {
         /* This is used to determine whether the click event was directed at the tree node,
         * or at the expand/collapse buttons in the SortableTree. */
         if (!(evtTarget.className.includes('expandButton') || evtTarget.className.includes('collapseButton'))) {
+            // TODO: Display the right click menu.
             console.log('Need to display the right click menu.');
         }
     }
 
+    createDirectory(evt) {
+
+    }
+
     createDirectoryLayout(evt) {
-        console.log('In create directory layout');
         this.setState({
             infoBoardType: BOARD_TYPES.DIRLAYOUT,
             infoBoardData: {
@@ -220,12 +224,12 @@ class DirectoryLayoutComponent extends React.Component {
                 </ListItem>);
                 accordionItems.push(<Collapse key={'collapse-' + eachDirLayout.id} in={eachDirLayout.isOpen} timeout="auto" unmountOnExit>
                 {
-                    this.state.treeData[eachDirLayout.id].treeData.length > 0 ?
+                    this.state.treeData[eachDirLayout.id].length > 0 ?
                     <SortableTree
-                    treeData={this.state.treeData[eachDirLayout.id].treeData}
+                    treeData={this.state.treeData[eachDirLayout.id]}
                     onChange={newTreeData=> {
                         var currentTreeData = this.state.treeData;
-                        currentTreeData[eachDirLayout.id].treeData = newTreeData;
+                        currentTreeData[eachDirLayout.id] = newTreeData;
                         this.setState({ treeData: currentTreeData })}
                     }
                     generateNodeProps={nodeInfo => ({
@@ -256,7 +260,7 @@ class DirectoryLayoutComponent extends React.Component {
                     </div>
                         {
                             this.state.infoBoardType == BOARD_TYPES.DIRLAYOUT &&
-                                <DirlayoutInfoBoard boardData={this.state.infoBoardData} />
+                                <DirlayoutInfoBoard boardData={this.state.infoBoardData} onSave={this.saveDirLayoutCallback} onDelete={this.deleteDirLayoutCallback} />
                         }
                         {
                             this.state.infoBoardType == BOARD_TYPES.DIRECTORY &&
@@ -277,6 +281,58 @@ class DirectoryLayoutComponent extends React.Component {
         }
 
         return elements;
+    }
+
+    saveDirLayoutCallback(savedInfo, created=false) {
+        this.setState((prevState, props) => {
+            const newState = {
+                accordionData: prevState.accordionData,
+                infoBoardData: savedInfo,
+            };
+
+            if (created) {
+                const newDirLayout = {
+                    id: savedInfo.id,
+                    name: savedInfo.name,
+                    description: savedInfo.description,
+                    isOpen: false
+                };
+
+                newState.treeData = prevState.treeData;
+                newState.treeData[savedInfo.id] = [];
+                newState.accordionData.push(newDirLayout);
+            } else {
+                newState.accordionData.forEach(eachDirLayout => {
+                    if (eachDirLayout.id == savedInfo.id) {
+                        eachDirLayout.name = savedInfo.name;
+                        eachDirLayout.description = savedInfo.description;
+                    }
+                });
+            }
+
+            return newState;
+        });
+    }
+
+    deleteDirLayoutCallback(deletedItemId) {
+        this.setState((prevState, props) => {
+            const newState = {
+                infoBoardType: BOARD_TYPES.NONE,
+                infoBoardData: {},
+                accordionData: prevState.accordionData,
+                treeData: prevState.treeData
+            };
+
+            delete newState.treeData[deletedItemId];
+
+            for (var i=0; i<newState.accordionData.length; i++) {
+                if (newState.accordionData[i].id == deletedItemId) {
+                    newState.accordionData.splice(i, 1);
+                }
+            }
+
+            return newState;
+        });
     }
 }
 

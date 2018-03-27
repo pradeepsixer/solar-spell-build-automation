@@ -9,7 +9,6 @@ import { APP_URLS, get_url } from './url.js';
 class DirlayoutInfoBoard extends React.Component {
     constructor(props) {
         super(props);
-        console.log(props);
         this.state = {
             id: props.boardData.id,
             name: props.boardData.name,
@@ -19,6 +18,8 @@ class DirlayoutInfoBoard extends React.Component {
         this.saveDirLayout = this.saveDirLayout.bind(this);
         this.cloneDirLayout = this.cloneDirLayout.bind(this);
         this.deleteDirLayout = this.deleteDirLayout.bind(this);
+        this.saveCallback = this.props.onSave.bind(this);
+        this.deleteCallback = this.props.onDelete.bind(this);
     }
 
     componentWillReceiveProps(props) {
@@ -38,28 +39,25 @@ class DirlayoutInfoBoard extends React.Component {
     saveDirLayout(evt) {
         var targetUrl = APP_URLS.DIRLAYOUT_LIST;
         const payload = {name: this.state.name, description: this.state.description};
+        const currentInstance = this;
         if (this.state.id > 0) {
             // Update an existing directory layout.
             targetUrl = get_url(APP_URLS.DIRLAYOUT_DETAIL, {id:this.state.id});
             axios.patch(targetUrl, payload, {
                 responseType: 'json'
             }).then(function(response) {
-                console.log(response.status, response.statusText);
-                console.log(response.data);
-                // TODO: Use the props' savecallback to notify successful addition
+                currentInstance.saveCallback(response.data);
             }).catch(function(error) {
-                console.error(error);
+                console.error("Error in updating the directory layout ", error);
             })
         } else {
             // Create a new directory layout.
             axios.post(targetUrl, payload, {
                 responseType: 'json'
             }).then(function(response) {
-                console.log(response.status, response.statusText);
-                console.log(response.data);
-                // TODO: Use the props' savecallback to notify successful updation
+                currentInstance.saveCallback(response.data, true);
             }).catch(function(error) {
-                console.error(error);
+                console.error("Error in creating a new directory layout ", error);
             })
         }
     }
@@ -71,14 +69,13 @@ class DirlayoutInfoBoard extends React.Component {
     deleteDirLayout(evt) {
         // TODO : First confirm the delete action.
         const targetUrl = get_url(APP_URLS.DIRLAYOUT_DETAIL, {id:this.state.id});
+        const currentInstance = this;
         axios.delete(targetUrl, {
             responseType: 'json'
         }).then(function(response) {
-            console.log(response.status, response.statusText);
-            console.log(response.data);
-            // TODO: Use the props' savecallback to notify successful deletion
+            currentInstance.deleteCallback(currentInstance.state.id);
         }).catch(function(error) {
-            console.log(error);
+            console.error("Error in deleting the directory layout ", error);
         })
     }
 
