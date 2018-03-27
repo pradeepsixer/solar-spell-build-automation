@@ -1,18 +1,22 @@
-import {
-    Accordion,
-    AccordionItem,
-    AccordionItemTitle,
-    AccordionItemBody,
-} from 'react-accessible-accordion';
 import axios from 'axios';
-// import {default as LodashObject} from 'lodash/fp/object';
 import React from 'react';
+// import {default as LodashObject} from 'lodash/fp/object';
+
+import Button from 'material-ui/Button';
+import Collapse from 'material-ui/transitions/Collapse';
+import ExpandLess from 'material-ui-icons/ExpandLess';
+import ExpandMore from 'material-ui-icons/ExpandMore';
+
+import ListSubheader from 'material-ui/List/ListSubheader';
+import List, { ListItem, ListItemIcon, ListItemText } from 'material-ui/List';
+
 import SortableTree from 'react-sortable-tree';
 
 import DirlayoutInfoBoard from './dirlayout_info_board.js';
 import DirectoryInfoBoard from './directory_info_board.js';
 
-import 'react-accessible-accordion/dist/fancy-example.css';
+import { withStyles } from 'material-ui/styles';
+
 import 'react-sortable-tree/style.css';
 import '../css/style.css';
 
@@ -43,6 +47,7 @@ class DirectoryLayoutComponent extends React.Component {
         this.handleDirectoryLayoutClick = this.handleDirectoryLayoutClick.bind(this);
         this.handleDirectoryLeftClick = this.handleDirectoryLeftClick.bind(this);
         this.handleDirectoryRightClick = this.handleDirectoryRightClick.bind(this);
+        this.createDirectoryLayout = this.createDirectoryLayout.bind(this);
     }
 
     componentDidMount() {
@@ -81,7 +86,6 @@ class DirectoryLayoutComponent extends React.Component {
                 layoutDirectories[eachDir.id] = {
                     id: eachDir.id,
                     title: eachDir.name,
-                    description: eachDir.description,
                     parent: eachDir.parent,
                     children: []
                 };
@@ -114,7 +118,7 @@ class DirectoryLayoutComponent extends React.Component {
             delete currentLayoutInfo.topLevelDirectories;
         });
         return directoryLayoutInfo;
-    }
+    };
 
     loadData() {
         const currInstance = this;
@@ -129,6 +133,9 @@ class DirectoryLayoutComponent extends React.Component {
                 }).then(function(response) {
                     const directories = response.data;
                     const transformedData = currInstance.transformDirectoriesToTreeData(dirLayouts, directories);
+                    dirLayouts.forEach(eachDirLayout => {
+                        eachDirLayout.isOpen = false;
+                    });
                     console.log(transformedData);
                     currInstance.setState((prevState, props) => ({
                         isLoaded: true,
@@ -145,13 +152,26 @@ class DirectoryLayoutComponent extends React.Component {
                 console.error('Error has occurred when trying to get the directory layouts.');
                 console.log(error);
             });
-    }
+    };
 
-    handleDirectoryLayoutClick(dirLayout, evt) {
-        console.log(evt.target);
-        this.setState({
-            infoBoardType: BOARD_TYPES.DIRLAYOUT,
-            infoBoardData: dirLayout
+    handleDirectoryLayoutClick(targetDirLayout, evt) {
+        this.setState((prevState, props) => {
+            const newState = {
+                isLoaded: true,
+                accordionData: prevState.accordionData,
+                infoBoardType: BOARD_TYPES.DIRLAYOUT,
+                infoBoardData: targetDirLayout
+            };
+
+            newState.accordionData.forEach(eachDirLayout => {
+                if (eachDirLayout.id == targetDirLayout.id) {
+                    eachDirLayout.isOpen = !eachDirLayout.isOpen;
+                } else {
+                    eachDirLayout.isOpen = false;
+                }
+            });
+
+            return newState;
         });
     }
 
@@ -161,7 +181,6 @@ class DirectoryLayoutComponent extends React.Component {
         /* This is used to determine whether the click event was directed at the tree node,
          * or at the expand/collapse buttons in the SortableTree. */
         if (!(evtTarget.className.includes('expandButton') || evtTarget.className.includes('collapseButton'))) {
-            console.log(nodeInfo.node);
             this.setState({
                 infoBoardType: BOARD_TYPES.DIRECTORY,
                 infoBoardData: nodeInfo.node
@@ -178,42 +197,63 @@ class DirectoryLayoutComponent extends React.Component {
         }
     }
 
+    createDirectoryLayout(evt) {
+        console.log('In create directory layout');
+        this.setState({
+            infoBoardType: BOARD_TYPES.DIRLAYOUT,
+            infoBoardData: {
+                id: -1,
+                name: '',
+                description: ''
+            }
+        });
+    }
+
     render() {
         var elements = null;
         if (this.state.isLoaded) {
+            var accordionItems = [];
+            this.state.accordionData.forEach(eachDirLayout => {
+                accordionItems.push(<ListItem button key={eachDirLayout.id} onClick={evt => this.handleDirectoryLayoutClick(eachDirLayout, evt)}>
+                    <ListItemText inset primary={ eachDirLayout.name } />
+                { eachDirLayout.isOpen ? <ExpandLess /> : <ExpandMore /> }
+                </ListItem>);
+                accordionItems.push(<Collapse key={'collapse-' + eachDirLayout.id} in={eachDirLayout.isOpen} timeout="auto" unmountOnExit>
+                {
+                    this.state.treeData[eachDirLayout.id].treeData.length > 0 ?
+                    <SortableTree
+                    treeData={this.state.treeData[eachDirLayout.id].treeData}
+                    onChange={newTreeData=> {
+                        var currentTreeData = this.state.treeData;
+                        currentTreeData[eachDirLayout.id].treeData = newTreeData;
+                        this.setState({ treeData: currentTreeData })}
+                    }
+                    generateNodeProps={nodeInfo => ({
+                        onClick: (evt) => this.handleDirectoryLeftClick(nodeInfo, evt),
+                        onContextMenu: (evt) => this.handleDirectoryRightClick(nodeInfo, evt)
+                    })}
+                    />
+                    : <Button variant="raised" color="primary">
+                        New Directory
+                    </Button>
+                }
+                </Collapse>);
+            });
+
             elements = (
                 <div style={{width: '100%'}}>
                     <div style={{width: '30%', cssFloat: 'left', display: 'inline'}}>
-                        <Accordion>
+                        <Button variant="raised" color="primary" onClick={this.createDirectoryLayout}>
+                            New Directory Layout
+                        </Button>
+                        <List component="nav">
+                            <ListSubheader component="div">Directory Layouts</ListSubheader>
                             {
-                                this.state.accordionData.map(eachDirLayout =>
-                                    <AccordionItem key={eachDirLayout.id}>
-                                    <AccordionItemTitle>
-                                    <h3 onClick={evt => this.handleDirectoryLayoutClick(eachDirLayout, evt)}> { eachDirLayout.name } </h3>
-                                    </AccordionItemTitle>
-                                    <AccordionItemBody>
-                                        {
-                                            this.state.treeData[eachDirLayout.id].treeData.length > 0 ?
-                                            <SortableTree
-                                                treeData={this.state.treeData[eachDirLayout.id].treeData}
-                                                onChange={newTreeData=> {
-                                                    var currentTreeData = this.state.treeData;
-                                                    currentTreeData[eachDirLayout.id].treeData = newTreeData;
-                                                    this.setState({ treeData: currentTreeData })}
-                                                }
-                                                generateNodeProps={nodeInfo => ({
-                                                    onClick: (evt) => this.handleDirectoryLeftClick(nodeInfo, evt),
-                                                    onContextMenu: (evt) => this.handleDirectoryRightClick(nodeInfo, evt)
-                                                })}
-                                            />
-                                            : <input type="button" value="Create a directory" />
-                                        }
-                                        </AccordionItemBody>
-                                        </AccordionItem>
-                                )
+                                accordionItems
                             }
-                            </Accordion>
-                        </div>
+
+                        </List>
+                    </div>
                         {
                             this.state.infoBoardType == BOARD_TYPES.DIRLAYOUT &&
                                 <DirlayoutInfoBoard boardData={this.state.infoBoardData} />
