@@ -11,11 +11,12 @@ import ListSubheader from 'material-ui/List/ListSubheader';
 import List, { ListItem, ListItemIcon, ListItemText } from 'material-ui/List';
 
 import SortableTree from 'react-sortable-tree';
+import { getTreeFromFlatData } from 'react-sortable-tree';
 
 import DirlayoutInfoBoard from './dirlayout_info_board.js';
 import DirectoryInfoBoard from './directory_info_board.js';
 
-import { withStyles } from 'material-ui/styles';
+import { APP_URLS } from './url.js';
 
 import 'react-sortable-tree/style.css';
 import '../css/style.css';
@@ -32,6 +33,49 @@ const BOARD_TYPES = {
  * Left Column - An accordion of directory layouts. The accordion's body will be the
  *      corresponding directory layout's directories (in tree format).
  * Right Column - Display the selected directory layout's / directory's information.
+ *
+ * State of the component
+ * ========================
+ * {
+ *      isLoaded: boolean - Tells whether the required data is loaded or not.
+ *      errorOccurred: boolean - Not used currently. Used to check whether an error was encountered or not.
+ *      accordionData: List of <DirectoryLayout> objects
+ *                {
+ *                      id: Integer - Id of the directory layout.
+ *                      name:   String - name of the directory layout.
+ *                      description: String - Description of the directory layout.
+ *                      isOpen: boolean - Whether the accordion is open or not.
+ *                }
+ *      treeData: A map of (directory_layout_id --> [<Directory>])
+ *              A <Directory> object has the following structure:
+ *              {
+ *                  id: Integer - Directory Id
+ *                  name: String - Name of the directory.
+ *                  dirLayoutId: Integer - Owning Directory Layout's ID
+ *                  title: String - Currently, the same as name.
+ *                  parent: Integer - The parent <Directory>'s id (if present, else null).
+ *                  children: [ <Directory> ]
+ *              }
+ *      infoBoardType: One of BOARD_TYPES
+ *          DIRLAYOUT - Directory Layout Screen
+ *          DIRECTORY - Directory Screen
+ *          NONE - Nothing to display
+ *
+ *      infoBoardData: Object - For BOARD_TYPES.DIRLAYOUT, this will be <DirectoryLayout> object.
+ *                                      See accordionData above for more info.
+ *                              For BOARD_TYPES.DIRECTORY, this will be <Directory> object.
+ *                                      For more details, refer treeData above.
+ *
+ *      tagTreeData: Object - A Tree Data containing all the tags. Each <Tag> will be like
+ *              {
+ *                  id: Integer - Tag Id
+ *                  name: String - Name of the Tag
+ *                  description: String - Description of the Tag
+ *                  title: String - Currently, the same as name.
+ *                  parent: Integer - The parent <Tag>'s id (if present, else null).
+ *                  children: [ <Directory> ]
+ *              }
+ * }
  */
 class DirectoryLayoutComponent extends React.Component {
     constructor(props) {
@@ -42,14 +86,19 @@ class DirectoryLayoutComponent extends React.Component {
             accordionData: [],
             treeData: [],
             infoBoardType: BOARD_TYPES.NONE,
-            infoBoardData: {}
+            infoBoardData: {},
+            tagTreeData: [],
         };
         this.handleDirectoryLayoutClick = this.handleDirectoryLayoutClick.bind(this);
         this.handleDirectoryLeftClick = this.handleDirectoryLeftClick.bind(this);
         this.handleDirectoryRightClick = this.handleDirectoryRightClick.bind(this);
+        this.createDirectory = this.createDirectory.bind(this);
         this.createDirectoryLayout = this.createDirectoryLayout.bind(this);
         this.saveDirLayoutCallback = this.saveDirLayoutCallback.bind(this);
         this.deleteDirLayoutCallback = this.deleteDirLayoutCallback.bind(this);
+        this.saveDirectoryCallback = this.saveDirectoryCallback.bind(this);
+        this.deleteDirectoryCallback = this.deleteDirectoryCallback.bind(this);
+        this.removeDirectoryEntry = this.removeDirectoryEntry.bind(this);
     }
 
     componentDidMount() {
@@ -66,6 +115,46 @@ class DirectoryLayoutComponent extends React.Component {
         clearTimeout(this.timerID);
     }
 
+    transformTagsToTreeData(tags) {
+        const allTagInfo = {};
+        const topLevelTags = [];
+
+        tags.forEach(eachTag => {
+            if (allTagInfo[eachTag.id]) {
+                allTagInfo[eachTag.id].id = eachTag.id;
+                allTagInfo[eachTag.id].name = eachTag.name;
+                allTagInfo[eachTag.id].title = eachTag.name;
+                allTagInfo[eachTag.id].parent = eachTag.parent;
+                allTagInfo[eachTag.id].description = eachTag.description;
+            } else {
+                allTagInfo[eachTag.id] = {
+                    id: eachTag.id,
+                    name: eachTag.name,
+                    title: eachTag.name,
+                    parent: eachTag.parent,
+                    description: eachTag.description,
+                    children: []
+                }
+            }
+            if (eachTag.parent) {
+                const currentTagTreeNode = allTagInfo[eachTag.id];
+                if (allTagInfo[eachTag.parent]) {
+                    allTagInfo[eachTag.parent].children.push(currentTagTreeNode);
+                } else {
+                    allTagInfo[eachTag.parent] = {children: [currentTagTreeNode]};
+                }
+            } else {
+                topLevelTags.push(eachTag.id);
+            }
+        });
+
+        const treeData = [];
+        topLevelTags.forEach(eachTagId => {
+            treeData.push(allTagInfo[eachTagId]);
+        });
+        return treeData;
+    }
+
     transformDirectoriesToTreeData(dirLayouts, inputData) {
         const directoryLayoutInfo = {};
 
@@ -78,17 +167,23 @@ class DirectoryLayoutComponent extends React.Component {
         });
 
         inputData.forEach(eachDir => {
-            const currentLayoutInfo = directoryLayoutInfo[eachDir.dir_layout_id];
+            const currentLayoutInfo = directoryLayoutInfo[eachDir.dir_layout];
             const layoutDirectories = currentLayoutInfo.directories;
             if (layoutDirectories[eachDir.id]) {
                 layoutDirectories[eachDir.id].id = eachDir.id;
+                layoutDirectories[eachDir.id].name = eachDir.name;
                 layoutDirectories[eachDir.id].title = eachDir.name;
                 layoutDirectories[eachDir.id].parent = eachDir.parent;
+                layoutDirectories[eachDir.id].dirLayoutId = eachDir.dir_layout;
+                layoutDirectories[eachDir.id].filterCriteria = eachDir.filter_criteria;
             } else {
                 layoutDirectories[eachDir.id] = {
                     id: eachDir.id,
+                    name: eachDir.name,
                     title: eachDir.name,
+                    dirLayoutId: eachDir.dir_layout,
                     parent: eachDir.parent,
+                    filterCriteria: eachDir.filter_criteria,
                     children: []
                 };
             }
@@ -126,13 +221,24 @@ class DirectoryLayoutComponent extends React.Component {
 
     loadData() {
         const currInstance = this;
-        axios.get('/api/dirlayouts/', {
+        axios.get(APP_URLS.TAG_LIST, {
+            responseType: 'json'
+        }).then(function(response) {
+            const tagTreeData = currInstance.transformTagsToTreeData(response.data);
+            currInstance.setState({
+                tagTreeData: tagTreeData
+            })
+        }).catch(function(error) {
+            console.log(error);
+            // TODO : Show the error message.
+        });
+        axios.get(APP_URLS.DIRLAYOUT_LIST, {
                 responseType: 'json',
             })
             .then(function(response) {
                 const dirLayouts = response.data;
 
-                axios.get('/api/directories/', {
+                axios.get(APP_URLS.DIRECTORY_LIST, {
                     responseType: 'json',
                 }).then(function(response) {
                     const directories = response.data;
@@ -143,7 +249,7 @@ class DirectoryLayoutComponent extends React.Component {
                     currInstance.setState((prevState, props) => ({
                         isLoaded: true,
                         accordionData: dirLayouts,
-                        treeData: transformedData
+                        treeData: transformedData,
                     }));
                 }).catch(function(error) {
                     console.error('Error has occurred when trying to get the directories', error);
@@ -177,7 +283,6 @@ class DirectoryLayoutComponent extends React.Component {
 
     handleDirectoryLeftClick(nodeInfo, evt) {
         const evtTarget = evt.target;
-
         /* This is used to determine whether the click event was directed at the tree node,
          * or at the expand/collapse buttons in the SortableTree. */
         if (!(evtTarget.className.includes('expandButton') || evtTarget.className.includes('collapseButton'))) {
@@ -198,8 +303,16 @@ class DirectoryLayoutComponent extends React.Component {
         }
     }
 
-    createDirectory(evt) {
-
+    createDirectory(dirLayoutId, evt) {
+        this.setState({
+            infoBoardType: BOARD_TYPES.DIRECTORY,
+            infoBoardData: {
+                id: -1,
+                name: '',
+                filterCriteria: '',
+                dirLayoutId: dirLayoutId
+            }
+        });
     }
 
     createDirectoryLayout(evt) {
@@ -237,7 +350,7 @@ class DirectoryLayoutComponent extends React.Component {
                         onContextMenu: (evt) => this.handleDirectoryRightClick(nodeInfo, evt)
                     })}
                     />
-                    : <Button variant="raised" color="primary">
+                : <Button variant="raised" color="primary" onClick={evt => {this.createDirectory(eachDirLayout.id, evt); }}>
                         New Directory
                     </Button>
                 }
@@ -246,7 +359,7 @@ class DirectoryLayoutComponent extends React.Component {
 
             elements = (
                 <div style={{width: '100%'}}>
-                    <div style={{width: '30%', cssFloat: 'left', display: 'inline'}}>
+                    <div style={{width: '20%', cssFloat: 'left', display: 'inline'}}>
                         <Button variant="raised" color="primary" onClick={this.createDirectoryLayout}>
                             New Directory Layout
                         </Button>
@@ -258,21 +371,21 @@ class DirectoryLayoutComponent extends React.Component {
 
                         </List>
                     </div>
+                    <div style={{width: '76%', cssFloat: 'right', display: 'inline'}}>
                         {
                             this.state.infoBoardType == BOARD_TYPES.DIRLAYOUT &&
                                 <DirlayoutInfoBoard boardData={this.state.infoBoardData} onSave={this.saveDirLayoutCallback} onDelete={this.deleteDirLayoutCallback} />
                         }
                         {
                             this.state.infoBoardType == BOARD_TYPES.DIRECTORY &&
-                                <DirectoryInfoBoard boardData={this.state.infoBoardData} />
+                                <DirectoryInfoBoard boardData={this.state.infoBoardData} onSave={this.saveDirectoryCallback} onDelete={this.deleteDirectoryCallback} tagTreeData={this.state.tagTreeData}/>
                         }
                         {
                             this.state.infoBoardType == BOARD_TYPES.NONE &&
-                                <div style={{width: '60%', cssFloat: 'right'}}>
-                                Nothing to show here.
-                                </div>
+                                <span>Nothing to show here.</span>
                         }
                     </div>
+                </div>
                 );
         } else {
             elements = (
@@ -328,8 +441,105 @@ class DirectoryLayoutComponent extends React.Component {
             for (var i=0; i<newState.accordionData.length; i++) {
                 if (newState.accordionData[i].id == deletedItemId) {
                     newState.accordionData.splice(i, 1);
+                    break;
                 }
             }
+
+            return newState;
+        });
+    }
+
+    updateDirectoryEntry(directoryId, array, newValue, created) {
+        for (var i=0; i<array.length; i++) {
+            if (array[i].id == directoryId) {
+                if (created) {
+                    // If the operation is a create operation
+                    array[i].children.push({
+                        id: newValue.id,
+                        name: newValue.name,
+                        title: newValue.name,
+                        dirLayoutId: eachDir.dir_layout,
+                        parent: eachDir.parent,
+                        filterCriteria: eachDir.filter_criteria,
+                        children: []
+                    });
+                } else {
+                    // If the operation is an update operation
+                    array[i].name = newValue.name;
+                    array[i].title = newValue.title;
+                    array[i].parent = newValue.parent;
+                    array[i].filterCriteria = newValue.filter_criteria;
+                }
+                return true;
+            }
+            if (array[i].children.length > 0) {
+                var found = this.updateDirectoryEntry(directoryId, array[i].children, newValue, created);
+                if (found) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    saveDirectoryCallback(savedInfo, created=false) {
+        this.setState((prevState, props) => {
+            const dirLayoutId = savedInfo.dir_layout;
+            const newState = {
+                treeData: prevState.treeData
+            }
+
+            if (created) {
+                if (savedInfo.parent) {
+                    // Add it to the parent.
+                    this.updateDirectoryEntry(savedInfo.parent, newState.treeData[dirLayoutId], savedInfo, created);
+                } else {
+                    // Add it as a top level directory for the layout.
+                    newState.treeData[dirLayoutId].push({
+                        id: savedInfo.id,
+                        name: savedInfo.name,
+                        title: savedInfo.name,
+                        dirLayoutId: savedInfo.dir_layout,
+                        parent: savedInfo.parent,
+                        filterCriteria: savedInfo.filter_criteria,
+                        children: []
+                    });
+                }
+            } else {
+                // Update the existing value.
+                this.updateDirectoryEntry(savedInfo.id, newState.treeData[dirLayoutId], savedInfo, created);
+            }
+
+            return newState;
+        });
+    }
+
+    /* Remove the directory entry from the array */
+    removeDirectoryEntry(directoryId, array) {
+        for (var i=0; i<array.length; i++) {
+            if (array[i].id == directoryId) {
+                array.splice(i, 1);
+                return true;
+            }
+            if (array[i].children.length > 0) {
+                var found = this.removeDirectoryEntry(directoryId, array[i].children);
+                if (found) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    deleteDirectoryCallback(dirLayoutId, directoryId) {
+        this.setState((prevState, props) => {
+            const newState = {
+                infoBoardType: BOARD_TYPES.NONE,
+                infoBoardData: {},
+                treeData: prevState.treeData
+            };
+
+            this.removeDirectoryEntry(directoryId, newState.treeData[dirLayoutId]);
 
             return newState;
         });

@@ -81,7 +81,7 @@ class DirlayoutInfoBoard extends React.Component {
 
     render() {
         return (
-            <div style={{width: '60%', cssFloat: 'right', display: 'inline'}}>
+            <div>
                 <Button variant="raised" color="primary" onClick={this.saveDirLayout}>
                     Save
                 </Button>
@@ -97,7 +97,6 @@ class DirlayoutInfoBoard extends React.Component {
                     Delete
                     </Button>
                 }
-                <input type="hidden" value={this.state.id} />
                 <TextField
                   id="name"
                   label="Name"

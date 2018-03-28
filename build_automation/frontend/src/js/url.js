@@ -3,7 +3,8 @@ const APP_URLS = {
     DIRLAYOUT_DETAIL: '/api/dirlayouts/${id}/',
     DIRLAYOUT_CLONE: '/api/dirlayouts/${id}/',
     DIRECTORY_LIST: '/api/directories/',
-    DIRECTORY_DETAIL: '/api/directories/${id}/'
+    DIRECTORY_DETAIL: '/api/directories/${id}/',
+    TAG_LIST: '/api/tags/'
 }
 
 function get_url(templateStringLiteral, context) {
