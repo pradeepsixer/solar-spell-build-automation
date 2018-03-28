@@ -61,7 +61,7 @@ class TagSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Tag
-        fields = ('url', 'name', 'description', 'parent', 'child_tags')
+        fields = ('id', 'url', 'name', 'description', 'parent', 'child_tags')
         extra_kwargs = {
             'url': {'lookup_field': 'pk'},
         }
@@ -119,7 +119,7 @@ class DirectorySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Directory
-        fields = ('id', 'name', 'dir_layout_id', 'filter_criteria', 'parent')
+        fields = ('id', 'name', 'dir_layout', 'filter_criteria', 'parent')
         validators = [
             UniqueTogetherValidator(
                 queryset=Directory.objects.all(),
