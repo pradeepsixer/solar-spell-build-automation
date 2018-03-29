@@ -98,16 +98,11 @@ class DirectoryCloneApiViewset(ViewSet, CreateModelMixin):
         clone.save()
 
         filter_criteria_obj = FilterCriteriaUtil()
-        print(cloned_layout.id)
         dir_queryset = Directory.objects.filter(dir_layout=cloned_layout.id)
-        print(dir_queryset)
         for dir in dir_queryset:
-            print("here")
-            print(dir)
             dir.pk = None
             dir.dir_layout = clone
             cloned_filter_criteria_str = dir.filter_criteria.get_filter_criteria_string()
-            print(cloned_filter_criteria_str)
             dir.filter_criteria = filter_criteria_obj.create_filter_criteria_from_string(cloned_filter_criteria_str)
             dir.save()
 
