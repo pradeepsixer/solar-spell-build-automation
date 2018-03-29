@@ -83,12 +83,21 @@ class DirectoryLayoutSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class FilterCriteriaField(serializers.CharField):
+    """
+    For serializing the filter criteria to a single string representation.
+    """
+
+    def to_representation(self, obj):
+        return obj.get_filter_criteria_string()
+
+
 class DirectorySerializer(serializers.ModelSerializer):
     """
     Create and Update functions to override the value of filter_criteria
     """
 
-    filter_criteria = serializers.CharField(max_length=500)
+    filter_criteria = FilterCriteriaField(max_length=500)
 
     def create(self, validated_data):
         filtercriteria_util = FilterCriteriaUtil()
