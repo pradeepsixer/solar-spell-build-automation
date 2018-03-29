@@ -90,23 +90,23 @@ class DirectoryViewSet(ModelViewSet):
 
 class DirectoryCloneApiViewset(ViewSet, CreateModelMixin):
     serializer_class = DirectoryLayoutSerializer
+    CLONE_SUFFIX = "_clone"
 
     def create(self, request, *args, **kwargs):
-        CLONE_SUFFIX = "_clone"
         original_layout = self.get_queryset()
-        if(DirectoryLayout.objects.filter(name=original_layout.name + CLONE_SUFFIX).count() >= 1):
-            dir = DirectoryLayout.objects.get(name=original_layout.name + CLONE_SUFFIX)
+        if(DirectoryLayout.objects.filter(name=original_layout.name + self.CLONE_SUFFIX).count() >= 1):
+            dir = DirectoryLayout.objects.get(name=original_layout.name + self.CLONE_SUFFIX)
             layout_url = reverse('directorylayout-detail', args=[dir.id], request=request)
             data = {
                 'result': 'error',
                 'error': 'DIRECTORY_LAYOUT_ALREADY_EXISTS',
                 'existing_directory_layout': {
-                    'directory_layout_name': original_layout.name + CLONE_SUFFIX,
+                    'directory_layout_name': original_layout.name + self.CLONE_SUFFIX,
                     'directory_layout': layout_url
                 }
             }
             return Response(data, status=status.HTTP_409_CONFLICT)
-        clone = DirectoryLayout(name=original_layout.name + CLONE_SUFFIX, description=original_layout.description)
+        clone = DirectoryLayout(name=original_layout.name + self.CLONE_SUFFIX, description=original_layout.description)
         clone.pk = None
         clone.save()
 
