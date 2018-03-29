@@ -22,3 +22,7 @@
 .rst__row:hover {
     cursor: pointer;
 }
+
+.rst__tree button span {
+    text-transform: none
+}

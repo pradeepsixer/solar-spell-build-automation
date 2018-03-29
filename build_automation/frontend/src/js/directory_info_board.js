@@ -3,6 +3,7 @@ import React from 'react';
 
 import Button from 'material-ui/Button';
 import Divider from 'material-ui/Divider';
+import Grid from 'material-ui/Grid';
 import { MenuItem } from 'material-ui/Menu';
 import Select from 'material-ui/Select';
 import TextField from 'material-ui/TextField';
@@ -126,8 +127,8 @@ class DirectoryInfoBoard extends React.Component {
 
     render() {
         return (
-            <div>
-                <div style={{ width: '60%', float: 'left', display: 'inline'}}>
+            <Grid container spacing={24}>
+                <Grid item xs={9}>
                     <Button variant="raised" color="primary" onClick={this.saveDirectory}>
                         Save
                     </Button>
@@ -152,8 +153,8 @@ class DirectoryInfoBoard extends React.Component {
                     <Typography>
                         Choose content which matches
                     </Typography>
-                    <div style={{clear: 'both', display: 'block'}}>
-                        <div style={{width: '30%', cssFloat:'left', display: 'inline'}}>
+                    <Grid container spacing={24}>
+                        <Grid item xs={2}>
                             <Select
                                 value={'all'}
                                 onChange={evt => console.log(evt)}
@@ -163,17 +164,17 @@ class DirectoryInfoBoard extends React.Component {
                                 <MenuItem value="all">All of the tags</MenuItem>
                                 <MenuItem value="any">Any of the tags</MenuItem>
                             </Select>
-                        </div>
-                        <div style={{width: '70%', cssFloat:'right', display: 'inline'}}>
+                        </Grid>
+                        <Grid item xs={10}>
                             <AutoCompleteWithChips suggestions={this.state.tags} searchKey={'name'} selectedItem={[]} onChange={evt => console.log(evt)}/>
-                        </div>
-                    </div>
+                        </Grid>
+                    </Grid>
                     <div style={{marginTop: '20px'}}></div>
                     <Typography gutterBottom variant="headline" component="h2">
                         Individual Files
                     </Typography>
-                </div>
-                <div style={{ width: '37%', float: 'right', display: 'inline' }}>
+                </Grid>
+                <Grid item xs={3}>
                     <SortableTree
                     treeData={this.state.tagTreeData}
                     onChange={newTreeData => {
@@ -184,8 +185,8 @@ class DirectoryInfoBoard extends React.Component {
                         onClick: (evt) => this.handleTagClick(nodeInfo, evt),
                     })}
                     />
-                </div>
-            </div>
+                </Grid>
+            </Grid>
         );
     }
 
