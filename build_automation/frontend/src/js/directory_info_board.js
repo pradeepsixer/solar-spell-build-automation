@@ -7,10 +7,10 @@ import { MenuItem } from 'material-ui/Menu';
 import Select from 'material-ui/Select';
 import TextField from 'material-ui/TextField';
 import Typography from 'material-ui/Typography';
-import red from 'material-ui/colors/red';
 
 import SortableTree from 'react-sortable-tree';
 
+import AutoCompleteWithChips from './autocomplete.js';
 import { APP_URLS, get_url } from './url.js';
 
 import 'react-sortable-tree/style.css';
@@ -25,12 +25,24 @@ class DirectoryInfoBoard extends React.Component {
             filterCriteria: props.boardData.filterCriteria,
             parent: props.boardData.parent,
             tagTreeData: props.tagTreeData,
+            tags: props.tags,
+            selectedTags: this.getSelectedTagsFromFilterCriteria(props.boardData.filterCriteria)
         };
 
+        console.log(this.state);
         this.saveDirectory = this.saveDirectory.bind(this);
         this.deleteDirectory = this.deleteDirectory.bind(this);
         this.saveCallback = this.props.onSave.bind(this);
         this.deleteCallback = this.props.onDelete.bind(this);
+        this.handleChipAddition = this.handleChipAddition.bind(this);
+    }
+
+    getSelectedTagsFromFilterCriteria(filterCriteria) {
+        if (!filterCriteria) {
+            return [];
+        }
+        // TODO Change this to parse the Filter Criteria
+        return [];
     }
 
     componentWillReceiveProps(props) {
@@ -40,7 +52,8 @@ class DirectoryInfoBoard extends React.Component {
             name: props.boardData.name,
             filterCriteria: props.boardData.filterCriteria,
             parent: props.boardData.parent,
-            tagTreeData: props.tagTreeData
+            tagTreeData: props.tagTreeData,
+            tags: props.tags
         });
     }
 
@@ -52,6 +65,10 @@ class DirectoryInfoBoard extends React.Component {
             filter_criteria: this.state.filterCriteria,
             parent: this.state.parent
         };
+
+        // TODO : Delete this later.
+        payload.filter_criteria = '(1 OR 2)';
+        console.log('Payload is ', payload);
         const currInstance = this;
         if (this.state.id > 0) {
             // Update an existing directory.
@@ -66,7 +83,6 @@ class DirectoryInfoBoard extends React.Component {
         } else {
             // Create a new directory.
             payload.filter_criteria = '(1 OR 2)'; // TODO: Change this to a proper one once the autocomplete is done.
-            payload.parent = null;
             axios.post(targetUrl, payload, {
                 responseType: 'json'
             }).then(function(response) {
@@ -96,6 +112,18 @@ class DirectoryInfoBoard extends React.Component {
         })
     }
 
+    /* Called when a chip is added to the autocomplete component. */
+    handleChipAddition(addedChip) {
+        console.log(addedChip);
+        this.setState((prevState, props) => {
+            const newState = {
+                selectedTags: prevState.selectedTags
+            }
+            newState.selectedTags.push(addedChip);
+            return {}; // TODO: Change this
+        });
+    }
+
     render() {
         return (
             <div>
@@ -117,20 +145,33 @@ class DirectoryInfoBoard extends React.Component {
                       fullWidth
                       margin="normal"
                     />
-                    <Divider />
+                    <p></p>
                     <Typography gutterBottom variant="headline" component="h2">
                         Tags
                     </Typography>
-                    Choose content which matches
-                    <Select
-                        value={'all'}
-                        onChange={evt => console.log(evt)}
-                        displayEmpty
-                        name="tag-option"
-                    >
-                        <MenuItem value="all">All of the tags</MenuItem>
-                        <MenuItem value="any">Any of the tags</MenuItem>
-                    </Select>
+                    <Typography>
+                        Choose content which matches
+                    </Typography>
+                    <div style={{clear: 'both', display: 'block'}}>
+                        <div style={{width: '30%', cssFloat:'left', display: 'inline'}}>
+                            <Select
+                                value={'all'}
+                                onChange={evt => console.log(evt)}
+                                displayEmpty
+                                name="tag-option"
+                            >
+                                <MenuItem value="all">All of the tags</MenuItem>
+                                <MenuItem value="any">Any of the tags</MenuItem>
+                            </Select>
+                        </div>
+                        <div style={{width: '70%', cssFloat:'right', display: 'inline'}}>
+                            <AutoCompleteWithChips suggestions={this.state.tags} searchKey={'name'} selectedItem={[]} onChange={evt => console.log(evt)}/>
+                        </div>
+                    </div>
+                    <div style={{marginTop: '20px'}}></div>
+                    <Typography gutterBottom variant="headline" component="h2">
+                        Individual Files
+                    </Typography>
                 </div>
                 <div style={{ width: '37%', float: 'right', display: 'inline' }}>
                     <SortableTree

@@ -6,12 +6,11 @@ import Button from 'material-ui/Button';
 import Collapse from 'material-ui/transitions/Collapse';
 import ExpandLess from 'material-ui-icons/ExpandLess';
 import ExpandMore from 'material-ui-icons/ExpandMore';
-
 import ListSubheader from 'material-ui/List/ListSubheader';
 import List, { ListItem, ListItemIcon, ListItemText } from 'material-ui/List';
+import Menu, { MenuItem } from 'material-ui/Menu';
 
 import SortableTree from 'react-sortable-tree';
-import { getTreeFromFlatData } from 'react-sortable-tree';
 
 import DirlayoutInfoBoard from './dirlayout_info_board.js';
 import DirectoryInfoBoard from './directory_info_board.js';
@@ -88,6 +87,11 @@ class DirectoryLayoutComponent extends React.Component {
             infoBoardType: BOARD_TYPES.NONE,
             infoBoardData: {},
             tagTreeData: [],
+            dirContextMenu: {
+                selectedDirectory: null,
+                AnchorPos: null
+            },
+            selectedDirLayout: null
         };
         this.handleDirectoryLayoutClick = this.handleDirectoryLayoutClick.bind(this);
         this.handleDirectoryLeftClick = this.handleDirectoryLeftClick.bind(this);
@@ -99,6 +103,7 @@ class DirectoryLayoutComponent extends React.Component {
         this.saveDirectoryCallback = this.saveDirectoryCallback.bind(this);
         this.deleteDirectoryCallback = this.deleteDirectoryCallback.bind(this);
         this.removeDirectoryEntry = this.removeDirectoryEntry.bind(this);
+        this.handleMenuClose = this.handleMenuClose.bind(this);
     }
 
     componentDidMount() {
@@ -172,7 +177,9 @@ class DirectoryLayoutComponent extends React.Component {
             if (layoutDirectories[eachDir.id]) {
                 layoutDirectories[eachDir.id].id = eachDir.id;
                 layoutDirectories[eachDir.id].name = eachDir.name;
-                layoutDirectories[eachDir.id].title = eachDir.name;
+                layoutDirectories[eachDir.id].title = (
+                    <div style={{width: '100%'}}><Button fullWidth>{eachDir.name}</Button></div>
+                );
                 layoutDirectories[eachDir.id].parent = eachDir.parent;
                 layoutDirectories[eachDir.id].dirLayoutId = eachDir.dir_layout;
                 layoutDirectories[eachDir.id].filterCriteria = eachDir.filter_criteria;
@@ -180,7 +187,9 @@ class DirectoryLayoutComponent extends React.Component {
                 layoutDirectories[eachDir.id] = {
                     id: eachDir.id,
                     name: eachDir.name,
-                    title: eachDir.name,
+                    title: (
+                        <div style={{width: '100%'}}><Button fullWidth>{eachDir.name}</Button></div>
+                    ),
                     dirLayoutId: eachDir.dir_layout,
                     parent: eachDir.parent,
                     filterCriteria: eachDir.filter_criteria,
@@ -226,7 +235,8 @@ class DirectoryLayoutComponent extends React.Component {
         }).then(function(response) {
             const tagTreeData = currInstance.transformTagsToTreeData(response.data);
             currInstance.setState({
-                tagTreeData: tagTreeData
+                tagTreeData: tagTreeData,
+                tags: response.data
             })
         }).catch(function(error) {
             console.log(error);
@@ -266,7 +276,8 @@ class DirectoryLayoutComponent extends React.Component {
             const newState = {
                 accordionData: prevState.accordionData,
                 infoBoardType: BOARD_TYPES.DIRLAYOUT,
-                infoBoardData: targetDirLayout
+                infoBoardData: targetDirLayout,
+                selectedDirLayout: targetDirLayout.id
             };
 
             newState.accordionData.forEach(eachDirLayout => {
@@ -298,19 +309,39 @@ class DirectoryLayoutComponent extends React.Component {
         /* This is used to determine whether the click event was directed at the tree node,
         * or at the expand/collapse buttons in the SortableTree. */
         if (!(evtTarget.className.includes('expandButton') || evtTarget.className.includes('collapseButton'))) {
-            // TODO: Display the right click menu.
-            console.log('Need to display the right click menu.');
+            this.setState({
+                dirContextMenu: {
+                    selectedDirectory: nodeInfo.node.id,
+                    AnchorPos: {top:evt.clientY, left:evt.clientX}
+                }
+            });
         }
+        evt.preventDefault();
     }
 
-    createDirectory(dirLayoutId, evt) {
+    handleMenuClose(evt) {
+        console.log(evt);
+        this.setState({
+            dirContextMenu: {
+                selectedDirectory: null,
+                AnchorPos: null
+            }
+        });
+    }
+
+    createDirectory(dirLayoutId, parentDirId) {
+        /*
+         * If the parentDirId is null, there is no parent directory and will be created at the root.
+         */
+        console.log(dirLayoutId, parentDirId);
         this.setState({
             infoBoardType: BOARD_TYPES.DIRECTORY,
             infoBoardData: {
                 id: -1,
                 name: '',
                 filterCriteria: '',
-                dirLayoutId: dirLayoutId
+                dirLayoutId: dirLayoutId,
+                parent: parentDirId
             }
         });
     }
@@ -350,7 +381,7 @@ class DirectoryLayoutComponent extends React.Component {
                         onContextMenu: (evt) => this.handleDirectoryRightClick(nodeInfo, evt)
                     })}
                     />
-                : <Button variant="raised" color="primary" onClick={evt => {this.createDirectory(eachDirLayout.id, evt); }}>
+                : <Button variant="raised" color="primary" onClick={evt => {this.createDirectory(eachDirLayout.id, null); }}>
                         New Directory
                     </Button>
                 }
@@ -364,7 +395,7 @@ class DirectoryLayoutComponent extends React.Component {
                             New Directory Layout
                         </Button>
                         <List component="nav">
-                            <ListSubheader component="div">Directory Layouts</ListSubheader>
+                            <ListSubheader disableSticky component="div">Directory Layouts</ListSubheader>
                             {
                                 accordionItems
                             }
@@ -378,13 +409,29 @@ class DirectoryLayoutComponent extends React.Component {
                         }
                         {
                             this.state.infoBoardType == BOARD_TYPES.DIRECTORY &&
-                                <DirectoryInfoBoard boardData={this.state.infoBoardData} onSave={this.saveDirectoryCallback} onDelete={this.deleteDirectoryCallback} tagTreeData={this.state.tagTreeData}/>
+                                <DirectoryInfoBoard boardData={this.state.infoBoardData} onSave={this.saveDirectoryCallback} onDelete={this.deleteDirectoryCallback} tagTreeData={this.state.tagTreeData} tags={this.state.tags}/>
                         }
                         {
                             this.state.infoBoardType == BOARD_TYPES.NONE &&
                                 <span>Nothing to show here.</span>
                         }
                     </div>
+                    <Menu
+                        id="simple-menu"
+                        anchorPosition={this.state.dirContextMenu.AnchorPos}
+                        anchorReference={'anchorPosition'}
+                        open={Boolean(this.state.dirContextMenu.AnchorPos)}
+                        onClose={this.handleMenuClose}
+                    >
+                        <MenuItem
+                            onClick={evt => {
+                                this.createDirectory(this.state.selectedDirLayout, this.state.dirContextMenu.selectedDirectory);
+                                this.handleMenuClose(evt);
+                            }}
+                        >
+                            Create Directory
+                        </MenuItem>
+                    </Menu>
                 </div>
                 );
         } else {
@@ -433,7 +480,8 @@ class DirectoryLayoutComponent extends React.Component {
                 infoBoardType: BOARD_TYPES.NONE,
                 infoBoardData: {},
                 accordionData: prevState.accordionData,
-                treeData: prevState.treeData
+                treeData: prevState.treeData,
+                selectedDirLayout: null
             };
 
             delete newState.treeData[deletedItemId];
@@ -457,16 +505,16 @@ class DirectoryLayoutComponent extends React.Component {
                     array[i].children.push({
                         id: newValue.id,
                         name: newValue.name,
-                        title: newValue.name,
-                        dirLayoutId: eachDir.dir_layout,
-                        parent: eachDir.parent,
-                        filterCriteria: eachDir.filter_criteria,
+                        title: (<div style={{width: '100%'}}><Button fullWidth>{newValue.name}</Button></div>),
+                        dirLayoutId: newValue.dir_layout,
+                        parent: newValue.parent,
+                        filterCriteria: newValue.filter_criteria,
                         children: []
                     });
                 } else {
                     // If the operation is an update operation
                     array[i].name = newValue.name;
-                    array[i].title = newValue.title;
+                    array[i].title = (<div style={{width: '100%'}}><Button fullWidth>{newValue.name}</Button></div>),
                     array[i].parent = newValue.parent;
                     array[i].filterCriteria = newValue.filter_criteria;
                 }
@@ -498,7 +546,7 @@ class DirectoryLayoutComponent extends React.Component {
                     newState.treeData[dirLayoutId].push({
                         id: savedInfo.id,
                         name: savedInfo.name,
-                        title: savedInfo.name,
+                        title: (<div style={{width: '100%'}}><Button fullWidth>{savedInfo.name}</Button></div>),
                         dirLayoutId: savedInfo.dir_layout,
                         parent: savedInfo.parent,
                         filterCriteria: savedInfo.filter_criteria,
