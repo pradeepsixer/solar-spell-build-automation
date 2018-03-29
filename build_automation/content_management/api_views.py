@@ -90,9 +90,9 @@ class DirectoryViewSet(ModelViewSet):
 
 class DirectoryCloneApiViewset(ViewSet, CreateModelMixin):
     serializer_class = DirectoryLayoutSerializer
-    CLONE_SUFFIX = "_clone"
 
     def create(self, request, *args, **kwargs):
+        CLONE_SUFFIX = "_clone"
         original_layout = self.get_queryset()
         if(DirectoryLayout.objects.filter(name=original_layout.name + CLONE_SUFFIX).count() >= 1):
             dir = DirectoryLayout.objects.get(name=original_layout.name + CLONE_SUFFIX)
