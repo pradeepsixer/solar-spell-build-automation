@@ -7,6 +7,9 @@
     "clean": "rm -rf dist/ ../content_management/static/",
     "build": "npm run-script clean; webpack --mode=production && cp -r dist/ ../content_management/static/",
     "build-dev": "npm run-script clean; webpack --mode=development && cp -r dist/ ../content_management/static/",
+    "winclean": "rd /s /q dist ..\\content_management\\static",
+    "winbuild": "npm run-script winclean && webpack --mode=production && xcopy dist ..\\content_management\\static\\ /E",
+    "winbuild-dev": "npm run-script winclean && webpack --mode=development && xcopy dist ..\\content_management\\static\\ /E",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "School for the Future of Innovation in Society, Arizona State University.",
