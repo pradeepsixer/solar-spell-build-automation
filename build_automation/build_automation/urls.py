@@ -17,14 +17,18 @@ from django.contrib import admin
 from django.urls import include, path
 from rest_framework import routers
 
-from content_management.api_views import ContentApiViewset, DirectoryCloneApiViewset, TagViewSet
+from content_management.api_views import ContentApiViewset, DirectoryCloneApiViewset, DirectoryLayoutViewSet, DirectoryViewSet, TagViewSet
 
 router = routers.SimpleRouter()
 router.register(r'contents', ContentApiViewset)
 router.register(r'tags', TagViewSet, base_name='tag')
+router.register(r'directories', DirectoryViewSet)
+router.register(r'dirlayouts', DirectoryLayoutViewSet)
 router.register(r'dirlayout/(?P<id>\d+)/clone', DirectoryCloneApiViewset, base_name='dirlayout')
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include(router.urls)),
+    path('content_management/', include('content_management.urls')),
+    path('accounts/', include('django.contrib.auth.urls')),
 ]

@@ -1,13 +1,12 @@
 from django.db.models import Q
 from rest_framework import filters, status
-from rest_framework.mixins import CreateModelMixin
 from rest_framework.response import Response
 from rest_framework.reverse import reverse
-from rest_framework.viewsets import ModelViewSet, ViewSet
+from rest_framework.viewsets import ModelViewSet
 
 from .exceptions import DuplicateContentFileException
 from .models import Content, Directory, DirectoryLayout, FilterCriteria, Tag
-from .serializers import ContentSerializer, DirectoryLayoutSerializer, TagSerializer
+from .serializers import ContentSerializer, DirectoryLayoutSerializer, DirectorySerializer, TagSerializer
 from .utils import FilterCriteriaUtil
 
 class ContentApiViewset(ModelViewSet):
@@ -75,6 +74,16 @@ class TagViewSet(ModelViewSet):
                 self.get_child(matching_result, tags_set)
         serializer = self.get_serializer(tags_set, many=True)
         return Response(serializer.data)
+
+
+class DirectoryLayoutViewSet(ModelViewSet):
+    serializer_class = DirectoryLayoutSerializer
+    queryset = DirectoryLayout.objects.all()
+
+
+class DirectoryViewSet(ModelViewSet):
+    serializer_class = DirectorySerializer
+    queryset = Directory.objects.all()
 
 
 class DirectoryCloneApiViewset(ViewSet,CreateModelMixin):
