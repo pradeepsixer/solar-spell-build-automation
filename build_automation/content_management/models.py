@@ -119,11 +119,11 @@ class FilterCriteria(models.Model):
         if self.left_criteria is not None or self.right_criteria is not None:
             returnstr = "("
             if self.left_criteria is not None:
-                returnstr += self.left_criteria.get_filter_criteria
+                returnstr += self.left_criteria.get_filter_criteria_string()
             if self.operator is not None:
                 returnstr += " " + self.operator_str + " "
             if self.right_criteria is not None:
-                returnstr += self.right_criteria.get_filter_criteria
+                returnstr += self.right_criteria.get_filter_criteria_string()
             returnstr += ")"
             return returnstr
         if self.tag is not None:

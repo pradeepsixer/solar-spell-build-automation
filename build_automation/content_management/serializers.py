@@ -100,7 +100,7 @@ class DirectorySerializer(serializers.ModelSerializer):
 
     def update(self, instance, validated_data):
         instance.name = validated_data.get('name', instance.name)
-        instance.dir_layout_id = validated_data.get('dir_layout_id', instance.dir_layout_id)
+        instance.dir_layout = validated_data.get('dir_layout', instance.dir_layout)
         if 'filter_criteria' in validated_data:
             FilterCriteria.objects.filter(directory=instance).delete()
             criteria_util = FilterCriteriaUtil()
@@ -112,7 +112,7 @@ class DirectorySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Directory
-        fields = ('pk', 'name', 'dir_layout_id', 'filter_criteria', 'parent')
+        fields = ('pk', 'name', 'dir_layout', 'filter_criteria', 'parent')
         validators = [
             UniqueTogetherValidator(
                 queryset=Directory.objects.all(),
