@@ -93,6 +93,18 @@ class DirectoryCloneApiViewset(ViewSet, CreateModelMixin):
 
     def create(self, request, *args, **kwargs):
         cloned_layout = self.get_queryset()
+        if(DirectoryLayout.objects.filter(name=cloned_layout.name + "_clone").count() >= 1):
+            dir = DirectoryLayout.objects.get(name=cloned_layout.name + "_clone")
+            content_url = reverse('directorylayout-detail', args=[dir.id], request=request)
+            data = {
+                'result': 'error',
+                'error': 'DIRECTORY_LAYOUT_ALREADY_EXISTS',
+                'existing_directory_layout': {
+                    'directory_layout_name': cloned_layout.name + "_clone",
+                    'directory_layout': content_url
+                }
+            }
+            return Response(data, status=status.HTTP_409_CONFLICT)
         clone = DirectoryLayout(name=cloned_layout.name + "_clone", description=cloned_layout.description)
         clone.pk = None
         clone.save()
