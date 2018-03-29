@@ -1,12 +1,14 @@
 from django.db.models import Q
 from rest_framework import filters, status
+from rest_framework.mixins import CreateModelMixin
 from rest_framework.response import Response
 from rest_framework.reverse import reverse
-from rest_framework.viewsets import ModelViewSet
+from rest_framework.viewsets import ModelViewSet, ViewSet
 
 from .exceptions import DuplicateContentFileException
 from .models import Content, Directory, DirectoryLayout, Tag
 from .serializers import ContentSerializer, DirectoryLayoutSerializer, DirectorySerializer, TagSerializer
+from .utils import FilterCriteriaUtil
 
 
 class ContentApiViewset(ModelViewSet):
@@ -84,3 +86,42 @@ class DirectoryLayoutViewSet(ModelViewSet):
 class DirectoryViewSet(ModelViewSet):
     serializer_class = DirectorySerializer
     queryset = Directory.objects.all()
+
+
+class DirectoryCloneApiViewset(ViewSet, CreateModelMixin):
+    serializer_class = DirectoryLayoutSerializer
+    CLONE_SUFFIX = "_clone"
+
+    def create(self, request, *args, **kwargs):
+        original_layout = self.get_queryset()
+        if(DirectoryLayout.objects.filter(name=original_layout.name + self.CLONE_SUFFIX).count() >= 1):
+            dir = DirectoryLayout.objects.get(name=original_layout.name + self.CLONE_SUFFIX)
+            layout_url = reverse('directorylayout-detail', args=[dir.id], request=request)
+            data = {
+                'result': 'error',
+                'error': 'DIRECTORY_LAYOUT_ALREADY_EXISTS',
+                'existing_directory_layout': {
+                    'directory_layout_name': original_layout.name + self.CLONE_SUFFIX,
+                    'directory_layout': layout_url
+                }
+            }
+            return Response(data, status=status.HTTP_409_CONFLICT)
+        clone = DirectoryLayout(name=original_layout.name + self.CLONE_SUFFIX, description=original_layout.description)
+        clone.pk = None
+        clone.save()
+
+        filter_criteria_util = FilterCriteriaUtil()
+        dir_queryset = Directory.objects.filter(dir_layout=original_layout.id)
+        for dir in dir_queryset:
+            dir.pk = None
+            dir.dir_layout = clone
+            cloned_filter_criteria_str = dir.filter_criteria.get_filter_criteria_string()
+            dir.filter_criteria = filter_criteria_util.create_filter_criteria_from_string(cloned_filter_criteria_str)
+            dir.save()
+
+        serializer = DirectoryLayoutSerializer(clone)
+        return Response(serializer.data)
+
+    def get_queryset(self, **kwargs):
+        queryset = DirectoryLayout.objects.get(id=self.kwargs['id'])
+        return queryset
