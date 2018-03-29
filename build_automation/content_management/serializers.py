@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from rest_framework.validators import UniqueValidator
+from rest_framework.validators import UniqueTogetherValidator, UniqueValidator
 
 from content_management.models import Content, Directory, DirectoryLayout, FilterCriteria, Tag
 from content_management.utils import FilterCriteriaUtil

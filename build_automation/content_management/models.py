@@ -129,6 +129,7 @@ class FilterCriteria(models.Model):
         if self.tag is not None:
             return str(self.tag.id)
 
+
 class DirectoryLayout(models.Model):
     """
     The Directory Layout for each build.
