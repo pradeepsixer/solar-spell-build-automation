@@ -34,3 +34,5 @@ body {
 .handPointer {
     cursor: pointer;
 }
+
+.hidden {display: none}
