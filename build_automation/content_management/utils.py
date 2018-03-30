@@ -1,4 +1,5 @@
 import hashlib
+import os
 import re
 
 from django.db import transaction
@@ -92,3 +93,15 @@ class FilterCriteriaUtil:
             return new_filter
         else:
             return first_token
+
+
+class DiskSpace:
+    disk_stats = os.statvfs('/')
+    block_size = disk_stats.f_frsize
+    avail_blocks = disk_stats.f_bavail
+    total_blocks = disk_stats.f_blocks
+
+    def getFreeSpace(self):
+        free_space = self.block_size * self.avail_blocks
+        total_space = self.total_blocks * self.block_size
+        return (free_space, total_space)
