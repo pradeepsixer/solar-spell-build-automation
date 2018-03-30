@@ -10,16 +10,18 @@ class MainScreen extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            value: 2
+            currentTab: 'dirlayout'
         };
         this.handleTabClick = this.handleTabClick.bind(this);
     }
 
-    handleTabClick(event, value) {
-        this.setState({ value: value });
+    handleTabClick(event, selectedTab) {
+        this.setState({ currentTab: selectedTab });
       };
 
     render() {
+        const currentTab = this.state.currentTab;
+
         return (
             <React.Fragment>
             <Grid container style={{backgroundColor: '#2196f3', height: '100px', flexGrow: 1, overflow: 'hidden'}} justify="center">
@@ -37,25 +39,25 @@ class MainScreen extends React.Component {
                 <Grid item xs={12}>
                     <Paper>
                         <Tabs
-                            value={this.state.value}
+                            value={currentTab}
                             indicatorColor="secondary"
                             onChange={this.handleTabClick}
                             textColor="secondary"
                             centered
-                            >
-                            <Tab label="Tags" />
-                            <Tab label="Contents" />
-                            <Tab label="Directory Layout" />
-                            <Tab label="Builds" />
-                            <Tab label="System Info" />
+                        >
+                            <Tab value="tags" label="Tags" />
+                            <Tab value="contents" label="Contents" />
+                            <Tab value="dirlayout" label="Directory Layout" />
+                            <Tab value="builds" label="Builds" />
+                            <Tab value="sysinfo" label="System Info" />
                         </Tabs>
                     </Paper>
                 </Grid>
             </Grid>
             <Grid container style={{marginTop: '20px'}}>
                 <Grid item xs={12}>
-            <DirectoryLayoutComponent />
-            </Grid>
+                    {currentTab == 'dirlayout' && <DirectoryLayoutComponent />}
+                </Grid>
             </Grid>
             </React.Fragment>
         );
