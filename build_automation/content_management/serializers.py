@@ -90,6 +90,8 @@ class FilterCriteriaField(serializers.CharField):
 
     def to_representation(self, obj):
         return obj.get_filter_criteria_string()
+
+
 class DirectorySerializer(serializers.ModelSerializer):
     """
     Create and Update functions to override the value of filter_criteria
