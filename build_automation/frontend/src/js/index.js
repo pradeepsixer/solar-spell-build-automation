@@ -2,10 +2,13 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 
 import CssBaseline from 'material-ui/CssBaseline';
-import DirectoryLayoutComponent from './directory_layout.js';
+
+import MainScreen from './main_screen.js';
 
 ReactDOM.render(
-    (<React.Fragment><CssBaseline /><DirectoryLayoutComponent /></React.Fragment>)
+    (<React.Fragment><CssBaseline />
+    <MainScreen />
+    </React.Fragment>)
     ,
     document.getElementById('container')
 );

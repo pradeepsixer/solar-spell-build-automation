@@ -12,6 +12,10 @@
 }
 */
 
+body {
+    font-family: "Roboto", "Helvetica", "Arial", sans-serif;
+}
+
 .accordion__title h3::after {
     content: '+';
     float: right;

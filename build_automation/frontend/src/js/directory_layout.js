@@ -96,7 +96,7 @@ class DirectoryLayoutComponent extends React.Component {
                 AnchorPos: null
             },
             selectedDirLayout: null,
-            breadCrumb: ''
+            breadCrumb: ' '
         };
         this.handleDirectoryLayoutClick = this.handleDirectoryLayoutClick.bind(this);
         this.handleDirectoryLeftClick = this.handleDirectoryLeftClick.bind(this);
@@ -397,7 +397,7 @@ class DirectoryLayoutComponent extends React.Component {
 
             elements = (
                 <Grid container spacing={8}>
-                    <Grid item xs={3}>
+                    <Grid item xs={3} style={{paddingLeft: '20px'}}>
                         <Button variant="raised" color="primary" onClick={this.createDirectoryLayout}>
                             New Directory Layout
                         </Button>
@@ -409,9 +409,9 @@ class DirectoryLayoutComponent extends React.Component {
 
                         </List>
                     </Grid>
-                    <Grid item xs={9}>
-                        <AppBar position="static">
-                            <Typography gutterBottom variant="subheading">
+                    <Grid item xs={8}>
+                        <AppBar position="static" style={{ height: '50px', margin: 'auto'}}>
+                            <Typography gutterBottom variant="subheading" style={{color: '#ffffff'}}>
                             {this.state.breadCrumb}
                             </Typography>
                         </AppBar>
@@ -495,7 +495,7 @@ class DirectoryLayoutComponent extends React.Component {
                 accordionData: prevState.accordionData,
                 treeData: prevState.treeData,
                 selectedDirLayout: null,
-                breadCrumb: ''
+                breadCrumb: ' '
             };
 
             delete newState.treeData[deletedItemId];
