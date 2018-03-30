@@ -1,6 +1,8 @@
 import React from 'react';
 
 import DirectoryLayoutComponent from './directory_layout.js';
+import ContentManagement from './content_management.js';
+
 import Grid from 'material-ui/Grid';
 import Paper from 'material-ui/Paper';
 import Tabs, { Tab } from 'material-ui/Tabs';
@@ -46,7 +48,7 @@ class MainScreen extends React.Component {
                             centered
                         >
                             <Tab value="tags" label="Tags" />
-                            <Tab value="contents" label="Contents" />
+                            <Tab value="contents" label="Content" />
                             <Tab value="dirlayout" label="Directory Layout" />
                             <Tab value="builds" label="Builds" />
                             <Tab value="sysinfo" label="System Info" />
@@ -57,6 +59,7 @@ class MainScreen extends React.Component {
             <Grid container style={{marginTop: '20px'}}>
                 <Grid item xs={12}>
                     {currentTab == 'dirlayout' && <DirectoryLayoutComponent />}
+                    {currentTab == 'contents' && <ContentManagement />}
                 </Grid>
             </Grid>
             </React.Fragment>

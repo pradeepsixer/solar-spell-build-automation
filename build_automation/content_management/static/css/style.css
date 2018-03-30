@@ -12,6 +12,10 @@
 }
 */
 
+body {
+    font-family: "Roboto", "Helvetica", "Arial", sans-serif;
+}
+
 .accordion__title h3::after {
     content: '+';
     float: right;
@@ -26,3 +30,5 @@
 .rst__tree button span {
     text-transform: none
 }
+
+.hidden {display: none}
