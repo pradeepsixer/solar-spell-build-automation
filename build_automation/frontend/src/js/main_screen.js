@@ -1,6 +1,7 @@
 import React from 'react';
 
 import DirectoryLayoutComponent from './directory_layout.js';
+import BuildProcessComponent from './build_process.js';
 import Grid from 'material-ui/Grid';
 import Paper from 'material-ui/Paper';
 import Tabs, { Tab } from 'material-ui/Tabs';
@@ -57,6 +58,7 @@ class MainScreen extends React.Component {
             <Grid container style={{marginTop: '20px'}}>
                 <Grid item xs={12}>
                     {currentTab == 'dirlayout' && <DirectoryLayoutComponent />}
+                    {currentTab == 'builds' && <BuildProcessComponent />}
                 </Grid>
             </Grid>
             </React.Fragment>
