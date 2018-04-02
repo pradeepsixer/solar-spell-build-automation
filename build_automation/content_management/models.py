@@ -15,6 +15,9 @@ class Tag(models.Model):
     def __str__(self):
         return "Tag[{}]".format(self.name)
 
+    class Meta:
+        ordering = ['pk']
+
 
 class Content(models.Model):
     """
@@ -59,6 +62,9 @@ class Content(models.Model):
 
     def get_absolute_url(self):
         return reverse('content-detail', args=[self.pk])
+
+    class Meta:
+        ordering = ['pk']
 
 
 class FilterCriteria(models.Model):
@@ -129,6 +135,9 @@ class FilterCriteria(models.Model):
         if self.tag is not None:
             return str(self.tag.id)
 
+    class Meta:
+        ordering = ['pk']
+
 
 class DirectoryLayout(models.Model):
     """
@@ -139,6 +148,9 @@ class DirectoryLayout(models.Model):
 
     def __str__(self):
         return "DirectoryLayout[{}]".format(self.name)
+
+    class Meta:
+        ordering = ['pk']
 
 
 class Directory(models.Model):
@@ -152,3 +164,6 @@ class Directory(models.Model):
 
     def __str__(self):
         return "Directory[{}]".format(self.name)
+
+    class Meta:
+        ordering = ['pk']

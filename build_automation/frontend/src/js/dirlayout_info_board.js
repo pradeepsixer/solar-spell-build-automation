@@ -49,6 +49,7 @@ class DirlayoutInfoBoard extends React.Component {
                 currentInstance.saveCallback(response.data);
             }).catch(function(error) {
                 console.error("Error in updating the directory layout ", error);
+                console.error(error.response.data);
             })
         } else {
             // Create a new directory layout.
@@ -58,6 +59,7 @@ class DirlayoutInfoBoard extends React.Component {
                 currentInstance.saveCallback(response.data, true);
             }).catch(function(error) {
                 console.error("Error in creating a new directory layout ", error);
+                console.error(error.response.data);
             })
         }
     }

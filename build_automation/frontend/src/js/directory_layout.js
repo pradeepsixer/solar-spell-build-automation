@@ -7,6 +7,7 @@ import Button from 'material-ui/Button';
 import Collapse from 'material-ui/transitions/Collapse';
 import ExpandLess from 'material-ui-icons/ExpandLess';
 import ExpandMore from 'material-ui-icons/ExpandMore';
+import ChevronRight from 'material-ui-icons/ChevronRight';
 import Grid from 'material-ui/Grid';
 import ListSubheader from 'material-ui/List/ListSubheader';
 import List, { ListItem, ListItemIcon, ListItemText } from 'material-ui/List';
@@ -112,12 +113,7 @@ class DirectoryLayoutComponent extends React.Component {
     }
 
     componentDidMount() {
-        // TODO: Try using lodash for deep merge of state
-        // this.timerID = setInterval(
-        this.timerID = setTimeout(
-            () => this.loadData(),
-            1000
-        );
+        this.loadData();
     }
 
     componentWillUnmount() {
@@ -355,6 +351,7 @@ class DirectoryLayoutComponent extends React.Component {
 
     createDirectoryLayout(evt) {
         this.setState({
+            breadCrumb: '',
             infoBoardType: BOARD_TYPES.DIRLAYOUT,
             infoBoardData: {
                 id: -1,
@@ -410,9 +407,10 @@ class DirectoryLayoutComponent extends React.Component {
                         </List>
                     </Grid>
                     <Grid item xs={8}>
-                        <AppBar position="static" style={{ height: '50px', margin: 'auto'}}>
-                            <Typography gutterBottom variant="subheading" style={{color: '#ffffff'}}>
+                        <AppBar position="static" style={{ minHeight: '50px', margin: 'auto', padding: '10px auto 10px 10px'}}>
+                            <Typography gutterBottom variant="subheading" style={{color: '#ffffff', verticalAlign: 'middle'}}>
                             {this.state.breadCrumb}
+                            <ChevronRight style={{verticalAlign: 'middle'}}/>
                             </Typography>
                         </AppBar>
                         <div style={{marginTop: '20px'}}> </div>
@@ -461,6 +459,7 @@ class DirectoryLayoutComponent extends React.Component {
             const newState = {
                 accordionData: prevState.accordionData,
                 infoBoardData: savedInfo,
+                breadCrumb: savedInfo.name,
             };
 
             if (created) {
@@ -598,7 +597,8 @@ class DirectoryLayoutComponent extends React.Component {
             const newState = {
                 infoBoardType: BOARD_TYPES.NONE,
                 infoBoardData: {},
-                treeData: prevState.treeData
+                treeData: prevState.treeData,
+                breadCrumb: ' '
             };
 
             this.removeDirectoryEntry(directoryId, newState.treeData[dirLayoutId]);
