@@ -2,6 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { withStyles } from 'material-ui/styles';
 import Button from 'material-ui/Button';
+import Grid from 'material-ui/Grid';
 import AutoCompleteWithChips from './autocomplete.js';
 import {APP_URLS} from "./url";
 import axios from 'axios';
@@ -43,19 +44,30 @@ class ContentManagement extends React.Component{
     render(){
     return (
         <div>
-        <h3>Content Management</h3>
-         <input
-        accept="*"
-        className={'hidden'}
-        id="raised-button-file"
-        multiple
-        type="file"
-      />
-      <label htmlFor="raised-button-file">
-        <Button variant="raised" component="span">
-          Upload
-        </Button>
-      </label>
+            <Grid container spacing={8}>
+                    <Grid item xs={3} style={{paddingLeft: '20px'}}>
+                        <Button variant="raised" color="primary">
+                            Test
+                        </Button>
+                    <h3>Content Management</h3>
+                    <h2>Test</h2>
+                    </Grid>
+            </Grid>
+                    <Grid item xs={8}>
+                        <input
+                        accept="*"
+                        className={'hidden'}
+                        id="raised-button-file"
+                        multiple
+                        type="file"
+                        />
+                    <label htmlFor="raised-button-file">
+                        <Button variant="raised" component="span">
+                        Upload
+                        </Button>
+                    </label>
+                    </Grid>
+
             <AutoCompleteWithChips suggestions={this.state.tags} searchKey={'name'} selectedItem={[]} onChange={evt => console.log(evt)}/>
         </div>
     )
