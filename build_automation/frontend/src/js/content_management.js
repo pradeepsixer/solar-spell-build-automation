@@ -3,19 +3,29 @@ import PropTypes from 'prop-types';
 import { withStyles } from 'material-ui/styles';
 import Button from 'material-ui/Button';
 import Grid from 'material-ui/Grid';
+import Paper from 'material-ui/Paper';
+import AppBar from 'material-ui/AppBar';
+import Typography from 'material-ui/Typography';
 import AutoCompleteWithChips from './autocomplete.js';
 import {APP_URLS} from "./url";
 import axios from 'axios';
 
 const styles = theme => ({
-  button: {
-    margin: theme.spacing.unit,
-  },
-  input: {
-    display: 'none',
-  },
+    root: {
+    flexGrow: 1,
+    },
+    paper: {
+        padding: theme.spacing.unit * 2,
+        textAlign: 'center',
+        color: theme.palette.text.secondary,
+    },
+    button: {
+        margin: theme.spacing.unit,
+    },
+    input: {
+        display: 'none',
+    },
 });
-
 
 
 class ContentManagement extends React.Component{
@@ -44,7 +54,7 @@ class ContentManagement extends React.Component{
     render(){
     return (
         <div>
-            <Grid container spacing={8}>
+            <Grid container spacing={8} style={{display: 'inline-block'}}>
                     <Grid item xs={3} style={{paddingLeft: '20px'}}>
                         <Button variant="raised" color="primary">
                             Test
@@ -67,8 +77,18 @@ class ContentManagement extends React.Component{
                         </Button>
                     </label>
                     </Grid>
+             <Grid item xs={8}>
+                        <AppBar position="static" style={{ height: '50px', margin: 'auto'}}>
+                            <Typography gutterBottom variant="subheading" style={{color: '#ffffff'}}>
 
-            <AutoCompleteWithChips suggestions={this.state.tags} searchKey={'name'} selectedItem={[]} onChange={evt => console.log(evt)}/>
+                            </Typography>
+                        </AppBar>
+                        <div style={{marginTop: '20px'}}> </div>
+                        <span>
+                            <AutoCompleteWithChips suggestions={this.state.tags} searchKey={'name'} selectedItem={[]} onChange={evt => console.log(evt)}/>
+                        </span>
+                    </Grid>
+
         </div>
     )
     }
