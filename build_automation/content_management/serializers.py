@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from rest_framework.validators import UniqueTogetherValidator, UniqueValidator
+from rest_framework.validators import UniqueValidator
 
 from content_management.models import Content, Directory, DirectoryLayout, FilterCriteria, Tag
 from content_management.utils import FilterCriteriaUtil
@@ -86,6 +86,16 @@ class DirectoryLayoutSerializer(serializers.ModelSerializer):
         }
 
 
+class DirectoryNameUniqueValidator(object):
+    def __call__(self, directory):
+        dir_name = directory.get('name')
+        parent = directory.get('parent')
+        dir_layout = directory.get('dir_layout')
+        matching_dirs_count = Directory.objects.filter(dir_layout=dir_layout, parent=parent, name=dir_name).count()
+        if matching_dirs_count > 0:
+            raise serializers.ValidationError({'name': [{'result': 'ERROR', 'error': 'DUPLICATE_DIRECTORY'}]})
+
+
 class FilterCriteriaField(serializers.CharField):
     """
     For serializing the filter criteria to a single string representation.
@@ -131,11 +141,7 @@ class DirectorySerializer(serializers.ModelSerializer):
         model = Directory
         fields = ('id', 'url', 'name', 'dir_layout', 'filter_criteria', 'parent')
         validators = [
-            UniqueTogetherValidator(
-                queryset=Directory.objects.all(),
-                fields=('name', 'parent'),
-                message=('The subdirectory for the parent already exists.')
-            )
+            DirectoryNameUniqueValidator()
         ]
         extra_kwargs = {
             'url': {'lookup_field': 'pk'},
