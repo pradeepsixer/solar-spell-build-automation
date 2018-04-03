@@ -32,7 +32,8 @@ class DirectoryInfoBoard extends React.Component {
             tagTreeData: props.tagTreeData,
             tags: props.tags,
             selectedOperator: filterCriteriaInfo.operator,
-            selectedTags: filterCriteriaInfo.selectedItems
+            selectedTags: filterCriteriaInfo.selectedItems,
+            fieldErrors: {}
         };
 
         console.log(this.state);
@@ -92,11 +93,16 @@ class DirectoryInfoBoard extends React.Component {
             tagTreeData: props.tagTreeData,
             tags: props.tags,
             selectedOperator: filterCriteriaInfo.operator,
-            selectedTags: filterCriteriaInfo.selectedItems
+            selectedTags: filterCriteriaInfo.selectedItems,
+            fieldErrors: {}
         });
     }
 
     saveDirectory(evt) {
+        if (!this.is_valid_state()) {
+            // If it is in an invalid state, do not proceed with the save operation.
+            return;
+        }
         var targetUrl = APP_URLS.DIRECTORY_LIST;
         const tagNameTagMap = this.buildTagNameTagMap(this.state.tags);
         const allSelectedTags = [];
@@ -137,6 +143,23 @@ class DirectoryInfoBoard extends React.Component {
         }
     }
 
+    is_valid_state() {
+        var hasErrors = false;
+        const fieldErrors = {};
+        if (!this.state.name || this.state.name.trim().length === 0) {
+            hasErrors = true;
+            fieldErrors['name'] = 'Name is required.';
+        }
+        if (!this.state.selectedTags || this.state.selectedTags.length === 0) {
+            hasErrors = true;
+            fieldErrors['selectedTags'] = 'Tags are required for filtering the contents.';
+        }
+        if (hasErrors) {
+            this.setState({fieldErrors});
+        }
+        return !hasErrors;
+    }
+
     deleteDirectory(evt) {
         const targetUrl = get_url(APP_URLS.DIRECTORY_DETAIL, {id:this.state.id});
         const currentInstance = this;
@@ -150,8 +173,14 @@ class DirectoryInfoBoard extends React.Component {
     }
 
     handleTextFieldUpdate(stateProperty, evt) {
-        this.setState({
-            [stateProperty]: evt.target.value
+        const targetVal = evt.target.value;
+        const newState = {
+            [stateProperty]: targetVal
+        };
+        this.setState((prevState, props) => {
+            newState.fieldErrors = prevState.fieldErrors;
+            newState.fieldErrors[stateProperty] = null;
+            return newState;
         })
     }
 
@@ -195,6 +224,8 @@ class DirectoryInfoBoard extends React.Component {
                     <TextField
                       id="name"
                       label="Name"
+                      required
+                      error={this.state.fieldErrors.name ? true: false}
                       value={this.state.name}
                       onChange={evt => this.handleTextFieldUpdate('name', evt)}
                       fullWidth
@@ -220,8 +251,10 @@ class DirectoryInfoBoard extends React.Component {
                             </Select>
                         </Grid>
                         <Grid item xs={10}>
-                            <AutoCompleteWithChips suggestions={this.state.tags} searchKey={'name'} selectedItem={this.state.selectedTags} onAddition={this.handleChipAddition}
-                                onDeletion={this.handleChipDeletion} />
+                            <AutoCompleteWithChips suggestions={this.state.tags} searchKey={'name'}
+                                selectedItem={this.state.selectedTags} onAddition={this.handleChipAddition}
+                                onDeletion={this.handleChipDeletion} required={true}
+                                errorMsg={this.state.fieldErrors.selectedTags} />
                         </Grid>
                     </Grid>
                     <div style={{marginTop: '20px'}}></div>

@@ -161,6 +161,8 @@ class AutoCompleteWithChips extends React.Component {
                                 onKeyDown: this.handleKeyDown,
                                 placeholder: this.props.placeholder,
                                 id: this.props.id,
+                                required: this.props.required,
+                                error: this.props.errorMsg ? true : false
                                 }),
                             })
                         }
@@ -193,7 +195,14 @@ AutoCompleteWithChips.propTypes = {
     classes: PropTypes.object.isRequired,
     suggestions: PropTypes.array,
     onAddition: PropTypes.func,
-    onDeletion: PropTypes.func
+    onDeletion: PropTypes.func,
+    required: PropTypes.bool,
+    errorMsg: PropTypes.string
+};
+
+AutoCompleteWithChips.defaultProps = {
+    required: false,
+    errorMsg: null
 };
 
 const styles = theme => ({

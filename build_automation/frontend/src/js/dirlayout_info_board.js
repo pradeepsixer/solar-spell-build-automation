@@ -12,7 +12,8 @@ class DirlayoutInfoBoard extends React.Component {
         this.state = {
             id: props.boardData.id,
             name: props.boardData.name,
-            description: props.boardData.description
+            description: props.boardData.description,
+            fieldErrors: {}
         };
         this.handleTextFieldUpdate = this.handleTextFieldUpdate.bind(this);
         this.saveDirLayout = this.saveDirLayout.bind(this);
@@ -26,17 +27,28 @@ class DirlayoutInfoBoard extends React.Component {
         this.setState({
             id: props.boardData.id,
             name: props.boardData.name,
-            description: props.boardData.description
+            description: props.boardData.description,
+            fieldErrors: {}
         });
     }
 
     handleTextFieldUpdate(stateProperty, evt) {
-        this.setState({
-            [stateProperty]: evt.target.value
+        const targetVal = evt.target.value;
+        this.setState((prevState, props) => {
+            const newState = {
+                fieldErrors: prevState.fieldErrors,
+                [stateProperty]: targetVal
+            };
+            newState.fieldErrors[stateProperty] = null;
+            return newState;
         })
     }
 
     saveDirLayout(evt) {
+        if (!this.is_valid_state()) {
+            // If it is in an invalid state, do not proceed with the save operation.
+            return;
+        }
         var targetUrl = APP_URLS.DIRLAYOUT_LIST;
         const payload = {name: this.state.name, description: this.state.description};
         const currentInstance = this;
@@ -62,6 +74,23 @@ class DirlayoutInfoBoard extends React.Component {
                 console.error(error.response.data);
             })
         }
+    }
+
+    is_valid_state() {
+        var hasErrors = false;
+        const fieldErrors = {};
+        if (!this.state.name || this.state.name.trim().length === 0) {
+            hasErrors = true;
+            fieldErrors['name'] = 'Name is required.';
+        }
+        if (!this.state.description || this.state.description.trim().length === 0) {
+            hasErrors = true;
+            fieldErrors['description'] = 'Description is required.';
+        }
+        if (hasErrors) {
+            this.setState({fieldErrors});
+        }
+        return !hasErrors;
     }
 
     cloneDirLayout(evt) {
@@ -103,6 +132,8 @@ class DirlayoutInfoBoard extends React.Component {
                   id="name"
                   label="Name"
                   value={this.state.name}
+                  required={true}
+                  error={this.state.fieldErrors.name ? true : false}
                   onChange={evt => this.handleTextFieldUpdate('name', evt)}
                   fullWidth
                   margin="normal"
@@ -112,6 +143,8 @@ class DirlayoutInfoBoard extends React.Component {
                   label="Description"
                   multiline
                   fullWidth
+                  required={true}
+                  error={this.state.fieldErrors.description ? true : false}
                   value={this.state.description}
                   onChange={evt => this.handleTextFieldUpdate('description', evt)}
                   margin="normal"
