@@ -279,3 +279,6 @@ typings/
 
 # next.js build output
 .next
+
+# SolarSPELL Specific Settings
+build_automation/content_management/static
