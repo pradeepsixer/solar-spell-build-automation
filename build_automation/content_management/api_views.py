@@ -106,20 +106,24 @@ class DirectoryCloneApiViewset(ViewSet, CreateModelMixin):
                 }
             }
             return Response(data, status=status.HTTP_409_CONFLICT)
-        clone = DirectoryLayout(name=original_layout.name + self.CLONE_SUFFIX, description=original_layout.description)
-        clone.pk = None
-        clone.save()
+        cloned_layout = DirectoryLayout(
+            name=original_layout.name + self.CLONE_SUFFIX, description=original_layout.description
+        )
+        cloned_layout.pk = None
+        cloned_layout.save()
 
         filter_criteria_util = FilterCriteriaUtil()
-        dir_queryset = Directory.objects.filter(dir_layout=original_layout.id)
+        dir_queryset = Directory.objects.filter(dir_layout=original_layout)
         for dir in dir_queryset:
-            dir.pk = None
-            dir.dir_layout = clone
             cloned_filter_criteria_str = dir.filter_criteria.get_filter_criteria_string()
-            dir.filter_criteria = filter_criteria_util.create_filter_criteria_from_string(cloned_filter_criteria_str)
+            dir.pk = None
+            dir.dir_layout = cloned_layout
             dir.save()
+            filter_criteria = filter_criteria_util.create_filter_criteria_from_string(cloned_filter_criteria_str)
+            filter_criteria.directory = dir
+            filter_criteria.save()
 
-        serializer = DirectoryLayoutSerializer(clone)
+        serializer = DirectoryLayoutSerializer(cloned_layout, context={'request': request})
         return Response(serializer.data)
 
     def get_queryset(self, **kwargs):

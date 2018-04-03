@@ -26,7 +26,7 @@ router.register(r'contents', ContentApiViewset)
 router.register(r'tags', TagViewSet, base_name='tag')
 router.register(r'directories', DirectoryViewSet)
 router.register(r'dirlayouts', DirectoryLayoutViewSet)
-router.register(r'dirlayout/(?P<id>\d+)/clone', DirectoryCloneApiViewset, base_name='dirlayout')
+router.register(r'dirlayouts/(?P<id>\d+)/clone', DirectoryCloneApiViewset, base_name='dirlayout')
 
 urlpatterns = [
     path('admin/', admin.site.urls),
