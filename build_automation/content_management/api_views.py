@@ -113,15 +113,8 @@ class DirectoryCloneApiViewset(ViewSet, CreateModelMixin):
         cloned_layout.save()
 
         filter_criteria_util = FilterCriteriaUtil()
-        dir_queryset = Directory.objects.filter(dir_layout=original_layout)
-        for dir in dir_queryset:
-            cloned_filter_criteria_str = dir.filter_criteria.get_filter_criteria_string()
-            dir.pk = None
-            dir.dir_layout = cloned_layout
-            dir.save()
-            filter_criteria = filter_criteria_util.create_filter_criteria_from_string(cloned_filter_criteria_str)
-            filter_criteria.directory = dir
-            filter_criteria.save()
+        dir_queryset = Directory.objects.filter(dir_layout=original_layout, parent=None)
+        self.__clone_directory_tree(filter_criteria_util, cloned_layout, dir_queryset, None)
 
         serializer = DirectoryLayoutSerializer(cloned_layout, context={'request': request})
         return Response(serializer.data)
@@ -129,3 +122,22 @@ class DirectoryCloneApiViewset(ViewSet, CreateModelMixin):
     def get_queryset(self, **kwargs):
         queryset = DirectoryLayout.objects.get(id=self.kwargs['id'])
         return queryset
+
+    def __clone_directory_tree(
+            self, filter_criteria_util, cloned_dir_layout,
+            original_directories, parent_cloned_directory):
+        for each_original_directory in original_directories:
+            cloned_directory = Directory(name=each_original_directory.name)
+            cloned_directory.dir_layout = cloned_dir_layout
+            cloned_directory.parent = parent_cloned_directory
+            cloned_directory.save()
+            cloned_filter_criteria_str = each_original_directory.filter_criteria.get_filter_criteria_string()
+            cloned_filter_criteria = filter_criteria_util.create_filter_criteria_from_string(
+                cloned_filter_criteria_str
+            )
+            cloned_filter_criteria.directory = cloned_directory
+            cloned_filter_criteria.save()
+            self.__clone_directory_tree(
+                filter_criteria_util, cloned_dir_layout,
+                each_original_directory.subdirectories.all(), cloned_directory
+            )
