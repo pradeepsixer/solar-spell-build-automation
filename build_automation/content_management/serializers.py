@@ -5,7 +5,7 @@ from content_management.models import Content, Directory, DirectoryLayout, Filte
 from content_management.utils import FilterCriteriaUtil
 
 
-class ContentSerializer(serializers.HyperlinkedModelSerializer):
+class ContentSerializer(serializers.ModelSerializer):
     tag_ids = serializers.PrimaryKeyRelatedField(many=True, read_only=False, queryset=Tag.objects.all(), source='tag')
 
     def create(self, validated_data):
@@ -80,7 +80,10 @@ class DirectoryLayoutSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = DirectoryLayout
-        fields = '__all__'
+        fields = ('id', 'url', 'name', 'description')
+        extra_kwargs = {
+            'url': {'lookup_field': 'pk'},
+        }
 
 
 class FilterCriteriaField(serializers.CharField):
@@ -102,10 +105,13 @@ class DirectorySerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         filtercriteria_util = FilterCriteriaUtil()
         validated_data_copy = dict(validated_data)
-        filter_criteria_value = filtercriteria_util.create_filter_criteria_from_string(
+        del validated_data_copy['filter_criteria']
+        filter_criteria = filtercriteria_util.create_filter_criteria_from_string(
             validated_data.get('filter_criteria'))
-        validated_data_copy['filter_criteria'] = filter_criteria_value
-        return Directory.objects.create(**validated_data_copy)
+        directory = Directory.objects.create(**validated_data_copy)
+        filter_criteria.directory = directory
+        filter_criteria.save()
+        return directory
 
     def update(self, instance, validated_data):
         instance.name = validated_data.get('name', instance.name)
@@ -113,15 +119,17 @@ class DirectorySerializer(serializers.ModelSerializer):
         if 'filter_criteria' in validated_data:
             FilterCriteria.objects.filter(directory=instance).delete()
             criteria_util = FilterCriteriaUtil()
-            instance.filter_criteria = criteria_util.create_filter_criteria_from_string(
+            filter_criteria = criteria_util.create_filter_criteria_from_string(
                 validated_data.get('filter_criteria'))
+            filter_criteria.directory = instance
+            filter_criteria.save()
         instance.parent = validated_data.get('parent', instance.parent)
         instance.save()
         return instance
 
     class Meta:
         model = Directory
-        fields = ('id', 'name', 'dir_layout', 'filter_criteria', 'parent')
+        fields = ('id', 'url', 'name', 'dir_layout', 'filter_criteria', 'parent')
         validators = [
             UniqueTogetherValidator(
                 queryset=Directory.objects.all(),
@@ -129,3 +137,6 @@ class DirectorySerializer(serializers.ModelSerializer):
                 message=('The subdirectory for the parent already exists.')
             )
         ]
+        extra_kwargs = {
+            'url': {'lookup_field': 'pk'},
+        }

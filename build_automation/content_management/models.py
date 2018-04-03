@@ -67,6 +67,35 @@ class Content(models.Model):
         ordering = ['pk']
 
 
+class DirectoryLayout(models.Model):
+    """
+    The Directory Layout for each build.
+    """
+    name = models.CharField(max_length=50, unique=True)
+    description = models.CharField(max_length=200, null=True)
+
+    def __str__(self):
+        return "DirectoryLayout[{}]".format(self.name)
+
+    class Meta:
+        ordering = ['pk']
+
+
+class Directory(models.Model):
+    """
+    Representation of the directory for each build.
+    """
+    name = models.CharField(max_length=50)
+    dir_layout = models.ForeignKey(DirectoryLayout, related_name='directories', on_delete=models.CASCADE)
+    parent = models.ForeignKey('self', related_name='subdirectories', on_delete=models.CASCADE, null=True)
+
+    def __str__(self):
+        return "Directory[{}]".format(self.name)
+
+    class Meta:
+        ordering = ['pk']
+
+
 class FilterCriteria(models.Model):
     """
     Model for specifying the filter criteria. Filter criteria is basically an expression tree, with multiple
@@ -78,6 +107,7 @@ class FilterCriteria(models.Model):
         (2, 'OR'),
     )
 
+    directory = models.OneToOneField(Directory, null=True, on_delete=models.CASCADE, related_name='filter_criteria')
     parent = models.ForeignKey('self', null=True, on_delete=models.CASCADE)
     left_criteria = models.ForeignKey('self', related_name="left_parent", null=True, on_delete=models.SET_NULL)
     right_criteria = models.ForeignKey('self', related_name="right_parent", null=True, on_delete=models.SET_NULL)
@@ -134,36 +164,6 @@ class FilterCriteria(models.Model):
             return returnstr
         if self.tag is not None:
             return str(self.tag.id)
-
-    class Meta:
-        ordering = ['pk']
-
-
-class DirectoryLayout(models.Model):
-    """
-    The Directory Layout for each build.
-    """
-    name = models.CharField(max_length=50, unique=True)
-    description = models.CharField(max_length=200, null=True)
-
-    def __str__(self):
-        return "DirectoryLayout[{}]".format(self.name)
-
-    class Meta:
-        ordering = ['pk']
-
-
-class Directory(models.Model):
-    """
-    Representation of the directory for each build.
-    """
-    name = models.CharField(max_length=50)
-    dir_layout = models.ForeignKey(DirectoryLayout, related_name='directories', on_delete=models.CASCADE)
-    filter_criteria = models.ForeignKey(FilterCriteria, on_delete=models.SET_NULL, null=True)
-    parent = models.ForeignKey('self', related_name='subdirectories', on_delete=models.CASCADE, null=True)
-
-    def __str__(self):
-        return "Directory[{}]".format(self.name)
 
     class Meta:
         ordering = ['pk']
