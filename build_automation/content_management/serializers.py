@@ -91,9 +91,17 @@ class DirectoryNameUniqueValidator(object):
         dir_name = directory.get('name')
         parent = directory.get('parent')
         dir_layout = directory.get('dir_layout')
-        matching_dirs_count = Directory.objects.filter(dir_layout=dir_layout, parent=parent, name=dir_name).count()
+        if self.id is None:
+            matching_dirs_count = Directory.objects.filter(dir_layout=dir_layout, parent=parent, name=dir_name).count()
+        else:
+            matching_dirs_count = Directory.objects.filter(
+                dir_layout=dir_layout, parent=parent, name=dir_name
+            ).exclude(pk=self.id).count()
         if matching_dirs_count > 0:
             raise serializers.ValidationError({'name': [{'result': 'ERROR', 'error': 'DUPLICATE_DIRECTORY'}]})
+
+    def set_context(self, serializer_field):
+        self.id = serializer_field.initial_data.get('id')
 
 
 class FilterCriteriaField(serializers.CharField):
