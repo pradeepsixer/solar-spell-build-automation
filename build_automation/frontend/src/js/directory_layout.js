@@ -12,7 +12,6 @@ import Grid from 'material-ui/Grid';
 import ListSubheader from 'material-ui/List/ListSubheader';
 import List, { ListItem, ListItemIcon, ListItemText } from 'material-ui/List';
 import Menu, { MenuItem } from 'material-ui/Menu';
-import Paper from 'material-ui/Paper';
 import Typography from 'material-ui/Typography';
 
 import SortableTree from 'react-sortable-tree';
@@ -92,12 +91,14 @@ class DirectoryLayoutComponent extends React.Component {
             infoBoardType: BOARD_TYPES.NONE,
             infoBoardData: {},
             tagTreeData: [],
+            allFiles: [],
+            fileIdFileMap: {},
             dirContextMenu: {
                 selectedDirectory: null,
                 AnchorPos: null
             },
             selectedDirLayout: null,
-            breadCrumb: ' '
+            breadCrumb: ' ',
         };
         this.handleDirectoryLayoutClick = this.handleDirectoryLayoutClick.bind(this);
         this.handleDirectoryLeftClick = this.handleDirectoryLeftClick.bind(this);
@@ -184,6 +185,7 @@ class DirectoryLayoutComponent extends React.Component {
                 layoutDirectories[eachDir.id].parent = eachDir.parent;
                 layoutDirectories[eachDir.id].dirLayoutId = eachDir.dir_layout;
                 layoutDirectories[eachDir.id].filterCriteria = eachDir.filter_criteria;
+                layoutDirectories[eachDir.id].individualFiles = eachDir.individual_files;
             } else {
                 layoutDirectories[eachDir.id] = {
                     id: eachDir.id,
@@ -194,6 +196,7 @@ class DirectoryLayoutComponent extends React.Component {
                     dirLayoutId: eachDir.dir_layout,
                     parent: eachDir.parent,
                     filterCriteria: eachDir.filter_criteria,
+                    individualFiles: eachDir.individual_files,
                     children: []
                 };
             }
@@ -229,6 +232,14 @@ class DirectoryLayoutComponent extends React.Component {
         return retval;
     };
 
+    buildFileIdFileMap(filesList) {
+        const fileIdFileMap = {};
+        filesList.forEach(eachFile => {
+            fileIdFileMap[eachFile.id] = eachFile;
+        });
+        return fileIdFileMap;
+    }
+
     loadData() {
         const currInstance = this;
         axios.get(APP_URLS.TAG_LIST, {
@@ -240,8 +251,20 @@ class DirectoryLayoutComponent extends React.Component {
                 tags: response.data
             })
         }).catch(function(error) {
-            console.log(error);
-            // TODO : Show the error message.
+            console.error(error);
+            console.error(error.response.data);
+        });
+        axios.get(APP_URLS.CONTENTS_LIST, {
+            responseType: 'json'
+        }).then(function(response) {
+            const fileIdFileMap = currInstance.buildFileIdFileMap(response.data);
+            currInstance.setState({
+                allFiles: response.data,
+                fileIdFileMap: fileIdFileMap
+            })
+        }).catch(function(error) {
+            console.error(error);
+            console.error(error.response.data);
         });
         axios.get(APP_URLS.DIRLAYOUT_LIST, {
                 responseType: 'json',
@@ -383,6 +406,7 @@ class DirectoryLayoutComponent extends React.Component {
                         currentTreeData[eachDirLayout.id] = newTreeData;
                         this.setState({ treeData: currentTreeData })}
                     }
+                    isVirtualized={false}
                     generateNodeProps={nodeInfo => ({
                         onClick: (evt) => this.handleDirectoryLeftClick(nodeInfo, evt),
                         onContextMenu: (evt) => this.handleDirectoryRightClick(nodeInfo, evt)
@@ -403,7 +427,6 @@ class DirectoryLayoutComponent extends React.Component {
                             {
                                 accordionItems
                             }
-
                         </List>
                     </Grid>
                     <Grid item xs={8}>
@@ -420,7 +443,7 @@ class DirectoryLayoutComponent extends React.Component {
                         }
                         {
                             this.state.infoBoardType == BOARD_TYPES.DIRECTORY &&
-                                <DirectoryInfoBoard boardData={this.state.infoBoardData} onSave={this.saveDirectoryCallback} onDelete={this.deleteDirectoryCallback} tagTreeData={this.state.tagTreeData} tags={this.state.tags}/>
+                                <DirectoryInfoBoard boardData={this.state.infoBoardData} onSave={this.saveDirectoryCallback} onDelete={this.deleteDirectoryCallback} tagTreeData={this.state.tagTreeData} tags={this.state.tags} allFiles={this.state.allFiles} fileIdFileMap={this.state.fileIdFileMap} />
                         }
                         {
                             this.state.infoBoardType == BOARD_TYPES.NONE &&
@@ -522,14 +545,16 @@ class DirectoryLayoutComponent extends React.Component {
                         dirLayoutId: newValue.dir_layout,
                         parent: newValue.parent,
                         filterCriteria: newValue.filter_criteria,
+                        individualFiles: newValue.individual_files,
                         children: []
                     });
                 } else {
                     // If the operation is an update operation
                     array[i].name = newValue.name;
-                    array[i].title = (<Button fullWidth>{newValue.name}</Button>),
+                    array[i].title = (<Button fullWidth>{newValue.name}</Button>);
                     array[i].parent = newValue.parent;
                     array[i].filterCriteria = newValue.filter_criteria;
+                    array[i].individualFiles = newValue.individual_files;
                 }
                 return true;
             }
@@ -563,6 +588,7 @@ class DirectoryLayoutComponent extends React.Component {
                         dirLayoutId: savedInfo.dir_layout,
                         parent: savedInfo.parent,
                         filterCriteria: savedInfo.filter_criteria,
+                        individualFiles: savedInfo.individual_files,
                         children: []
                     });
                 }

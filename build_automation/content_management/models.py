@@ -88,6 +88,7 @@ class Directory(models.Model):
     name = models.CharField(max_length=50)
     dir_layout = models.ForeignKey(DirectoryLayout, related_name='directories', on_delete=models.CASCADE)
     parent = models.ForeignKey('self', related_name='subdirectories', on_delete=models.CASCADE, null=True)
+    individual_files = models.ManyToManyField(Content, related_name='individual_files')
 
     def __str__(self):
         return "Directory[{}]".format(self.name)

@@ -40,7 +40,7 @@ class ContentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Content
-        fields = ('url', 'name', 'description', 'content_file', 'updated_time', 'last_uploaded_time', 'tag_ids')
+        fields = ('url', 'id', 'name', 'description', 'content_file', 'updated_time', 'last_uploaded_time', 'tag_ids')
         extra_kwargs = {
             'url': {'lookup_field': 'pk'},
         }
@@ -115,10 +115,12 @@ class DirectorySerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         filtercriteria_util = FilterCriteriaUtil()
         validated_data_copy = dict(validated_data)
+        del validated_data_copy['individual_files']
         del validated_data_copy['filter_criteria']
         filter_criteria = filtercriteria_util.create_filter_criteria_from_string(
             validated_data.get('filter_criteria'))
         directory = Directory.objects.create(**validated_data_copy)
+        directory.individual_files.set(validated_data['individual_files'])
         filter_criteria.directory = directory
         filter_criteria.save()
         return directory
@@ -133,13 +135,14 @@ class DirectorySerializer(serializers.ModelSerializer):
                 validated_data.get('filter_criteria'))
             filter_criteria.directory = instance
             filter_criteria.save()
+        instance.individual_files.set(validated_data.get('individual_files', instance.individual_files))
         instance.parent = validated_data.get('parent', instance.parent)
         instance.save()
         return instance
 
     class Meta:
         model = Directory
-        fields = ('id', 'url', 'name', 'dir_layout', 'filter_criteria', 'parent')
+        fields = ('id', 'url', 'name', 'dir_layout', 'filter_criteria', 'individual_files', 'parent')
         validators = [
             DirectoryNameUniqueValidator()
         ]

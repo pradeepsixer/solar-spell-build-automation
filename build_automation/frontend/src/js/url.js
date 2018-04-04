@@ -1,4 +1,5 @@
 const APP_URLS = {
+    CONTENTS_LIST: '/api/contents/',
     DIRLAYOUT_LIST: '/api/dirlayouts/',
     DIRLAYOUT_DETAIL: '/api/dirlayouts/${id}/',
     DIRLAYOUT_CLONE: '/api/dirlayouts/${id}/',

@@ -12,6 +12,7 @@ import Typography from 'material-ui/Typography';
 import SortableTree from 'react-sortable-tree';
 
 import AutoCompleteWithChips from './autocomplete.js';
+import FileSelectionComponent from './directory_file_selection.js'
 import { APP_URLS, get_url } from './url.js';
 import { convert_tags_to_filter_criteria_string, parse_filter_criteria_string } from './utils.js';
 
@@ -21,8 +22,8 @@ class DirectoryInfoBoard extends React.Component {
     constructor(props) {
         super(props);
         console.log('DirInfoBoard props ', props);
-        const tagsMap = this.buildTagIdTagsMap(props.tags);
-        const filterCriteriaInfo  = this.getFilterCriteriaInfoFromString(props.boardData.filterCriteria, tagsMap);
+        const tagIdsTagsMap = this.buildTagIdTagsMap(props.tags);
+        const filterCriteriaInfo  = this.getFilterCriteriaInfoFromString(props.boardData.filterCriteria, tagIdsTagsMap);
         this.state = {
             id: props.boardData.id,
             dirLayoutId: props.boardData.dirLayoutId,
@@ -31,6 +32,10 @@ class DirectoryInfoBoard extends React.Component {
             parent: props.boardData.parent,
             tagTreeData: props.tagTreeData,
             tags: props.tags,
+            tagIdsTagsMap: tagIdsTagsMap,
+            allFiles: props.allFiles,
+            fileIdFileMap: props.fileIdFileMap,
+            selectedFiles: props.boardData.individualFiles,
             selectedOperator: filterCriteriaInfo.operator,
             selectedTags: filterCriteriaInfo.selectedItems,
             fieldErrors: {}
@@ -48,17 +53,17 @@ class DirectoryInfoBoard extends React.Component {
 
     buildTagIdTagsMap(tags) {
         // Builds a map of <Tag Id> - Tag
-        const tagIdTagMap = new Map();
+        const tagIdTagMap = {};
         tags.forEach(eachTag => {
-            tagIdTagMap.set(eachTag.id, eachTag);
+            tagIdTagMap[eachTag.id] = eachTag;
         })
         return tagIdTagMap;
     }
 
     buildTagNameTagMap(tags) {
-        const tagNameTagMap = new Map();
+        const tagNameTagMap = {};
         tags.forEach(eachTag => {
-            tagNameTagMap.set(eachTag.name, eachTag);
+            tagNameTagMap[eachTag.name] = eachTag;
         })
         return tagNameTagMap;
     }
@@ -70,7 +75,7 @@ class DirectoryInfoBoard extends React.Component {
         const filterCriteriaInfo = parse_filter_criteria_string(filterCriteria);
         const selectedItems = [];
         filterCriteriaInfo.tags.forEach(eachTagId => {
-            selectedItems.push(tagIdTagsMap.get(eachTagId).name);
+            selectedItems.push(tagIdTagsMap[eachTagId].name);
         });
         const retval = {
             operator: filterCriteriaInfo.operator,
@@ -82,8 +87,8 @@ class DirectoryInfoBoard extends React.Component {
 
     componentWillReceiveProps(props) {
         console.log('DirInfoBoard props ', props);
-        const tagsMap = this.buildTagIdTagsMap(props.tags);
-        const filterCriteriaInfo  = this.getFilterCriteriaInfoFromString(props.boardData.filterCriteria, tagsMap);
+        const tagIdsTagsMap = this.buildTagIdTagsMap(props.tags);
+        const filterCriteriaInfo  = this.getFilterCriteriaInfoFromString(props.boardData.filterCriteria, tagIdsTagsMap);
         this.setState({
             id: props.boardData.id,
             dirLayoutId: props.boardData.dirLayoutId,
@@ -92,6 +97,10 @@ class DirectoryInfoBoard extends React.Component {
             parent: props.boardData.parent,
             tagTreeData: props.tagTreeData,
             tags: props.tags,
+            tagIdsTagsMap: tagIdsTagsMap,
+            allFiles: props.allFiles,
+            fileIdFileMap: props.fileIdFileMap,
+            selectedFiles: props.boardData.individualFiles,
             selectedOperator: filterCriteriaInfo.operator,
             selectedTags: filterCriteriaInfo.selectedItems,
             fieldErrors: {}
@@ -107,7 +116,7 @@ class DirectoryInfoBoard extends React.Component {
         const tagNameTagMap = this.buildTagNameTagMap(this.state.tags);
         const allSelectedTags = [];
         this.state.selectedTags.forEach(eachTagName => {
-            allSelectedTags.push(tagNameTagMap.get(eachTagName));
+            allSelectedTags.push(tagNameTagMap[eachTagName]);
         });
         const filterCriteriaString = convert_tags_to_filter_criteria_string(allSelectedTags, this.state.selectedOperator);
         console.log(filterCriteriaString);
@@ -258,9 +267,7 @@ class DirectoryInfoBoard extends React.Component {
                         </Grid>
                     </Grid>
                     <div style={{marginTop: '20px'}}></div>
-                    <Typography gutterBottom variant="headline" component="h2">
-                        Individual Files
-                    </Typography>
+                    <FileSelectionComponent allFiles={this.state.allFiles} tagIdsTagsMap={this.state.tagIdsTagsMap} selectedFiles={[]} />
                 </Grid>
                 <Grid item xs={3}>
                     {
