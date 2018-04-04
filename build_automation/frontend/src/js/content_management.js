@@ -54,7 +54,7 @@ class ContentManagement extends React.Component{
     render(){
     return (
         <div>
-            <Grid container spacing={8} style={{display: 'inline-block'}}>
+            <Grid container spacing={8} style={{paddingLeft: '20px'}}>
                     <Grid item xs={3} style={{paddingLeft: '20px'}}>
                         <Button variant="raised" color="primary">
                             Test
@@ -62,8 +62,13 @@ class ContentManagement extends React.Component{
                     <h3>Content Management</h3>
                     <h2>Test</h2>
                     </Grid>
-            </Grid>
+
                     <Grid item xs={8}>
+                        <AppBar position="static" style={{ height: '50px', margin: 'auto'}}>
+                            <Typography gutterBottom variant="subheading" style={{color: '#ffffff'}}>
+
+                            </Typography>
+                        </AppBar>
                         <input
                         accept="*"
                         className={'hidden'}
@@ -76,18 +81,13 @@ class ContentManagement extends React.Component{
                         Upload
                         </Button>
                     </label>
-                    </Grid>
-             <Grid item xs={8}>
-                        <AppBar position="static" style={{ height: '50px', margin: 'auto'}}>
-                            <Typography gutterBottom variant="subheading" style={{color: '#ffffff'}}>
 
-                            </Typography>
-                        </AppBar>
                         <div style={{marginTop: '20px'}}> </div>
                         <span>
                             <AutoCompleteWithChips suggestions={this.state.tags} searchKey={'name'} selectedItem={[]} onChange={evt => console.log(evt)}/>
                         </span>
                     </Grid>
+            </Grid>
 
         </div>
     )
