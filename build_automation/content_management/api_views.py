@@ -131,6 +131,8 @@ class DirectoryCloneApiViewset(ViewSet, CreateModelMixin):
             cloned_directory.dir_layout = cloned_dir_layout
             cloned_directory.parent = parent_cloned_directory
             cloned_directory.save()
+            cloned_directory.individual_files.set(list(each_original_directory.individual_files.all()))
+            cloned_directory.save()
             cloned_filter_criteria_str = each_original_directory.filter_criteria.get_filter_criteria_string()
             cloned_filter_criteria = filter_criteria_util.create_filter_criteria_from_string(
                 cloned_filter_criteria_str

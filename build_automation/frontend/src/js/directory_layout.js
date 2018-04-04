@@ -19,6 +19,7 @@ import SortableTree from 'react-sortable-tree';
 import DirlayoutInfoBoard from './dirlayout_info_board.js';
 import DirectoryInfoBoard from './directory_info_board.js';
 
+import { DIRLAYOUT_SAVE_TYPE } from './constants.js';
 import { APP_URLS } from './url.js';
 
 import 'react-sortable-tree/style.css';
@@ -284,6 +285,9 @@ class DirectoryLayoutComponent extends React.Component {
                         isLoaded: true,
                         accordionData: dirLayouts,
                         treeData: transformedData,
+                        infoBoardType: BOARD_TYPES.NONE,
+                        infoBoardData: {},
+                        breadCrumb: ' '
                     }));
                 }).catch(function(error) {
                     console.error('Error has occurred when trying to get the directories', error);
@@ -478,36 +482,41 @@ class DirectoryLayoutComponent extends React.Component {
         return elements;
     }
 
-    saveDirLayoutCallback(savedInfo, created=false) {
-        this.setState((prevState, props) => {
-            const newState = {
-                accordionData: prevState.accordionData,
-                infoBoardData: savedInfo,
-                breadCrumb: savedInfo.name,
-            };
-
-            if (created) {
-                const newDirLayout = {
-                    id: savedInfo.id,
-                    name: savedInfo.name,
-                    description: savedInfo.description,
-                    isOpen: false
+    saveDirLayoutCallback(savedInfo, saveType) {
+        if (saveType == DIRLAYOUT_SAVE_TYPE.CLONE) {
+            // TODO : Create a new endpoint for getting the directories associated with a layout, and reload just them.
+            this.loadData();
+        } else {
+            this.setState((prevState, props) => {
+                const newState = {
+                    accordionData: prevState.accordionData,
+                    infoBoardData: savedInfo,
+                    breadCrumb: savedInfo.name,
                 };
 
-                newState.treeData = prevState.treeData;
-                newState.treeData[savedInfo.id] = [];
-                newState.accordionData.push(newDirLayout);
-            } else {
-                newState.accordionData.forEach(eachDirLayout => {
-                    if (eachDirLayout.id == savedInfo.id) {
-                        eachDirLayout.name = savedInfo.name;
-                        eachDirLayout.description = savedInfo.description;
-                    }
-                });
-            }
+                if (saveType == DIRLAYOUT_SAVE_TYPE.CREATE) {
+                    const newDirLayout = {
+                        id: savedInfo.id,
+                        name: savedInfo.name,
+                        description: savedInfo.description,
+                        isOpen: false
+                    };
 
-            return newState;
-        });
+                    newState.treeData = prevState.treeData;
+                    newState.treeData[savedInfo.id] = [];
+                    newState.accordionData.push(newDirLayout);
+                } else if (saveType == DIRLAYOUT_SAVE_TYPE.UPDATE) {
+                    newState.accordionData.forEach(eachDirLayout => {
+                        if (eachDirLayout.id == savedInfo.id) {
+                            eachDirLayout.name = savedInfo.name;
+                            eachDirLayout.description = savedInfo.description;
+                        }
+                    });
+                }
+
+                return newState;
+            });
+        }
     }
 
     deleteDirLayoutCallback(deletedItemId) {

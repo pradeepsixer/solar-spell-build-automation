@@ -4,6 +4,7 @@ import React from 'react';
 import Button from 'material-ui/Button';
 import TextField from 'material-ui/TextField';
 
+import { DIRLAYOUT_SAVE_TYPE } from './constants.js';
 import { APP_URLS, get_url } from './url.js';
 
 class DirlayoutInfoBoard extends React.Component {
@@ -58,7 +59,7 @@ class DirlayoutInfoBoard extends React.Component {
             axios.patch(targetUrl, payload, {
                 responseType: 'json'
             }).then(function(response) {
-                currentInstance.saveCallback(response.data);
+                currentInstance.saveCallback(response.data, DIRLAYOUT_SAVE_TYPE.UPDATE);
             }).catch(function(error) {
                 console.error("Error in updating the directory layout ", error);
                 console.error(error.response.data);
@@ -68,7 +69,7 @@ class DirlayoutInfoBoard extends React.Component {
             axios.post(targetUrl, payload, {
                 responseType: 'json'
             }).then(function(response) {
-                currentInstance.saveCallback(response.data, true);
+                currentInstance.saveCallback(response.data, DIRLAYOUT_SAVE_TYPE.CREATE);
             }).catch(function(error) {
                 console.error("Error in creating a new directory layout ", error);
                 console.error(error.response.data);
@@ -94,7 +95,16 @@ class DirlayoutInfoBoard extends React.Component {
     }
 
     cloneDirLayout(evt) {
-        console.log("Need to clone the directory layout");
+        const targetUrl = get_url(APP_URLS.DIRLAYOUT_CLONE, {id: this.state.id});
+        const currentInstance = this;
+        axios.post(targetUrl, {}, {
+            responseType: 'json'
+        }).then(function(response) {
+            currentInstance.saveCallback(response.data, DIRLAYOUT_SAVE_TYPE.CLONE);
+        }).catch(function(error) {
+            console.error("Error in cloning the directory layout", error);
+            console.error(error.response.data);
+        })
     }
 
     deleteDirLayout(evt) {
