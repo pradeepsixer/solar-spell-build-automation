@@ -161,7 +161,7 @@ class FileSelectionComponent extends React.Component {
                     anchorPosition={this.state.allFilesMenu.AnchorPos}
                     anchorReference={'anchorPosition'}
                     open={Boolean(this.state.allFilesMenu.AnchorPos)}
-                    onClose={this.handleMenuClose}
+                    onClose={evt => { console.log(evt); this.handleMenuClose(evt, 'allFilesMenu');}}
                 >
                     <MenuItem
                         onClick={evt => {
@@ -214,7 +214,7 @@ class FileSelectionComponent extends React.Component {
                     anchorPosition={this.state.selectedFilesMenu.AnchorPos}
                     anchorReference={'anchorPosition'}
                     open={Boolean(this.state.selectedFilesMenu.AnchorPos)}
-                    onClose={this.handleMenuClose}
+                    onClose={evt => {this.handleMenuClose(evt, 'selectedFilesMenu')}}
                 >
                     <MenuItem
                         onClick={evt => {
