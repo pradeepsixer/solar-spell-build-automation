@@ -52,11 +52,9 @@ function LinkTypeProvider(props) {
 class FileSelectionComponent extends React.Component {
     constructor(props) {
         super(props);
+        const selectedFiles = this.getSelectedFilesFromFileIds(props.selectedFiles, props.fileIdFileMap);
         this.state = {
-            allFiles: props.allFiles,
-            filesPerPage: 10,
-            selectedFiles: props.selectedFiles,
-            tagIdsTagsMap: props.tagIdsTagsMap,
+            selectedFiles: selectedFiles,
             allFilesMenu: {
                 selectedFile: null,
                 AnchorPos: null
@@ -72,13 +70,21 @@ class FileSelectionComponent extends React.Component {
         this.tableRowComponent = this.tableRowComponent.bind(this);
         this.addFileToSelection = this.addFileToSelection.bind(this);
         this.removeFileFromSelection = this.removeFileFromSelection.bind(this);
+        this.selectCallback = props.onFileSelect;
+        this.deselectCallback = props.onFileDeselect;
+    }
+
+    /*
+     * Get the File Information object from the list of File IDs
+     */
+    getSelectedFilesFromFileIds(fileIds, fileIdFileMap) {
+        return fileIds.map(eachFileId => fileIdFileMap[eachFileId]);
     }
 
     componentWillReceiveProps(props) {
+        const selectedFiles = this.getSelectedFilesFromFileIds(props.selectedFiles, props.fileIdFileMap);
         this.setState({
-            allFiles: props.allFiles,
-            selectedFiles: props.selectedFiles,
-            tagIdsTagsMap: props.tagIdsTagsMap
+            selectedFiles: selectedFiles,
         });
         __tagIdsTagsMap = props.tagIdsTagsMap;
     }
@@ -103,21 +109,15 @@ class FileSelectionComponent extends React.Component {
     }
 
     addFileToSelection(file) {
-        this.setState((prevState, props) => {
-            const { selectedFiles } = prevState;
-            if ( selectedFiles.indexOf(file) === -1) {
-                selectedFiles.push(file);
-            }
-            return { selectedFiles };
-        })
+        if (this.selectCallback) {
+            this.selectCallback(file);
+        }
     }
 
     removeFileFromSelection(file) {
-        this.setState((prevState, props) => {
-            const { selectedFiles } = prevState;
-            selectedFiles.splice(selectedFiles.indexOf(file), 1);
-            return { selectedFiles };
-        })
+        if (this.deselectCallback) {
+            this.deselectCallback(file);
+        }
     }
 
     tableRowComponent(obj, menuName)  {
@@ -132,7 +132,7 @@ class FileSelectionComponent extends React.Component {
                     Select individual files
                 </Typography>
                 <Grid
-                    rows={this.state.allFiles}
+                    rows={this.props.allFiles}
                     columns={[
                         { name: 'name', title: 'Name' },
                         { name: 'description', title: 'Description' },

@@ -119,6 +119,7 @@ class DirectorySerializer(serializers.ModelSerializer):
     """
 
     filter_criteria = FilterCriteriaField(max_length=500)
+    individual_files = serializers.PrimaryKeyRelatedField(many=True, queryset=Content.objects.all(), read_only=False)
 
     def create(self, validated_data):
         filtercriteria_util = FilterCriteriaUtil()

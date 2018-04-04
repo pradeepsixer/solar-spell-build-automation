@@ -366,6 +366,7 @@ class DirectoryLayoutComponent extends React.Component {
                 id: -1,
                 name: '',
                 filterCriteria: '',
+                individualFiles: [],
                 dirLayoutId: dirLayoutId,
                 parent: parentDirId
             }

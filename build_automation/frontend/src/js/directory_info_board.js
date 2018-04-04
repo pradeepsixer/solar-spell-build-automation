@@ -49,6 +49,8 @@ class DirectoryInfoBoard extends React.Component {
         this.handleChipAddition = this.handleChipAddition.bind(this);
         this.handleChipDeletion = this.handleChipDeletion.bind(this);
         this.handleOperatorChange = this.handleOperatorChange.bind(this);
+        this.fileSelectionCallback = this.fileSelectionCallback.bind(this);
+        this.fileDeselectionCallback = this.fileDeselectionCallback.bind(this);
     }
 
     buildTagIdTagsMap(tags) {
@@ -124,12 +126,14 @@ class DirectoryInfoBoard extends React.Component {
             name: this.state.name,
             dir_layout: this.state.dirLayoutId,
             filter_criteria: filterCriteriaString,
+            individual_files: this.state.selectedFiles,
             parent: this.state.parent
         };
 
         const currInstance = this;
         if (this.state.id > 0) {
             // Update an existing directory.
+            payload.id = this.state.id;
             targetUrl = get_url(APP_URLS.DIRECTORY_DETAIL, {id:this.state.id});
             axios.patch(targetUrl, payload, {
                 responseType: 'json'
@@ -217,6 +221,24 @@ class DirectoryInfoBoard extends React.Component {
         });
     }
 
+    fileSelectionCallback(file) {
+        this.setState((prevState, props) => {
+            const {selectedFiles} = prevState;
+            if (selectedFiles.indexOf(file.id) === -1) {
+                selectedFiles.push(file.id);
+            }
+            return {selectedFiles};
+        });
+    }
+
+    fileDeselectionCallback(file) {
+        this.setState((prevState, props) => {
+            const {selectedFiles} = prevState;
+            selectedFiles.splice(selectedFiles.indexOf(file.id), 1);
+            return {selectedFiles};
+        });
+    }
+
     render() {
         return (
             <Grid container spacing={24}>
@@ -267,7 +289,10 @@ class DirectoryInfoBoard extends React.Component {
                         </Grid>
                     </Grid>
                     <div style={{marginTop: '20px'}}></div>
-                    <FileSelectionComponent allFiles={this.state.allFiles} tagIdsTagsMap={this.state.tagIdsTagsMap} selectedFiles={[]} />
+                    <FileSelectionComponent allFiles={this.state.allFiles} tagIdsTagsMap={this.state.tagIdsTagsMap}
+                        selectedFiles={this.state.selectedFiles} fileIdFileMap={this.state.fileIdFileMap}
+                        onFileSelect={this.fileSelectionCallback} onFileDeselect={this.fileDeselectionCallback}
+                    />
                 </Grid>
                 <Grid item xs={3}>
                     {
