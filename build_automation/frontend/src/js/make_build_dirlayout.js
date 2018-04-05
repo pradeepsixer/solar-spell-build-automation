@@ -20,7 +20,8 @@ class MakeBuildDirlayoutInfo extends React.Component{
             id: props.info.id,
             name: props.info.name,
             description: props.info.description,
-            currTime: new Date().toLocaleString()
+            currTime: new Date().toLocaleString(),
+            loaded: 6000,
         }
         this.setState({
             id: props.info.id,
