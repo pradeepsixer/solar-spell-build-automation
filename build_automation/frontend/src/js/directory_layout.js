@@ -13,6 +13,7 @@ import ListSubheader from 'material-ui/List/ListSubheader';
 import List, { ListItem, ListItemIcon, ListItemText } from 'material-ui/List';
 import Menu, { MenuItem } from 'material-ui/Menu';
 import Typography from 'material-ui/Typography';
+import Divider from 'material-ui/Divider';
 
 import SortableTree from 'react-sortable-tree';
 
@@ -419,6 +420,7 @@ class DirectoryLayoutComponent extends React.Component {
                     />
                 }
                 </Collapse>);
+                accordionItems.push(<Divider key={'divider_' + eachDirLayout.id} />);
             });
 
             elements = (

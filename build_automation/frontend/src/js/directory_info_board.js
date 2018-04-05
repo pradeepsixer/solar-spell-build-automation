@@ -2,6 +2,7 @@ import axios from 'axios';
 import React from 'react';
 
 import Button from 'material-ui/Button';
+import Dialog, { DialogActions, DialogContent, DialogContentText, DialogTitle } from 'material-ui/Dialog';
 import Divider from 'material-ui/Divider';
 import Grid from 'material-ui/Grid';
 import { MenuItem } from 'material-ui/Menu';
@@ -38,6 +39,7 @@ class DirectoryInfoBoard extends React.Component {
             selectedFiles: props.boardData.individualFiles,
             selectedOperator: filterCriteriaInfo.operator,
             selectedTags: filterCriteriaInfo.selectedItems,
+            confirmDelete: false,
             fieldErrors: {}
         };
 
@@ -51,6 +53,8 @@ class DirectoryInfoBoard extends React.Component {
         this.handleOperatorChange = this.handleOperatorChange.bind(this);
         this.fileSelectionCallback = this.fileSelectionCallback.bind(this);
         this.fileDeselectionCallback = this.fileDeselectionCallback.bind(this);
+        this.confirmDeleteDirectory = this.confirmDeleteDirectory.bind(this);
+        this.closeConfirmDialog = this.closeConfirmDialog.bind(this);
     }
 
     buildTagIdTagsMap(tags) {
@@ -105,6 +109,7 @@ class DirectoryInfoBoard extends React.Component {
             selectedFiles: props.boardData.individualFiles,
             selectedOperator: filterCriteriaInfo.operator,
             selectedTags: filterCriteriaInfo.selectedItems,
+            confirmDelete: false,
             fieldErrors: {}
         });
     }
@@ -173,7 +178,13 @@ class DirectoryInfoBoard extends React.Component {
         return !hasErrors;
     }
 
-    deleteDirectory(evt) {
+    confirmDeleteDirectory() {
+        this.setState({
+            confirmDelete: true
+        })
+    }
+
+    deleteDirectory() {
         const targetUrl = get_url(APP_URLS.DIRECTORY_DETAIL, {id:this.state.id});
         const currentInstance = this;
         axios.delete(targetUrl, {
@@ -239,6 +250,10 @@ class DirectoryInfoBoard extends React.Component {
         });
     }
 
+    closeConfirmDialog() {
+        this.setState({confirmDelete: false})
+    }
+
     render() {
         return (
             <Grid container spacing={24}>
@@ -248,7 +263,7 @@ class DirectoryInfoBoard extends React.Component {
                     </Button>
                     {
                         this.state.id > 0 &&
-                        <Button variant="raised" onClick={this.deleteDirectory}>
+                        <Button variant="raised" onClick={this.confirmDeleteDirectory}>
                         Delete
                         </Button>
                     }
@@ -309,6 +324,27 @@ class DirectoryInfoBoard extends React.Component {
                             />) : 'No Tags Available'
                     }
                 </Grid>
+                <Dialog
+                    open={this.state.confirmDelete}
+                    onClose={this.closeConfirmDialog}
+                    aria-labelledby="alert-dialog-title"
+                    aria-describedby="alert-dialog-description"
+                >
+                    <DialogTitle id="alert-dialog-title">{"Confirm Delete?"}</DialogTitle>
+                    <DialogContent>
+                        <DialogContentText id="alert-dialog-description">
+                            Are you sure you want to delete the directory {this.state.name}?
+                        </DialogContentText>
+                    </DialogContent>
+                    <DialogActions>
+                        <Button onClick={this.closeConfirmDialog} color="primary">
+                            No
+                        </Button>
+                        <Button onClick={evt => {this.closeConfirmDialog(); this.deleteDirectory();}} color="primary" autoFocus>
+                            Yes
+                        </Button>
+                    </DialogActions>
+                </Dialog>
             </Grid>
         );
     }

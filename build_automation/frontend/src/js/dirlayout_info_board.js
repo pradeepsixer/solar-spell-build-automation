@@ -2,6 +2,7 @@ import axios from 'axios';
 import React from 'react';
 
 import Button from 'material-ui/Button';
+import Dialog, { DialogActions, DialogContent, DialogContentText, DialogTitle } from 'material-ui/Dialog';
 import TextField from 'material-ui/TextField';
 
 import { DIRLAYOUT_SAVE_TYPE } from './constants.js';
@@ -14,7 +15,8 @@ class DirlayoutInfoBoard extends React.Component {
             id: props.boardData.id,
             name: props.boardData.name,
             description: props.boardData.description,
-            fieldErrors: {}
+            fieldErrors: {},
+            confirmDelete: false,
         };
         this.handleTextFieldUpdate = this.handleTextFieldUpdate.bind(this);
         this.saveDirLayout = this.saveDirLayout.bind(this);
@@ -22,6 +24,8 @@ class DirlayoutInfoBoard extends React.Component {
         this.deleteDirLayout = this.deleteDirLayout.bind(this);
         this.saveCallback = this.props.onSave.bind(this);
         this.deleteCallback = this.props.onDelete.bind(this);
+        this.confirmDeleteDirLayout = this.confirmDeleteDirLayout.bind(this);
+        this.closeConfirmDialog = this.closeConfirmDialog.bind(this);
     }
 
     componentWillReceiveProps(props) {
@@ -29,7 +33,8 @@ class DirlayoutInfoBoard extends React.Component {
             id: props.boardData.id,
             name: props.boardData.name,
             description: props.boardData.description,
-            fieldErrors: {}
+            fieldErrors: {},
+            confirmDelete: false,
         });
     }
 
@@ -107,8 +112,13 @@ class DirlayoutInfoBoard extends React.Component {
         })
     }
 
-    deleteDirLayout(evt) {
-        // TODO : First confirm the delete action.
+    confirmDeleteDirLayout() {
+        this.setState({
+            confirmDelete: true
+        })
+    }
+
+    deleteDirLayout() {
         const targetUrl = get_url(APP_URLS.DIRLAYOUT_DETAIL, {id:this.state.id});
         const currentInstance = this;
         axios.delete(targetUrl, {
@@ -118,6 +128,10 @@ class DirlayoutInfoBoard extends React.Component {
         }).catch(function(error) {
             console.error("Error in deleting the directory layout ", error);
         })
+    }
+
+    closeConfirmDialog() {
+        this.setState({confirmDelete: false})
     }
 
     render() {
@@ -134,7 +148,7 @@ class DirlayoutInfoBoard extends React.Component {
                 }
                 {
                     this.state.id > 0 &&
-                    <Button variant="raised" color="secondary" onClick={this.deleteDirLayout}>
+                    <Button variant="raised" color="secondary" onClick={this.confirmDeleteDirLayout}>
                     Delete
                     </Button>
                 }
@@ -159,6 +173,27 @@ class DirlayoutInfoBoard extends React.Component {
                   onChange={evt => this.handleTextFieldUpdate('description', evt)}
                   margin="normal"
                 />
+                <Dialog
+                    open={this.state.confirmDelete}
+                    onClose={this.closeConfirmDialog}
+                    aria-labelledby="alert-dialog-title"
+                    aria-describedby="alert-dialog-description"
+                >
+                    <DialogTitle id="alert-dialog-title">{"Confirm Delete?"}</DialogTitle>
+                    <DialogContent>
+                        <DialogContentText id="alert-dialog-description">
+                            Are you sure you want to delete the directory layout {this.state.name}?
+                        </DialogContentText>
+                    </DialogContent>
+                    <DialogActions>
+                        <Button onClick={this.closeConfirmDialog} color="primary">
+                            No
+                        </Button>
+                        <Button onClick={evt => {this.closeConfirmDialog(); this.deleteDirLayout();}} color="primary" autoFocus>
+                            Yes
+                        </Button>
+                    </DialogActions>
+                </Dialog>
             </div>
         );
     }
