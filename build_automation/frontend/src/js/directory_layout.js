@@ -7,18 +7,20 @@ import Button from 'material-ui/Button';
 import Collapse from 'material-ui/transitions/Collapse';
 import ExpandLess from 'material-ui-icons/ExpandLess';
 import ExpandMore from 'material-ui-icons/ExpandMore';
+import ChevronRight from 'material-ui-icons/ChevronRight';
 import Grid from 'material-ui/Grid';
 import ListSubheader from 'material-ui/List/ListSubheader';
 import List, { ListItem, ListItemIcon, ListItemText } from 'material-ui/List';
 import Menu, { MenuItem } from 'material-ui/Menu';
-import Paper from 'material-ui/Paper';
 import Typography from 'material-ui/Typography';
+import Divider from 'material-ui/Divider';
 
 import SortableTree from 'react-sortable-tree';
 
 import DirlayoutInfoBoard from './dirlayout_info_board.js';
 import DirectoryInfoBoard from './directory_info_board.js';
 
+import { DIRLAYOUT_SAVE_TYPE } from './constants.js';
 import { APP_URLS } from './url.js';
 
 import 'react-sortable-tree/style.css';
@@ -91,12 +93,14 @@ class DirectoryLayoutComponent extends React.Component {
             infoBoardType: BOARD_TYPES.NONE,
             infoBoardData: {},
             tagTreeData: [],
+            allFiles: [],
+            fileIdFileMap: {},
             dirContextMenu: {
                 selectedDirectory: null,
                 AnchorPos: null
             },
             selectedDirLayout: null,
-            breadCrumb: ' '
+            breadCrumb: ' ',
         };
         this.handleDirectoryLayoutClick = this.handleDirectoryLayoutClick.bind(this);
         this.handleDirectoryLeftClick = this.handleDirectoryLeftClick.bind(this);
@@ -112,12 +116,7 @@ class DirectoryLayoutComponent extends React.Component {
     }
 
     componentDidMount() {
-        // TODO: Try using lodash for deep merge of state
-        // this.timerID = setInterval(
-        this.timerID = setTimeout(
-            () => this.loadData(),
-            1000
-        );
+        this.loadData();
     }
 
     componentWillUnmount() {
@@ -188,6 +187,7 @@ class DirectoryLayoutComponent extends React.Component {
                 layoutDirectories[eachDir.id].parent = eachDir.parent;
                 layoutDirectories[eachDir.id].dirLayoutId = eachDir.dir_layout;
                 layoutDirectories[eachDir.id].filterCriteria = eachDir.filter_criteria;
+                layoutDirectories[eachDir.id].individualFiles = eachDir.individual_files;
             } else {
                 layoutDirectories[eachDir.id] = {
                     id: eachDir.id,
@@ -198,6 +198,7 @@ class DirectoryLayoutComponent extends React.Component {
                     dirLayoutId: eachDir.dir_layout,
                     parent: eachDir.parent,
                     filterCriteria: eachDir.filter_criteria,
+                    individualFiles: eachDir.individual_files,
                     children: []
                 };
             }
@@ -233,6 +234,14 @@ class DirectoryLayoutComponent extends React.Component {
         return retval;
     };
 
+    buildFileIdFileMap(filesList) {
+        const fileIdFileMap = {};
+        filesList.forEach(eachFile => {
+            fileIdFileMap[eachFile.id] = eachFile;
+        });
+        return fileIdFileMap;
+    }
+
     loadData() {
         const currInstance = this;
         axios.get(APP_URLS.TAG_LIST, {
@@ -244,8 +253,20 @@ class DirectoryLayoutComponent extends React.Component {
                 tags: response.data
             })
         }).catch(function(error) {
-            console.log(error);
-            // TODO : Show the error message.
+            console.error(error);
+            console.error(error.response.data);
+        });
+        axios.get(APP_URLS.CONTENTS_LIST, {
+            responseType: 'json'
+        }).then(function(response) {
+            const fileIdFileMap = currInstance.buildFileIdFileMap(response.data);
+            currInstance.setState({
+                allFiles: response.data,
+                fileIdFileMap: fileIdFileMap
+            })
+        }).catch(function(error) {
+            console.error(error);
+            console.error(error.response.data);
         });
         axios.get(APP_URLS.DIRLAYOUT_LIST, {
                 responseType: 'json',
@@ -265,6 +286,9 @@ class DirectoryLayoutComponent extends React.Component {
                         isLoaded: true,
                         accordionData: dirLayouts,
                         treeData: transformedData,
+                        infoBoardType: BOARD_TYPES.NONE,
+                        infoBoardData: {},
+                        breadCrumb: ' '
                     }));
                 }).catch(function(error) {
                     console.error('Error has occurred when trying to get the directories', error);
@@ -347,6 +371,7 @@ class DirectoryLayoutComponent extends React.Component {
                 id: -1,
                 name: '',
                 filterCriteria: '',
+                individualFiles: [],
                 dirLayoutId: dirLayoutId,
                 parent: parentDirId
             }
@@ -355,6 +380,7 @@ class DirectoryLayoutComponent extends React.Component {
 
     createDirectoryLayout(evt) {
         this.setState({
+            breadCrumb: '',
             infoBoardType: BOARD_TYPES.DIRLAYOUT,
             infoBoardData: {
                 id: -1,
@@ -386,6 +412,7 @@ class DirectoryLayoutComponent extends React.Component {
                         currentTreeData[eachDirLayout.id] = newTreeData;
                         this.setState({ treeData: currentTreeData })}
                     }
+                    isVirtualized={false}
                     generateNodeProps={nodeInfo => ({
                         onClick: (evt) => this.handleDirectoryLeftClick(nodeInfo, evt),
                         onContextMenu: (evt) => this.handleDirectoryRightClick(nodeInfo, evt)
@@ -393,6 +420,7 @@ class DirectoryLayoutComponent extends React.Component {
                     />
                 }
                 </Collapse>);
+                accordionItems.push(<Divider key={'divider_' + eachDirLayout.id} />);
             });
 
             elements = (
@@ -406,13 +434,13 @@ class DirectoryLayoutComponent extends React.Component {
                             {
                                 accordionItems
                             }
-
                         </List>
                     </Grid>
                     <Grid item xs={8}>
-                        <AppBar position="static" style={{ height: '50px', margin: 'auto'}}>
-                            <Typography gutterBottom variant="subheading" style={{color: '#ffffff'}}>
+                        <AppBar position="static" style={{ minHeight: '50px', margin: 'auto', padding: '10px auto 10px 10px'}}>
+                            <Typography gutterBottom variant="subheading" style={{color: '#ffffff', verticalAlign: 'middle'}}>
                             {this.state.breadCrumb}
+                            <ChevronRight style={{verticalAlign: 'middle'}}/>
                             </Typography>
                         </AppBar>
                         <div style={{marginTop: '20px'}}> </div>
@@ -422,7 +450,7 @@ class DirectoryLayoutComponent extends React.Component {
                         }
                         {
                             this.state.infoBoardType == BOARD_TYPES.DIRECTORY &&
-                                <DirectoryInfoBoard boardData={this.state.infoBoardData} onSave={this.saveDirectoryCallback} onDelete={this.deleteDirectoryCallback} tagTreeData={this.state.tagTreeData} tags={this.state.tags}/>
+                                <DirectoryInfoBoard boardData={this.state.infoBoardData} onSave={this.saveDirectoryCallback} onDelete={this.deleteDirectoryCallback} tagTreeData={this.state.tagTreeData} tags={this.state.tags} allFiles={this.state.allFiles} fileIdFileMap={this.state.fileIdFileMap} />
                         }
                         {
                             this.state.infoBoardType == BOARD_TYPES.NONE &&
@@ -456,35 +484,41 @@ class DirectoryLayoutComponent extends React.Component {
         return elements;
     }
 
-    saveDirLayoutCallback(savedInfo, created=false) {
-        this.setState((prevState, props) => {
-            const newState = {
-                accordionData: prevState.accordionData,
-                infoBoardData: savedInfo,
-            };
-
-            if (created) {
-                const newDirLayout = {
-                    id: savedInfo.id,
-                    name: savedInfo.name,
-                    description: savedInfo.description,
-                    isOpen: false
+    saveDirLayoutCallback(savedInfo, saveType) {
+        if (saveType == DIRLAYOUT_SAVE_TYPE.CLONE) {
+            // TODO : Create a new endpoint for getting the directories associated with a layout, and reload just them.
+            this.loadData();
+        } else {
+            this.setState((prevState, props) => {
+                const newState = {
+                    accordionData: prevState.accordionData,
+                    infoBoardData: savedInfo,
+                    breadCrumb: savedInfo.name,
                 };
 
-                newState.treeData = prevState.treeData;
-                newState.treeData[savedInfo.id] = [];
-                newState.accordionData.push(newDirLayout);
-            } else {
-                newState.accordionData.forEach(eachDirLayout => {
-                    if (eachDirLayout.id == savedInfo.id) {
-                        eachDirLayout.name = savedInfo.name;
-                        eachDirLayout.description = savedInfo.description;
-                    }
-                });
-            }
+                if (saveType == DIRLAYOUT_SAVE_TYPE.CREATE) {
+                    const newDirLayout = {
+                        id: savedInfo.id,
+                        name: savedInfo.name,
+                        description: savedInfo.description,
+                        isOpen: false
+                    };
 
-            return newState;
-        });
+                    newState.treeData = prevState.treeData;
+                    newState.treeData[savedInfo.id] = [];
+                    newState.accordionData.push(newDirLayout);
+                } else if (saveType == DIRLAYOUT_SAVE_TYPE.UPDATE) {
+                    newState.accordionData.forEach(eachDirLayout => {
+                        if (eachDirLayout.id == savedInfo.id) {
+                            eachDirLayout.name = savedInfo.name;
+                            eachDirLayout.description = savedInfo.description;
+                        }
+                    });
+                }
+
+                return newState;
+            });
+        }
     }
 
     deleteDirLayoutCallback(deletedItemId) {
@@ -523,14 +557,16 @@ class DirectoryLayoutComponent extends React.Component {
                         dirLayoutId: newValue.dir_layout,
                         parent: newValue.parent,
                         filterCriteria: newValue.filter_criteria,
+                        individualFiles: newValue.individual_files,
                         children: []
                     });
                 } else {
                     // If the operation is an update operation
                     array[i].name = newValue.name;
-                    array[i].title = (<Button fullWidth>{newValue.name}</Button>),
+                    array[i].title = (<Button fullWidth>{newValue.name}</Button>);
                     array[i].parent = newValue.parent;
                     array[i].filterCriteria = newValue.filter_criteria;
+                    array[i].individualFiles = newValue.individual_files;
                 }
                 return true;
             }
@@ -564,6 +600,7 @@ class DirectoryLayoutComponent extends React.Component {
                         dirLayoutId: savedInfo.dir_layout,
                         parent: savedInfo.parent,
                         filterCriteria: savedInfo.filter_criteria,
+                        individualFiles: savedInfo.individual_files,
                         children: []
                     });
                 }
@@ -598,7 +635,8 @@ class DirectoryLayoutComponent extends React.Component {
             const newState = {
                 infoBoardType: BOARD_TYPES.NONE,
                 infoBoardData: {},
-                treeData: prevState.treeData
+                treeData: prevState.treeData,
+                breadCrumb: ' '
             };
 
             this.removeDirectoryEntry(directoryId, newState.treeData[dirLayoutId]);

@@ -30,3 +30,7 @@ body {
 .rst__tree button span {
     text-transform: none
 }
+
+.handPointer {
+    cursor: pointer;
+}

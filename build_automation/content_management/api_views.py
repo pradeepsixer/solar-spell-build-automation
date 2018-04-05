@@ -106,22 +106,40 @@ class DirectoryCloneApiViewset(ViewSet, CreateModelMixin):
                 }
             }
             return Response(data, status=status.HTTP_409_CONFLICT)
-        clone = DirectoryLayout(name=original_layout.name + self.CLONE_SUFFIX, description=original_layout.description)
-        clone.pk = None
-        clone.save()
+        cloned_layout = DirectoryLayout(
+            name=original_layout.name + self.CLONE_SUFFIX, description=original_layout.description
+        )
+        cloned_layout.pk = None
+        cloned_layout.save()
 
         filter_criteria_util = FilterCriteriaUtil()
-        dir_queryset = Directory.objects.filter(dir_layout=original_layout.id)
-        for dir in dir_queryset:
-            dir.pk = None
-            dir.dir_layout = clone
-            cloned_filter_criteria_str = dir.filter_criteria.get_filter_criteria_string()
-            dir.filter_criteria = filter_criteria_util.create_filter_criteria_from_string(cloned_filter_criteria_str)
-            dir.save()
+        dir_queryset = Directory.objects.filter(dir_layout=original_layout, parent=None)
+        self.__clone_directory_tree(filter_criteria_util, cloned_layout, dir_queryset, None)
 
-        serializer = DirectoryLayoutSerializer(clone)
+        serializer = DirectoryLayoutSerializer(cloned_layout, context={'request': request})
         return Response(serializer.data)
 
     def get_queryset(self, **kwargs):
         queryset = DirectoryLayout.objects.get(id=self.kwargs['id'])
         return queryset
+
+    def __clone_directory_tree(
+            self, filter_criteria_util, cloned_dir_layout,
+            original_directories, parent_cloned_directory):
+        for each_original_directory in original_directories:
+            cloned_directory = Directory(name=each_original_directory.name)
+            cloned_directory.dir_layout = cloned_dir_layout
+            cloned_directory.parent = parent_cloned_directory
+            cloned_directory.save()
+            cloned_directory.individual_files.set(list(each_original_directory.individual_files.all()))
+            cloned_directory.save()
+            cloned_filter_criteria_str = each_original_directory.filter_criteria.get_filter_criteria_string()
+            cloned_filter_criteria = filter_criteria_util.create_filter_criteria_from_string(
+                cloned_filter_criteria_str
+            )
+            cloned_filter_criteria.directory = cloned_directory
+            cloned_filter_criteria.save()
+            self.__clone_directory_tree(
+                filter_criteria_util, cloned_dir_layout,
+                each_original_directory.subdirectories.all(), cloned_directory
+            )

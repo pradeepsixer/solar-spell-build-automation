@@ -2,8 +2,10 @@ import axios from 'axios';
 import React from 'react';
 
 import Button from 'material-ui/Button';
+import Dialog, { DialogActions, DialogContent, DialogContentText, DialogTitle } from 'material-ui/Dialog';
 import TextField from 'material-ui/TextField';
 
+import { DIRLAYOUT_SAVE_TYPE } from './constants.js';
 import { APP_URLS, get_url } from './url.js';
 
 class DirlayoutInfoBoard extends React.Component {
@@ -12,7 +14,9 @@ class DirlayoutInfoBoard extends React.Component {
         this.state = {
             id: props.boardData.id,
             name: props.boardData.name,
-            description: props.boardData.description
+            description: props.boardData.description,
+            fieldErrors: {},
+            confirmDelete: false,
         };
         this.handleTextFieldUpdate = this.handleTextFieldUpdate.bind(this);
         this.saveDirLayout = this.saveDirLayout.bind(this);
@@ -20,23 +24,37 @@ class DirlayoutInfoBoard extends React.Component {
         this.deleteDirLayout = this.deleteDirLayout.bind(this);
         this.saveCallback = this.props.onSave.bind(this);
         this.deleteCallback = this.props.onDelete.bind(this);
+        this.confirmDeleteDirLayout = this.confirmDeleteDirLayout.bind(this);
+        this.closeConfirmDialog = this.closeConfirmDialog.bind(this);
     }
 
     componentWillReceiveProps(props) {
         this.setState({
             id: props.boardData.id,
             name: props.boardData.name,
-            description: props.boardData.description
+            description: props.boardData.description,
+            fieldErrors: {},
+            confirmDelete: false,
         });
     }
 
     handleTextFieldUpdate(stateProperty, evt) {
-        this.setState({
-            [stateProperty]: evt.target.value
+        const targetVal = evt.target.value;
+        this.setState((prevState, props) => {
+            const newState = {
+                fieldErrors: prevState.fieldErrors,
+                [stateProperty]: targetVal
+            };
+            newState.fieldErrors[stateProperty] = null;
+            return newState;
         })
     }
 
     saveDirLayout(evt) {
+        if (!this.is_valid_state()) {
+            // If it is in an invalid state, do not proceed with the save operation.
+            return;
+        }
         var targetUrl = APP_URLS.DIRLAYOUT_LIST;
         const payload = {name: this.state.name, description: this.state.description};
         const currentInstance = this;
@@ -46,28 +64,61 @@ class DirlayoutInfoBoard extends React.Component {
             axios.patch(targetUrl, payload, {
                 responseType: 'json'
             }).then(function(response) {
-                currentInstance.saveCallback(response.data);
+                currentInstance.saveCallback(response.data, DIRLAYOUT_SAVE_TYPE.UPDATE);
             }).catch(function(error) {
                 console.error("Error in updating the directory layout ", error);
+                console.error(error.response.data);
             })
         } else {
             // Create a new directory layout.
             axios.post(targetUrl, payload, {
                 responseType: 'json'
             }).then(function(response) {
-                currentInstance.saveCallback(response.data, true);
+                currentInstance.saveCallback(response.data, DIRLAYOUT_SAVE_TYPE.CREATE);
             }).catch(function(error) {
                 console.error("Error in creating a new directory layout ", error);
+                console.error(error.response.data);
             })
         }
     }
 
-    cloneDirLayout(evt) {
-        console.log("Need to clone the directory layout");
+    is_valid_state() {
+        var hasErrors = false;
+        const fieldErrors = {};
+        if (!this.state.name || this.state.name.trim().length === 0) {
+            hasErrors = true;
+            fieldErrors['name'] = 'Name is required.';
+        }
+        if (!this.state.description || this.state.description.trim().length === 0) {
+            hasErrors = true;
+            fieldErrors['description'] = 'Description is required.';
+        }
+        if (hasErrors) {
+            this.setState({fieldErrors});
+        }
+        return !hasErrors;
     }
 
-    deleteDirLayout(evt) {
-        // TODO : First confirm the delete action.
+    cloneDirLayout(evt) {
+        const targetUrl = get_url(APP_URLS.DIRLAYOUT_CLONE, {id: this.state.id});
+        const currentInstance = this;
+        axios.post(targetUrl, {}, {
+            responseType: 'json'
+        }).then(function(response) {
+            currentInstance.saveCallback(response.data, DIRLAYOUT_SAVE_TYPE.CLONE);
+        }).catch(function(error) {
+            console.error("Error in cloning the directory layout", error);
+            console.error(error.response.data);
+        })
+    }
+
+    confirmDeleteDirLayout() {
+        this.setState({
+            confirmDelete: true
+        })
+    }
+
+    deleteDirLayout() {
         const targetUrl = get_url(APP_URLS.DIRLAYOUT_DETAIL, {id:this.state.id});
         const currentInstance = this;
         axios.delete(targetUrl, {
@@ -77,6 +128,10 @@ class DirlayoutInfoBoard extends React.Component {
         }).catch(function(error) {
             console.error("Error in deleting the directory layout ", error);
         })
+    }
+
+    closeConfirmDialog() {
+        this.setState({confirmDelete: false})
     }
 
     render() {
@@ -93,7 +148,7 @@ class DirlayoutInfoBoard extends React.Component {
                 }
                 {
                     this.state.id > 0 &&
-                    <Button variant="raised" color="secondary" onClick={this.deleteDirLayout}>
+                    <Button variant="raised" color="secondary" onClick={this.confirmDeleteDirLayout}>
                     Delete
                     </Button>
                 }
@@ -101,6 +156,8 @@ class DirlayoutInfoBoard extends React.Component {
                   id="name"
                   label="Name"
                   value={this.state.name}
+                  required={true}
+                  error={this.state.fieldErrors.name ? true : false}
                   onChange={evt => this.handleTextFieldUpdate('name', evt)}
                   fullWidth
                   margin="normal"
@@ -110,10 +167,33 @@ class DirlayoutInfoBoard extends React.Component {
                   label="Description"
                   multiline
                   fullWidth
+                  required={true}
+                  error={this.state.fieldErrors.description ? true : false}
                   value={this.state.description}
                   onChange={evt => this.handleTextFieldUpdate('description', evt)}
                   margin="normal"
                 />
+                <Dialog
+                    open={this.state.confirmDelete}
+                    onClose={this.closeConfirmDialog}
+                    aria-labelledby="alert-dialog-title"
+                    aria-describedby="alert-dialog-description"
+                >
+                    <DialogTitle id="alert-dialog-title">{"Confirm Delete?"}</DialogTitle>
+                    <DialogContent>
+                        <DialogContentText id="alert-dialog-description">
+                            Are you sure you want to delete the directory layout {this.state.name}?
+                        </DialogContentText>
+                    </DialogContent>
+                    <DialogActions>
+                        <Button onClick={this.closeConfirmDialog} color="primary">
+                            No
+                        </Button>
+                        <Button onClick={evt => {this.closeConfirmDialog(); this.deleteDirLayout();}} color="primary" autoFocus>
+                            Yes
+                        </Button>
+                    </DialogActions>
+                </Dialog>
             </div>
         );
     }

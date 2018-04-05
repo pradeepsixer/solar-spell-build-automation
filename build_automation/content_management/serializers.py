@@ -1,11 +1,11 @@
 from rest_framework import serializers
-from rest_framework.validators import UniqueTogetherValidator, UniqueValidator
+from rest_framework.validators import UniqueValidator
 
 from content_management.models import Content, Directory, DirectoryLayout, FilterCriteria, Tag
 from content_management.utils import FilterCriteriaUtil
 
 
-class ContentSerializer(serializers.HyperlinkedModelSerializer):
+class ContentSerializer(serializers.ModelSerializer):
     tag_ids = serializers.PrimaryKeyRelatedField(many=True, read_only=False, queryset=Tag.objects.all(), source='tag')
 
     def create(self, validated_data):
@@ -40,7 +40,7 @@ class ContentSerializer(serializers.HyperlinkedModelSerializer):
 
     class Meta:
         model = Content
-        fields = ('url', 'name', 'description', 'content_file', 'updated_time', 'last_uploaded_time', 'tag_ids')
+        fields = ('url', 'id', 'name', 'description', 'content_file', 'updated_time', 'last_uploaded_time', 'tag_ids')
         extra_kwargs = {
             'url': {'lookup_field': 'pk'},
         }
@@ -80,7 +80,28 @@ class DirectoryLayoutSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = DirectoryLayout
-        fields = '__all__'
+        fields = ('id', 'url', 'name', 'description')
+        extra_kwargs = {
+            'url': {'lookup_field': 'pk'},
+        }
+
+
+class DirectoryNameUniqueValidator(object):
+    def __call__(self, directory):
+        dir_name = directory.get('name')
+        parent = directory.get('parent')
+        dir_layout = directory.get('dir_layout')
+        if self.id is None:
+            matching_dirs_count = Directory.objects.filter(dir_layout=dir_layout, parent=parent, name=dir_name).count()
+        else:
+            matching_dirs_count = Directory.objects.filter(
+                dir_layout=dir_layout, parent=parent, name=dir_name
+            ).exclude(pk=self.id).count()
+        if matching_dirs_count > 0:
+            raise serializers.ValidationError({'name': [{'result': 'ERROR', 'error': 'DUPLICATE_DIRECTORY'}]})
+
+    def set_context(self, serializer_field):
+        self.id = serializer_field.initial_data.get('id')
 
 
 class FilterCriteriaField(serializers.CharField):
@@ -98,14 +119,20 @@ class DirectorySerializer(serializers.ModelSerializer):
     """
 
     filter_criteria = FilterCriteriaField(max_length=500)
+    individual_files = serializers.PrimaryKeyRelatedField(many=True, queryset=Content.objects.all(), read_only=False)
 
     def create(self, validated_data):
         filtercriteria_util = FilterCriteriaUtil()
         validated_data_copy = dict(validated_data)
-        filter_criteria_value = filtercriteria_util.create_filter_criteria_from_string(
+        del validated_data_copy['individual_files']
+        del validated_data_copy['filter_criteria']
+        filter_criteria = filtercriteria_util.create_filter_criteria_from_string(
             validated_data.get('filter_criteria'))
-        validated_data_copy['filter_criteria'] = filter_criteria_value
-        return Directory.objects.create(**validated_data_copy)
+        directory = Directory.objects.create(**validated_data_copy)
+        directory.individual_files.set(validated_data['individual_files'])
+        filter_criteria.directory = directory
+        filter_criteria.save()
+        return directory
 
     def update(self, instance, validated_data):
         instance.name = validated_data.get('name', instance.name)
@@ -113,19 +140,21 @@ class DirectorySerializer(serializers.ModelSerializer):
         if 'filter_criteria' in validated_data:
             FilterCriteria.objects.filter(directory=instance).delete()
             criteria_util = FilterCriteriaUtil()
-            instance.filter_criteria = criteria_util.create_filter_criteria_from_string(
+            filter_criteria = criteria_util.create_filter_criteria_from_string(
                 validated_data.get('filter_criteria'))
+            filter_criteria.directory = instance
+            filter_criteria.save()
+        instance.individual_files.set(validated_data.get('individual_files', instance.individual_files))
         instance.parent = validated_data.get('parent', instance.parent)
         instance.save()
         return instance
 
     class Meta:
         model = Directory
-        fields = ('id', 'name', 'dir_layout', 'filter_criteria', 'parent')
+        fields = ('id', 'url', 'name', 'dir_layout', 'filter_criteria', 'individual_files', 'parent')
         validators = [
-            UniqueTogetherValidator(
-                queryset=Directory.objects.all(),
-                fields=('name', 'parent'),
-                message=('The subdirectory for the parent already exists.')
-            )
+            DirectoryNameUniqueValidator()
         ]
+        extra_kwargs = {
+            'url': {'lookup_field': 'pk'},
+        }

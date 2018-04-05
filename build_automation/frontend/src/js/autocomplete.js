@@ -65,7 +65,7 @@ class AutoCompleteWithChips extends React.Component {
         super(props);
         this.state = {
             inputValue: '',
-            selectedItem: [],
+            selectedItem: props.selectedItem,
         };
         this.handleKeyDown = this.handleKeyDown.bind(this);
         this.handleInputChange = this.handleInputChange.bind(this);
@@ -76,7 +76,7 @@ class AutoCompleteWithChips extends React.Component {
     componentWillReceiveProps(props) {
         this.setState({
             inputValue: '',
-            selectedItem: []
+            selectedItem: props.selectedItem
         })
     }
 
@@ -94,32 +94,38 @@ class AutoCompleteWithChips extends React.Component {
     };
 
     handleChange(item) {
-        let { selectedItem } = this.state;
-
-        if (selectedItem.indexOf(item) === -1) {
-            selectedItem = [...selectedItem, item];
-            if (this.props.onChange) {
-                var selectedSuggestion = null;
-                for (var i=0; i<this.props.suggestions.length; i++) {
-                    if(this.props.suggestions[i][this.props.searchKey] == item) {
-                        selectedSuggestion = this.props.suggestions[i];
-                    }
+        if (this.props.onAddition) {
+            var selectedSuggestion = null;
+            for (var i=0; i<this.props.suggestions.length; i++) {
+                if(this.props.suggestions[i][this.props.searchKey] == item) {
+                    selectedSuggestion = this.props.suggestions[i];
                 }
-                this.props.onChange(selectedSuggestion);
             }
-        }
+            this.props.onAddition(selectedSuggestion);
+        } else {
+            let { selectedItem } = this.state;
 
-        this.setState({
-            inputValue: '',
-            selectedItem,
-        });
+            if (selectedItem.indexOf(item) === -1) {
+                selectedItem = [...selectedItem, item];
+            }
+            this.setState({inputValue: '', selectedItem});
+        }
     };
 
     handleDelete(item) {
-        const selectedItem = [...this.state.selectedItem];
-        selectedItem.splice(selectedItem.indexOf(item), 1);
-
-        this.setState({ selectedItem });
+        if (this.props.onDeletion) {
+            var removedChip = null;
+            for (var i=0; i<this.props.suggestions.length; i++) {
+                if(this.props.suggestions[i][this.props.searchKey] == item) {
+                    removedChip = this.props.suggestions[i];
+                }
+            }
+            this.props.onDeletion(removedChip);
+        } else {
+            const selectedItem = [...this.state.selectedItem];
+            selectedItem.splice(selectedItem.indexOf(item), 1);
+            this.setState({ selectedItem });
+        }
     };
 
     render() {
@@ -155,6 +161,8 @@ class AutoCompleteWithChips extends React.Component {
                                 onKeyDown: this.handleKeyDown,
                                 placeholder: this.props.placeholder,
                                 id: this.props.id,
+                                required: this.props.required,
+                                error: this.props.errorMsg ? true : false
                                 }),
                             })
                         }
@@ -186,7 +194,15 @@ class AutoCompleteWithChips extends React.Component {
 AutoCompleteWithChips.propTypes = {
     classes: PropTypes.object.isRequired,
     suggestions: PropTypes.array,
-    onChange: PropTypes.func
+    onAddition: PropTypes.func,
+    onDeletion: PropTypes.func,
+    required: PropTypes.bool,
+    errorMsg: PropTypes.string
+};
+
+AutoCompleteWithChips.defaultProps = {
+    required: false,
+    errorMsg: null
 };
 
 const styles = theme => ({

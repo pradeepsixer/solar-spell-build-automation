@@ -26,7 +26,10 @@ export function parse_filter_criteria_string(filter_criteria_string) {
             tags: tagIds
         }
     }
-    return null;
+    return {
+        operator: 'AND',
+        tags: []
+    };
 }
 
 /*
