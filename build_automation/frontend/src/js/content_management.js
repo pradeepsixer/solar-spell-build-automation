@@ -1,13 +1,6 @@
 import React from 'react';
-import PropTypes from 'prop-types';
-import { withStyles } from 'material-ui/styles';
 import Button from 'material-ui/Button';
 import Grid from 'material-ui/Grid';
-import Paper from 'material-ui/Paper';
-import AppBar from 'material-ui/AppBar';
-import Typography from 'material-ui/Typography';
-import AutoCompleteWithChips from './autocomplete.js';
-import TextField from 'material-ui/TextField';
 import UploadContent from './upload_content';
 import FileListComponent from './file_list_component';
 import {APP_URLS} from "./url";
@@ -15,7 +8,7 @@ import axios from 'axios';
 
 const styles = theme => ({
     root: {
-    flexGrow: 1,
+        flexGrow: 1,
     },
     paper: {
         padding: theme.spacing.unit * 2,
@@ -49,7 +42,7 @@ class ContentManagement extends React.Component{
     componentDidMount() {
         this.loadData()
     }
-     buildTagIdTagsMap(tags) {
+    buildTagIdTagsMap(tags) {
         // Builds a map of <Tag Id> - Tag
         const tagIdTagMap = {};
         tags.forEach(eachTag => {
@@ -98,9 +91,9 @@ class ContentManagement extends React.Component{
     }
     render(){
         console.log(this.tagIdTagsMap);
-    return (
-        <div>
-            <Grid container spacing={8} style={{paddingLeft: '20px'}}>
+        return (
+            <div>
+                <Grid container spacing={8} style={{paddingLeft: '20px'}}>
                     <Grid item xs={3} style={{paddingLeft: '20px'}}>
                         <h3>Content Management</h3>
                         <Button variant="raised" color="primary" onClick={e => {this.setCurrentView('manage')}}>
@@ -116,10 +109,10 @@ class ContentManagement extends React.Component{
                         {this.state.currentView=='manage'&&<FileListComponent allFiles={this.state.files} tagIdsTagsMap={this.tagIdTagsMap}/>}
                         {this.state.currentView=='upload'&&<UploadContent />}
                     </Grid>
-            </Grid>
+                </Grid>
 
-        </div>
-    )
+            </div>
+        )
     }
 }
 module.exports = ContentManagement;
