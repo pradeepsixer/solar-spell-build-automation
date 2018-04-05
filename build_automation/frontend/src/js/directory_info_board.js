@@ -219,7 +219,9 @@ class DirectoryInfoBoard extends React.Component {
     handleChipAddition(addedChip) {
         this.setState((prevState, props) => {
             const selectedTags = prevState.selectedTags;
-            selectedTags.push(addedChip.name);
+            if (selectedTags.indexOf(addedChip.name) === -1) {
+                selectedTags.push(addedChip.name);
+            }
             return {selectedTags};
         });
     }
