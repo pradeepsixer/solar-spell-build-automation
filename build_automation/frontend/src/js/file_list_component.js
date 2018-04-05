@@ -44,7 +44,7 @@ class FileListComponent extends React.Component {
             },
         };
         console.log(props);
-         __tagIdsTagsMap = props.tagIdsTagsMap;
+        __tagIdsTagsMap = props.tagIdsTagsMap;
     }
 
     componentWillReceiveProps(props) {
@@ -71,7 +71,7 @@ class FileListComponent extends React.Component {
         });
     }
 
-     tableRowComponent(obj, menuName)  {
+    tableRowComponent(obj, menuName)  {
         const {row, children} = obj;
         return(<tr onContextMenu={evt => this.handleFilesRightClick(evt, row, menuName)}>{children}</tr>);
     }
@@ -130,8 +130,8 @@ class FileListComponent extends React.Component {
                         View this file
                     </MenuItem>
                 </Menu>
-                </React.Fragment>
-                );
-                }
+            </React.Fragment>
+        );
+    }
 }
 module.exports = FileListComponent;

@@ -1,23 +1,19 @@
 import React from 'react';
-import PropTypes from 'prop-types';
-import { withStyles } from 'material-ui/styles';
 import Button from 'material-ui/Button';
 import Grid from 'material-ui/Grid';
-import Paper from 'material-ui/Paper';
 import AppBar from 'material-ui/AppBar';
 import Typography from 'material-ui/Typography';
 import AutoCompleteWithChips from './autocomplete.js';
 import TextField from 'material-ui/TextField';
 import { DateTimePicker } from 'material-ui-pickers';
 import {APP_URLS} from "./url";
-import DatePicker from 'material-ui-pickers/DatePicker';
 import DateFnsUtils from 'material-ui-pickers/utils/date-fns-utils';
 import MuiPickersUtilsProvider from 'material-ui-pickers/utils/MuiPickersUtilsProvider';
 import axios from 'axios';
 
 const styles = theme => ({
     root: {
-    flexGrow: 1,
+        flexGrow: 1,
     },
     paper: {
         padding: theme.spacing.unit * 2,
@@ -74,79 +70,79 @@ class UploadContent extends React.Component{
         })
     }
     handleDateChange(date){
-    this.setState({ selectedDate: date });
+        this.setState({ selectedDate: date });
     };
 
     render(){
-    return (
-                    <Grid item xs={8}>
-                        <AppBar position="static" style={{ height: '50px', margin: 'auto'}}>
-                            <Typography gutterBottom variant="subheading" style={{color: '#ffffff'}}>
+        return (
+            <Grid item xs={8}>
+                <AppBar position="static" style={{ height: '50px', margin: 'auto'}}>
+                    <Typography gutterBottom variant="subheading" style={{color: '#ffffff'}}>
 
-                            </Typography>
-                        </AppBar>
-                        <div style={{marginTop: '20px'}}> </div>
+                    </Typography>
+                </AppBar>
+                <div style={{marginTop: '20px'}}> </div>
 
-                        <TextField
-                        id="name"
-                        label="Name"
-                        value={this.state.name}
-                        required={true}
-                        error={this.state.fieldErrors.name ? true : false}
-                        onChange={evt => this.handleTextFieldUpdate('name', evt)}
-                        fullWidth
-                        margin="normal"
-                        />
-                        <TextField
-                        id="description"
-                        label="Description"
-                        multiline
-                        fullWidth
-                        required={true}
-                        error={this.state.fieldErrors.description ? true : false}
-                        value={this.state.description}
-                        onChange={evt => this.handleTextFieldUpdate('description', evt)}
-                        margin="normal"
-                        />
-                        <div style={{marginTop: '20px'}}> </div>
-                        <MuiPickersUtilsProvider utils={DateFnsUtils}>
-                        <DateTimePicker
-                            id="updated_time"
+                <TextField
+                    id="name"
+                    label="Name"
+                    value={this.state.name}
+                    required={true}
+                    error={this.state.fieldErrors.name ? true : false}
+                    onChange={evt => this.handleTextFieldUpdate('name', evt)}
+                    fullWidth
+                    margin="normal"
+                />
+                <TextField
+                    id="description"
+                    label="Description"
+                    multiline
+                    fullWidth
+                    required={true}
+                    error={this.state.fieldErrors.description ? true : false}
+                    value={this.state.description}
+                    onChange={evt => this.handleTextFieldUpdate('description', evt)}
+                    margin="normal"
+                />
+                <div style={{marginTop: '20px'}}> </div>
+                <MuiPickersUtilsProvider utils={DateFnsUtils}>
+                    <DateTimePicker
+                        id="updated_time"
                         label="Last Updated:"
                         value={this.state.selectedDate}
                         onChange={this.handleDateChange}
-                        />
-                        </MuiPickersUtilsProvider>
-                        <div style={{marginTop: '20px'}}> </div>
-                        <Typography gutterBottom variant="subheading">
-                            Tags
-                            </Typography>
-                        <span>
+                    />
+                </MuiPickersUtilsProvider>
+                <div style={{marginTop: '20px'}}> </div>
+                <Typography gutterBottom variant="subheading">
+                    Tags
+                </Typography>
+                <span>
                             <AutoCompleteWithChips suggestions={this.state.tags} searchKey={'name'} selectedItem={[]} onChange={evt => console.log(evt)}/>
                         </span>
-                        <div style={{marginTop: '20px'}}> </div>
-                        <input
-                        accept="*"
-                        className={'hidden'}
-                        id="raised-button-file"
-                        multiple
-                        type="file"
-                        ref={input => {this.fileInput = input;}}
-                        onChange={e => console.log(this.fileInput.files)}
-                        />
-                    <label htmlFor="raised-button-file">
-                        <Button variant="raised" component="span">
+                <div style={{marginTop: '20px'}}> </div>
+                <input
+                    accept="*"
+                    className={'hidden'}
+                    id="raised-button-file"
+                    multiple
+                    type="file"
+                    ref={input => {this.fileInput = input;}}
+                    onChange={e => console.log(this.fileInput.files)}
+                />
+                <label htmlFor="raised-button-file">
+                    <Button variant="raised" component="span">
                         Browse
-                        </Button>
-                    </label>
-                        <Button variant="raised" component="span">
-                        Save
-                        </Button>
+                    </Button>
+                </label>
+                <Button variant="raised" component="span">
+                    Save
+                </Button>
 
-                        <div style={{marginTop: '20px'}}> </div>
+                <div style={{marginTop: '20px'}}> </div>
 
-                    </Grid>
-    )
+            </Grid>
+        )
     }
 }
 module.exports = UploadContent;
