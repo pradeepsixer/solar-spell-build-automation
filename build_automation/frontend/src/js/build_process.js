@@ -10,14 +10,24 @@ class BuildProcessComponent extends React.Component{
   constructor(props) {
         super(props);
         this.state = {
-            currentTab: 'makebuild'
+            currentTab: 'makebuild',
+            builtLayout : {}
         };
         this.handleTabClick = this.handleTabClick.bind(this);
+        this.handleData = this.handleData.bind(this);
     }
 
   handleTabClick(event, selectedTab) {
         this.setState({ currentTab: selectedTab });
       };
+
+  handleData(builtLayout){
+        console.log("buildprocess")
+        console.log(builtLayout);
+        this.setState({
+            builtLayout: builtLayout
+        });
+    }
 
   render() {
     const currentTab = this.state.currentTab;
@@ -39,8 +49,8 @@ class BuildProcessComponent extends React.Component{
             </Grid>
             <Grid container style={{marginTop: '20px'}}>
                 <Grid item xs={12}>
-                    {currentTab == 'makebuild' && <MakeBuildComponent />}
-                    {currentTab == 'viewbuild' && <ViewBuildComponent />}
+                    {currentTab == 'makebuild' && <MakeBuildComponent handlerFromParent={this.handleData}/>}
+                    {currentTab == 'viewbuild' && <ViewBuildComponent built={this.state.builtLayout}/>}
                 </Grid>
             </Grid>
         </React.Fragment>
