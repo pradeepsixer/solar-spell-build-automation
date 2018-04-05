@@ -149,7 +149,7 @@ class DiskSpaceViewSet(ViewSet):
     def list(self, request):
         dp = DiskSpace()
         data = {
-            'available_space': dp.getFreeSpace()[0],
-            'total_space': dp.getFreeSpace()[1]
+            'available_space': dp.getfreespace()[0],
+            'total_space': dp.getfreespace()[1]
         }
         return Response(data)

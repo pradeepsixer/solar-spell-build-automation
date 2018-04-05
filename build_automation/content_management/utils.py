@@ -101,7 +101,7 @@ class DiskSpace:
     avail_blocks = disk_stats.f_bavail
     total_blocks = disk_stats.f_blocks
 
-    def getFreeSpace(self):
+    def getfreespace(self):
         free_space = self.block_size * self.avail_blocks
         total_space = self.total_blocks * self.block_size
         return (free_space, total_space)
