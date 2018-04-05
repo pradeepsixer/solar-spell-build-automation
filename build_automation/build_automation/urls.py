@@ -18,7 +18,8 @@ from django.urls import include, path
 from rest_framework import routers
 
 from content_management.api_views import (
-    ContentApiViewset, DirectoryCloneApiViewset, DirectoryLayoutViewSet, DirectoryViewSet, TagViewSet
+    ContentApiViewset, DirectoryCloneApiViewset, DirectoryLayoutViewSet, DirectoryViewSet, DiskSpaceViewSet,
+    TagViewSet
 )
 
 router = routers.SimpleRouter()
@@ -27,6 +28,7 @@ router.register(r'tags', TagViewSet, base_name='tag')
 router.register(r'directories', DirectoryViewSet)
 router.register(r'dirlayouts', DirectoryLayoutViewSet)
 router.register(r'dirlayouts/(?P<id>\d+)/clone', DirectoryCloneApiViewset, base_name='dirlayout')
+router.register(r'diskspace', DiskSpaceViewSet, base_name='diskspace')
 
 urlpatterns = [
     path('admin/', admin.site.urls),

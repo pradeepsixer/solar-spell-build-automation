@@ -8,7 +8,7 @@ from rest_framework.viewsets import ModelViewSet, ViewSet
 from .exceptions import DuplicateContentFileException
 from .models import Content, Directory, DirectoryLayout, Tag
 from .serializers import ContentSerializer, DirectoryLayoutSerializer, DirectorySerializer, TagSerializer
-from .utils import FilterCriteriaUtil
+from .utils import DiskSpace, FilterCriteriaUtil
 
 
 class ContentApiViewset(ModelViewSet):
@@ -143,3 +143,13 @@ class DirectoryCloneApiViewset(ViewSet, CreateModelMixin):
                 filter_criteria_util, cloned_dir_layout,
                 each_original_directory.subdirectories.all(), cloned_directory
             )
+
+
+class DiskSpaceViewSet(ViewSet):
+    def list(self, request):
+        dp = DiskSpace()
+        data = {
+            'available_space': dp.getFreeSpace()[0],
+            'total_space': dp.getFreeSpace()[1]
+        }
+        return Response(data)
