@@ -33,17 +33,23 @@ class UploadContent extends React.Component{
     constructor(props) {
         super(props);
         this.state = {
-            tags: [],
+            creators: [],
+            coverage: [],
+            subjects: [],
+            keywords: [],
+            workareas: [],
+            language: [],
+            cataloger: [],
             name: "",
             description: "",
             fieldErrors: {},
             updatedTime: '',
             selectedDate: new Date()
-        }
+        };
         this.handleDateChange=this.handleDateChange.bind(this);
     }
     componentDidMount() {
-        this.loadData()
+        // this.loadData()
     }
     loadData() {
         const currInstance = this;
@@ -115,10 +121,52 @@ class UploadContent extends React.Component{
                 </MuiPickersUtilsProvider>
                 <div style={{marginTop: '20px'}}> </div>
                 <Typography gutterBottom variant="subheading">
-                    Tags
+                    Creator(s)
                 </Typography>
                 <span>
-                            <AutoCompleteWithChips suggestions={this.state.tags} searchKey={'name'} selectedItem={[]} onChange={evt => console.log(evt)}/>
+                            <AutoCompleteWithChips suggestions={this.state.creators} searchKey={'name'} selectedItem={[]} onChange={evt => console.log(evt)}/>
+                        </span>
+                <div style={{marginTop: '20px'}}> </div>
+                <Typography gutterBottom variant="subheading">
+                    Coverage
+                </Typography>
+                <span>
+                            <AutoCompleteWithChips suggestions={this.state.coverage} searchKey={'name'} selectedItem={[]} onChange={evt => console.log(evt)}/>
+                        </span>
+                <div style={{marginTop: '20px'}}> </div>
+                <Typography gutterBottom variant="subheading">
+                    Subject(s)
+                </Typography>
+                <span>
+                            <AutoCompleteWithChips suggestions={this.state.subjects} searchKey={'name'} selectedItem={[]} onChange={evt => console.log(evt)}/>
+                        </span>
+                <div style={{marginTop: '20px'}}> </div>
+                <Typography gutterBottom variant="subheading">
+                    Keywords
+                </Typography>
+                <span>
+                            <AutoCompleteWithChips suggestions={this.state.keywords} searchKey={'name'} selectedItem={[]} onChange={evt => console.log(evt)}/>
+                        </span>
+                <div style={{marginTop: '20px'}}> </div>
+                <Typography gutterBottom variant="subheading">
+                    Work Area(s)
+                </Typography>
+                <span>
+                            <AutoCompleteWithChips suggestions={this.state.workareas} searchKey={'name'} selectedItem={[]} onChange={evt => console.log(evt)}/>
+                        </span>
+                <div style={{marginTop: '20px'}}> </div>
+                <Typography gutterBottom variant="subheading">
+                    Language
+                </Typography>
+                <span>
+                            <AutoCompleteWithChips suggestions={this.state.language} searchKey={'name'} selectedItem={[]} onChange={evt => console.log(evt)}/>
+                        </span>
+                <div style={{marginTop: '20px'}}> </div>
+                <Typography gutterBottom variant="subheading">
+                    Cataloger
+                </Typography>
+                <span>
+                            <AutoCompleteWithChips suggestions={this.state.cataloger} searchKey={'name'} selectedItem={[]} onChange={evt => console.log(evt)}/>
                         </span>
                 <div style={{marginTop: '20px'}}> </div>
                 <input

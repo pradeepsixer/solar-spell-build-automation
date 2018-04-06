@@ -1,14 +1,13 @@
 from django.db.models import Q
 from rest_framework import filters, status
-from rest_framework.mixins import CreateModelMixin
+from rest_framework.mixins import CreateModelMixin, RetrieveModelMixin
 from rest_framework.response import Response
 from rest_framework.reverse import reverse
 from rest_framework.viewsets import ModelViewSet, ViewSet
 
 from .exceptions import DuplicateContentFileException
-from .models import Content, Directory, DirectoryLayout, Tag
-from .serializers import ContentSerializer, DirectoryLayoutSerializer, DirectorySerializer, TagSerializer
-from .utils import FilterCriteriaUtil
+from .models import *
+from .serializers import *
 
 
 class ContentApiViewset(ModelViewSet):
@@ -48,34 +47,69 @@ class ContentApiViewset(ModelViewSet):
             return Response(data, status=status.HTTP_409_CONFLICT)
 
 
-class TagViewSet(ModelViewSet):
-    serializer_class = TagSerializer
-    filter_backends = (filters.SearchFilter,)
-    search_fields = ('description', 'name')
+# class TagViewSet(ModelViewSet):
+#     serializer_class = TagSerializer
+#     filter_backends = (filters.SearchFilter,)
+#     search_fields = ('description', 'name')
+#
+#     def get_child(self, matching_result, tags_set):
+#         children = matching_result.child_tags.all()
+#         for child in children:
+#             tags_set.add(child)
+#             self.get_child(child, tags_set)
+#
+#     def get_queryset(self):
+#         queryset = Tag.objects.all()
+#         search_param = self.request.query_params.get('search', None)
+#         if search_param is not None:
+#             queryset = queryset.filter(Q(name__icontains=search_param) | Q(description__icontains=search_param))
+#         return queryset
+#
+#     def list(self, request, *args, **kwargs):
+#         tags_set = set()
+#         all_matches = self.get_queryset()
+#         include_subtags = self.request.query_params.get('subtags', False)
+#         for matching_result in all_matches:
+#             tags_set.add(matching_result)
+#             if include_subtags:
+#                 self.get_child(matching_result, tags_set)
+#         serializer = self.get_serializer(tags_set, many=True)
+#         return Response(serializer.data)
 
-    def get_child(self, matching_result, tags_set):
-        children = matching_result.child_tags.all()
-        for child in children:
-            tags_set.add(child)
-            self.get_child(child, tags_set)
 
-    def get_queryset(self):
-        queryset = Tag.objects.all()
-        search_param = self.request.query_params.get('search', None)
-        if search_param is not None:
-            queryset = queryset.filter(Q(name__icontains=search_param) | Q(description__icontains=search_param))
-        return queryset
+class CreatorViewSet(ModelViewSet):
+    serializer_class = CreatorSerializer
+    queryset = Creator.objects.all()
 
-    def list(self, request, *args, **kwargs):
-        tags_set = set()
-        all_matches = self.get_queryset()
-        include_subtags = self.request.query_params.get('subtags', False)
-        for matching_result in all_matches:
-            tags_set.add(matching_result)
-            if include_subtags:
-                self.get_child(matching_result, tags_set)
-        serializer = self.get_serializer(tags_set, many=True)
-        return Response(serializer.data)
+
+class CoverageViewSet(ModelViewSet):
+    serializer_class = CoverageSerializer
+    queryset = Coverage.objects.all()
+
+
+class SubjectViewSet(ModelViewSet):
+    serializer_class = SubjectSerializer
+    queryset = Subject.objects.all()
+
+
+class KeywordViewSet(ModelViewSet):
+    serializer_class = KeywordSerializer
+    queryset = Keyword.objects.all()
+
+
+class WorkareaViewSet(ModelViewSet):
+    serializer_class = WorkareaSerializer
+    queryset = Workarea.objects.all()
+
+
+class LanguageViewSet(ModelViewSet):
+    serializer_class = LanguageSerializer
+    queryset = Language.objects.all()
+
+
+class CatalogerViewSet(ModelViewSet):
+    serializer_class = CatalogerSerializer
+    queryset = Cataloger.objects.all()
 
 
 class DirectoryLayoutViewSet(ModelViewSet):
@@ -88,7 +122,13 @@ class DirectoryViewSet(ModelViewSet):
     queryset = Directory.objects.all()
 
 
-class DirectoryCloneApiViewset(ViewSet, CreateModelMixin):
+# class TagViewSet(RetrieveModelMixin):
+#
+#     def retrieve(request, *args, **kwargs):
+
+
+
+class DirectoryCloneApiViewSet(ViewSet, CreateModelMixin):
     serializer_class = DirectoryLayoutSerializer
     CLONE_SUFFIX = "_clone"
 
@@ -112,9 +152,9 @@ class DirectoryCloneApiViewset(ViewSet, CreateModelMixin):
         cloned_layout.pk = None
         cloned_layout.save()
 
-        filter_criteria_util = FilterCriteriaUtil()
+        # filter_criteria_util = FilterCriteriaUtil()
         dir_queryset = Directory.objects.filter(dir_layout=original_layout, parent=None)
-        self.__clone_directory_tree(filter_criteria_util, cloned_layout, dir_queryset, None)
+        self.__clone_directory_tree(None, cloned_layout, dir_queryset, None)
 
         serializer = DirectoryLayoutSerializer(cloned_layout, context={'request': request})
         return Response(serializer.data)
@@ -133,12 +173,12 @@ class DirectoryCloneApiViewset(ViewSet, CreateModelMixin):
             cloned_directory.save()
             cloned_directory.individual_files.set(list(each_original_directory.individual_files.all()))
             cloned_directory.save()
-            cloned_filter_criteria_str = each_original_directory.filter_criteria.get_filter_criteria_string()
-            cloned_filter_criteria = filter_criteria_util.create_filter_criteria_from_string(
-                cloned_filter_criteria_str
-            )
-            cloned_filter_criteria.directory = cloned_directory
-            cloned_filter_criteria.save()
+            # cloned_filter_criteria_str = each_original_directory.filter_criteria.get_filter_criteria_string()
+            # cloned_filter_criteria = filter_criteria_util.create_filter_criteria_from_string(
+            #     cloned_filter_criteria_str
+            # )
+            # cloned_filter_criteria.directory = cloned_directory
+            # cloned_filter_criteria.save()
             self.__clone_directory_tree(
                 filter_criteria_util, cloned_dir_layout,
                 each_original_directory.subdirectories.all(), cloned_directory

@@ -3,7 +3,7 @@ from django.urls import reverse
 from django.utils.safestring import mark_safe
 
 from .exceptions import DuplicateContentFileException
-from .models import Content, Tag
+from .models import Content
 
 
 class ContentAdmin(admin.ModelAdmin):
@@ -36,4 +36,4 @@ class TagAdmin(admin.ModelAdmin):
     list_display = ('name', 'description', 'parent')
 
 
-admin.site.register(Tag, TagAdmin)
+# admin.site.register(Tag, TagAdmin)

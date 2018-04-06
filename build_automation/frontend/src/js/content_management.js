@@ -28,7 +28,6 @@ class ContentManagement extends React.Component{
     constructor(props) {
         super(props);
         this.state = {
-            tags: [],
             name: "",
             description: "",
             fieldErrors: {},
@@ -40,7 +39,7 @@ class ContentManagement extends React.Component{
         this.tagIdTagsMap= {};
     }
     componentDidMount() {
-        this.loadData()
+        // this.loadData()
     }
     buildTagIdTagsMap(tags) {
         // Builds a map of <Tag Id> - Tag
@@ -106,7 +105,7 @@ class ContentManagement extends React.Component{
                     </Grid>
 
                     <Grid item xs={8}>
-                        {this.state.currentView=='manage'&&<FileListComponent allFiles={this.state.files} tagIdsTagsMap={this.tagIdTagsMap}/>}
+                        {this.state.currentView=='manage2'&&<FileListComponent allFiles={this.state.files} />}
                         {this.state.currentView=='upload'&&<UploadContent />}
                     </Grid>
                 </Grid>
