@@ -9,31 +9,33 @@ from content_management.models import (
 class ContentSerializer(serializers.ModelSerializer):
 
     creators = serializers.PrimaryKeyRelatedField(many=True, queryset=Creator.objects.all(), read_only=False)
-    coverage = serializers.PrimaryKeyRelatedField(queryset=Coverage.objects.all(), read_only=False)
+    coverage = serializers.PrimaryKeyRelatedField(
+        queryset=Coverage.objects.all(), read_only=False, allow_null=True, required=False
+    )
     subjects = serializers.PrimaryKeyRelatedField(many=True, queryset=Subject.objects.all(), read_only=False)
     keywords = serializers.PrimaryKeyRelatedField(many=True, queryset=Keyword.objects.all(), read_only=False)
     workareas = serializers.PrimaryKeyRelatedField(many=True, queryset=Workarea.objects.all(), read_only=False)
-    language = serializers.PrimaryKeyRelatedField(queryset=Language.objects.all(), read_only=False)
-    cataloger = serializers.PrimaryKeyRelatedField(queryset=Cataloger.objects.all(), read_only=False)
+    language = serializers.PrimaryKeyRelatedField(
+        queryset=Language.objects.all(), read_only=False, allow_null=True, required=False
+    )
+    cataloger = serializers.PrimaryKeyRelatedField(
+        queryset=Cataloger.objects.all(), read_only=False, allow_null=True, required=False
+    )
 
     def create(self, validated_data):
         validated_data_copy = dict(validated_data)
         del validated_data_copy['creators']
-        del validated_data_copy['coverage']
         del validated_data_copy['subjects']
         del validated_data_copy['keywords']
         del validated_data_copy['workareas']
-        del validated_data_copy['language']
-        del validated_data_copy['cataloger']
         content = Content(**validated_data_copy)
+        content = self.__create_update(content, None)
         content.creators.set(validated_data['creators'])
-        content.coverage = (validated_data['coverage'])
         content.subjects.set(validated_data['subjects'])
         content.keywords.set(validated_data['keywords'])
         content.workareas.set(validated_data['workareas'])
-        content.language = (validated_data['language'])
-        content.cataloger = (validated_data['cataloger'])
-        return self.__create_update(content, None)
+        content.save()
+        return content
 
     def update(self, content, validated_data):
         content.name = validated_data.get('name', content.name)
