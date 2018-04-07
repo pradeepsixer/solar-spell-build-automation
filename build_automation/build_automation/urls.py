@@ -17,7 +17,10 @@ from django.contrib import admin
 from django.urls import include, path
 from rest_framework import routers
 
-from content_management.api_views import *
+from content_management.api_views import (
+    AllTagsApiViewSet, CatalogerViewSet, ContentApiViewset, CoverageViewSet, CreatorViewSet, DirectoryCloneApiViewSet,
+    DirectoryLayoutViewSet, DirectoryViewSet, KeywordViewSet, LanguageViewSet, SubjectViewSet, WorkareaViewSet
+)
 
 router = routers.SimpleRouter()
 router.register(r'contents', ContentApiViewset)

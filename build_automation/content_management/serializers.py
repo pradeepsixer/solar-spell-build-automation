@@ -1,12 +1,12 @@
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
 
-from .models import *
-# from content_management.utils import FilterCriteriaUtil
+from content_management.models import (
+    Cataloger, Content, Coverage, Creator, Directory, DirectoryLayout, Keyword, Language, Subject, Workarea
+)
 
 
 class ContentSerializer(serializers.ModelSerializer):
-    # tag_ids = serializers.PrimaryKeyRelatedField(many=True, read_only=False, queryset=Tag.objects.all(), source='tag')
 
     creators = serializers.PrimaryKeyRelatedField(many=True, queryset=Creator.objects.all(), read_only=False)
     coverage = serializers.PrimaryKeyRelatedField(queryset=Coverage.objects.all(), read_only=False)
@@ -54,8 +54,6 @@ class ContentSerializer(serializers.ModelSerializer):
         if 'content_file' in request.FILES:
             content.content_file_uploaded = True
         content.save()
-        # if tag_list is not None:
-        #     content.tag.set(tag_list)
         return content
 
     class Meta:
@@ -65,27 +63,6 @@ class ContentSerializer(serializers.ModelSerializer):
         extra_kwargs = {
             'url': {'lookup_field': 'pk'},
         }
-
-
-# class TagSerializer(serializers.ModelSerializer):
-#     name = serializers.CharField(
-#         max_length=50, validators=[
-#             UniqueValidator(
-#                 queryset=Tag.objects.all(),
-#                 message={
-#                     'error': 'DUPLICATE_TAG_NAME'
-#                 },
-#                 lookup='iexact'
-#             )
-#         ]
-#     )
-#
-#     class Meta:
-#         model = Tag
-#         fields = ('id', 'url', 'name', 'description', 'parent', 'child_tags')
-#         extra_kwargs = {
-#             'url': {'lookup_field': 'pk'},
-#         }
 
 
 class CreatorSerializer(serializers.ModelSerializer):
@@ -272,34 +249,18 @@ class DirectoryNameUniqueValidator(object):
         self.id = serializer_field.initial_data.get('id')
 
 
-# class FilterCriteriaField(serializers.CharField):
-#     """
-#     For serializing the filter criteria to a single string representation.
-#     """
-#
-#     def to_representation(self, obj):
-#         return obj.get_filter_criteria_string()
-
-
 class DirectorySerializer(serializers.ModelSerializer):
     """
     Create and Update functions to override the value of filter_criteria
     """
 
-    # filter_criteria = FilterCriteriaField(max_length=500)
     individual_files = serializers.PrimaryKeyRelatedField(many=True, queryset=Content.objects.all(), read_only=False)
 
     def create(self, validated_data):
-        # filtercriteria_util = FilterCriteriaUtil()
         validated_data_copy = dict(validated_data)
         del validated_data_copy['individual_files']
-        # del validated_data_copy['filter_criteria']
-        # filter_criteria = filtercriteria_util.create_filter_criteria_from_string(
-        #     validated_data.get('filter_criteria'))
         directory = Directory.objects.create(**validated_data_copy)
         directory.individual_files.set(validated_data['individual_files'])
-        # filter_criteria.directory = directory
-        # filter_criteria.save()
         return directory
 
     def update(self, instance, validated_data):
