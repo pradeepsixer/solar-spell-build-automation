@@ -1,6 +1,6 @@
 from django.db.models import Q
 from rest_framework import filters, status
-from rest_framework.mixins import CreateModelMixin, RetrieveModelMixin
+from rest_framework.mixins import CreateModelMixin, ListModelMixin
 from rest_framework.response import Response
 from rest_framework.reverse import reverse
 from rest_framework.viewsets import ModelViewSet, ViewSet
@@ -183,3 +183,21 @@ class DirectoryCloneApiViewSet(ViewSet, CreateModelMixin):
                 filter_criteria_util, cloned_dir_layout,
                 each_original_directory.subdirectories.all(), cloned_directory
             )
+
+
+class AllTagsApiViewSet(ViewSet, ListModelMixin):
+    """
+    Get all kinds of tags in a single API call
+    creator, coverage, subjects, workareas, keywords, language and cataloger
+    """
+    def list(request, *args, **kwarsgs):
+        response_data = {
+            'creators': Creator.objects.all().values(),
+            'coverages': Coverage.objects.all().values(),
+            'subjects': Subject.objects.all().values(),
+            'keywords': Keyword.objects.all().values(),
+            'workareas': Workarea.objects.all().values(),
+            'languages': Language.objects.all().values(),
+            'catalogers': Cataloger.objects.all().values(),
+        }
+        return Response(response_data, status=status.HTTP_200_OK)

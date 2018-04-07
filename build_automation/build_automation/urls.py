@@ -32,6 +32,7 @@ router.register(r'workareas', WorkareaViewSet)
 router.register(r'keywords', KeywordViewSet)
 router.register(r'languages', LanguageViewSet)
 router.register(r'catalogers', CatalogerViewSet)
+router.register(r'alltags', AllTagsApiViewSet, base_name='alltag')
 
 urlpatterns = [
     path('admin/', admin.site.urls),
