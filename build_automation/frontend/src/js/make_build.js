@@ -1,7 +1,7 @@
 import axios from 'axios';
 import React from 'react';
 import { AutoComplete } from 'material-ui';
-import {RadioGroup, Radio} from 'react-radio-group'
+import Radio, { RadioGroup } from 'material-ui/Radio';
 import Grid from 'material-ui/Grid';
 import ListSubheader from 'material-ui/List/ListSubheader';
 import List, { ListItem, ListItemIcon, ListItemText } from 'material-ui/List';
@@ -53,22 +53,7 @@ class MakeBuildComponent extends React.Component{
         axios.get(APP_URLS.DIRLAYOUT_LIST, {
             responseType: 'json'
         }).then(function(response) {
-            const dirLayouts = response.data.map((layout, i) => {
-                return(
-                    <div key={i}>
-                        <RadioGroup name="dirlayouts" selectedValue={currInstance.state.selectedValue}
-                            onChange={event => currInstance.handleClick(layout, event)}>
-                            <Radio value={layout.id} />{layout.name}
-                        </RadioGroup>
-                    </div>
-                    /*<div key={i}>
-                        <li onClick={event => currInstance.handleClick(layout, event)}>
-                            {layout.name}
-                        </li>
-                    </div>*/
-                )
-            }, this);
-
+            const dirLayouts = response.data;
             currInstance.setState({dirLayouts:dirLayouts});
             console.log(currInstance.state.dirLayouts);
 
@@ -87,7 +72,19 @@ class MakeBuildComponent extends React.Component{
                     <List component="nav">
                             <ListSubheader disableSticky component="div">Directory Layouts</ListSubheader>
                                 <div className="container1">
-                                    {this.state.dirLayouts}
+                                    this.state.dirLayouts.forEach(layout => {
+                                            <div>
+                                                <RadioGroup name="dirlayouts" selectedValue={this.state.selectedValue}
+                                                    onChange={event => this.handleClick(layout, event)}>
+                                                    <Radio value={layout.id} />{layout.name}
+                                                </RadioGroup>
+                                            </div>
+                                            /*<div key={i}>
+                                                <li onClick={event => currInstance.handleClick(layout, event)}>
+                                                    {layout.name}
+                                                </li>
+                                            </div>*/
+                                    }, this)
                                 </div>
                     </List>
                 </Grid>
