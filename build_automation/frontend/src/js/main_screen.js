@@ -1,6 +1,8 @@
 import React from 'react';
 
 import DirectoryLayoutComponent from './directory_layout.js';
+import ContentManagement from './content_management.js';
+
 import BuildProcessComponent from './build_process.js';
 import Grid from 'material-ui/Grid';
 import Paper from 'material-ui/Paper';
@@ -58,6 +60,7 @@ class MainScreen extends React.Component {
             <Grid container style={{marginTop: '20px'}}>
                 <Grid item xs={12}>
                     {currentTab == 'dirlayout' && <DirectoryLayoutComponent />}
+                    {currentTab == 'contents' && <ContentManagement />}
                     {currentTab == 'builds' && <BuildProcessComponent />}
                 </Grid>
             </Grid>
