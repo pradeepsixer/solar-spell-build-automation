@@ -22,11 +22,18 @@ import {
 var __tagIdsTagsMap = {};
 
 function ChippedTagsFormatter(input) {
-    const {row, value} = input;
+    const {row, column, value} = input;
     const allChips = [];
-    value.forEach(eachTagId => {
-        allChips.push(<Chip key={row.id + '_' + eachTagId} label={__tagIdsTagsMap[eachTagId]['name']} />);
-    });
+    if (typeof(value)=='number') {
+        allChips.push(<Chip key={row.id + '_' + column['name'] + '_' + value} label={__tagIdsTagsMap[column['name']
+        +'s'][value]['name']} />);
+    }
+    else {
+        value.forEach(eachTagId => {
+            allChips.push(<Chip key={row.id + '_' + column['name'] + '_' + eachTagId}
+                                label={__tagIdsTagsMap[column['name']][eachTagId]['name']}/>);
+        });
+    }
     return allChips;
 }
 
@@ -42,6 +49,7 @@ class FileListComponent extends React.Component {
                 selectedFile: null,
                 AnchorPos: null
             },
+            allFiles: props.allFiles
         };
         console.log(props);
         __tagIdsTagsMap = props.tagIdsTagsMap;
@@ -49,7 +57,7 @@ class FileListComponent extends React.Component {
 
     componentWillReceiveProps(props) {
         __tagIdsTagsMap = props.tagIdsTagsMap;
-        console.log('message!', props);
+        this.setState({allFiles: props.allFiles})
     }
 
     handleFilesRightClick(evt, row, menuName) {
@@ -87,10 +95,16 @@ class FileListComponent extends React.Component {
                     columns={[
                         { name: 'name', title: 'Name' },
                         { name: 'description', title: 'Description' },
-                        { name: 'tag_ids', title: 'Tags' },
+                        { name: 'creators', title: 'Creators' },
+                        { name: 'coverage', title: 'Coverage' },
+                        { name: 'subjects', title: 'Subjects' },
+                        { name: 'keywords', title: 'Keywords' },
+                        { name: 'workareas', title: 'Workareas' },
+                        { name: 'language', title: 'Language' },
+                        { name: 'cataloger', title: 'Cataloger' },
                     ]}
                 >
-                    <ChippedTagsTypeProvider for={['tag_ids']} />
+                    <ChippedTagsTypeProvider for={['creators', 'coverage', 'subjects', 'keywords', 'workareas', 'language', 'cataloger']} />
                     <FilteringState defaultFilters={[]} columnExtensions={[{columnName: 'content_file', filteringEnabled: false}]} />
                     <IntegratedFiltering />
                     <PagingState defaultCurrentPage={0} defaultPageSize={10} />
@@ -100,7 +114,13 @@ class FileListComponent extends React.Component {
                         defaultColumnWidths={[
                             { columnName: 'name', width: 230 },
                             { columnName: 'description', width: 250 },
-                            { columnName: 'tag_ids', width: 420 },
+                            { columnName: 'creators', width: 420 },
+                            { columnName: 'coverage', width: 420 },
+                            { columnName: 'subjects', width: 420 },
+                            { columnName: 'keywords', width: 420 },
+                            { columnName: 'workareas', width: 420 },
+                            { columnName: 'language', width: 80 },
+                            { columnName: 'cataloger', width: 80 },
                         ]} />
                     <TableHeaderRow />
                     <TableFilterRow />

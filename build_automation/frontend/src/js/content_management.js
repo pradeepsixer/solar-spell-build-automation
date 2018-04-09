@@ -3,6 +3,7 @@ import Button from 'material-ui/Button';
 import Grid from 'material-ui/Grid';
 import UploadContent from './upload_content';
 import FileListComponent from './file_list_component';
+import {buildMapFromArray} from './utils';
 import {APP_URLS} from "./url";
 import axios from 'axios';
 
@@ -39,19 +40,19 @@ class ContentManagement extends React.Component{
         this.tagIdTagsMap= {};
     }
     componentDidMount() {
-        // this.loadData()
+        this.loadData()
     }
     buildTagIdTagsMap(tags) {
         // Builds a map of <Tag Id> - Tag
         const tagIdTagMap = {};
-        tags.forEach(eachTag => {
-            tagIdTagMap[eachTag.id] = eachTag;
+        Object.keys(tags).forEach(eachKey => {
+            tagIdTagMap[eachKey] = buildMapFromArray(tags[eachKey], 'id');
         });
         return tagIdTagMap;
     }
     loadData() {
         const currInstance = this;
-        axios.get(APP_URLS.TAG_LIST, {
+        axios.get(APP_URLS.ALLTAGS_LIST, {
             responseType: 'json'
         }).then(function (response) {
             currInstance.tagIdTagsMap=currInstance.buildTagIdTagsMap(response.data);
@@ -89,7 +90,6 @@ class ContentManagement extends React.Component{
         this.setState({currentView: viewName})
     }
     render(){
-        console.log(this.tagIdTagsMap);
         return (
             <div>
                 <Grid container spacing={8} style={{paddingLeft: '20px'}}>
@@ -105,7 +105,7 @@ class ContentManagement extends React.Component{
                     </Grid>
 
                     <Grid item xs={8}>
-                        {this.state.currentView=='manage2'&&<FileListComponent allFiles={this.state.files} />}
+                        {this.state.currentView=='manage'&&<FileListComponent allFiles={this.state.files} tagIdsTagsMap={this.tagIdTagsMap} />}
                         {this.state.currentView=='upload'&&<UploadContent />}
                     </Grid>
                 </Grid>
