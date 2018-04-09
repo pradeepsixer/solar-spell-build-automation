@@ -36,9 +36,11 @@ class ContentManagement extends React.Component{
             files: [],
             currentView: 'manage'
         };
-        this.setCurrentView=this.setCurrentView.bind(this);
-        this.tagIdTagsMap= {};
+        this.setCurrentView = this.setCurrentView.bind(this);
+        this.tagIdTagsMap = {};
+        this.handleFileDelete = this.handleFileDelete.bind(this);
     }
+
     componentDidMount() {
         this.loadData()
     }
@@ -89,6 +91,17 @@ class ContentManagement extends React.Component{
     setCurrentView(viewName){
         this.setState({currentView: viewName})
     }
+    handleFileDelete(file){
+        this.setState((prevState, props)=>{
+            const {files} = prevState;
+            files.forEach(eachFile => {
+                if (eachFile.id===file.id){
+                    files.splice(files.indexOf(eachFile), 1)
+                }
+            });
+            return {files};
+        })
+    }
     render(){
         return (
             <div>
@@ -105,7 +118,7 @@ class ContentManagement extends React.Component{
                     </Grid>
 
                     <Grid item xs={8}>
-                        {this.state.currentView=='manage'&&<FileListComponent allFiles={this.state.files} tagIdsTagsMap={this.tagIdTagsMap} />}
+                        {this.state.currentView=='manage'&&<FileListComponent onDelete={this.handleFileDelete} allFiles={this.state.files} tagIdsTagsMap={this.tagIdTagsMap} />}
                         {this.state.currentView=='upload'&&<UploadContent />}
                     </Grid>
                 </Grid>

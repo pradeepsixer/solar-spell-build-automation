@@ -2,6 +2,8 @@ import React from 'react';
 import Typography from 'material-ui/Typography';
 import Chip from 'material-ui/Chip';
 import Menu, { MenuItem } from 'material-ui/Menu';
+import axios from 'axios';
+import { APP_URLS, get_url } from './url.js';
 
 import {
     DataTypeProvider,
@@ -53,6 +55,7 @@ class FileListComponent extends React.Component {
         };
         console.log(props);
         __tagIdsTagsMap = props.tagIdsTagsMap;
+        this.deleteCallback = props.onDelete;
     }
 
     componentWillReceiveProps(props) {
@@ -84,7 +87,20 @@ class FileListComponent extends React.Component {
         return(<tr onContextMenu={evt => this.handleFilesRightClick(evt, row, menuName)}>{children}</tr>);
     }
 
-    render() {
+    deleteFile(file) {
+        const targetUrl = get_url(APP_URLS.CONTENT_DETAIL, {id: file.id});
+        const currentInstance = this;
+        axios.delete(targetUrl).then(function (response) {
+            if (currentInstance.deleteCallback){
+                currentInstance.deleteCallback(file);
+            }
+        }).catch(function (error) {
+            console.error("Error in deleting the file ", error);
+        });
+    }
+
+
+        render() {
         return (
             <React.Fragment>
                 <Typography gutterBottom variant="headline" component="h2">
@@ -135,19 +151,27 @@ class FileListComponent extends React.Component {
                 >
                     <MenuItem
                         onClick={evt => {
-                            this.addFileToSelection(this.state.allFilesMenu.selectedFile);
                             this.handleMenuClose(evt, 'allFilesMenu');
+                            this.addFileToSelection(this.state.allFilesMenu.selectedFile);
                         }}
                     >
                         Edit this file
                     </MenuItem>
                     <MenuItem
                         onClick={evt => {
-                            window.open(this.state.allFilesMenu.selectedFile.content_file, '_blank');
                             this.handleMenuClose(evt, 'allFilesMenu');
+                            window.open(this.state.allFilesMenu.selectedFile.content_file, '_blank');
                         }}
                     >
                         View this file
+                    </MenuItem>
+                    <MenuItem
+                        onClick={evt => {
+                            this.handleMenuClose(evt, 'allFilesMenu');
+                            this.deleteFile(this.state.allFilesMenu.selectedFile);
+                        }}
+                    >
+                        Delete this file
                     </MenuItem>
                 </Menu>
             </React.Fragment>
