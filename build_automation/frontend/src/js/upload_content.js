@@ -5,10 +5,11 @@ import AppBar from 'material-ui/AppBar';
 import Typography from 'material-ui/Typography';
 import AutoCompleteWithChips from './autocomplete.js';
 import TextField from 'material-ui/TextField';
-import { DateTimePicker } from 'material-ui-pickers';
+import { DatePicker } from 'material-ui-pickers';
 import {APP_URLS} from "./url";
 import DateFnsUtils from 'material-ui-pickers/utils/date-fns-utils';
 import MuiPickersUtilsProvider from 'material-ui-pickers/utils/MuiPickersUtilsProvider';
+import {ChevronLeft, ChevronRight} from 'material-ui-icons';
 import axios from 'axios';
 
 const styles = theme => ({
@@ -33,20 +34,36 @@ class UploadContent extends React.Component{
     constructor(props) {
         super(props);
         this.state = {
-            creators: [],
-            coverage: [],
-            subjects: [],
-            keywords: [],
-            workareas: [],
-            language: [],
-            cataloger: [],
             name: "",
             description: "",
+            selectedCreators: [],
+            selectedCoverage: [],
+            selectedSubjects: [],
+            selectedKeywords: [],
+            selectedWorkareas: [],
+            selectedLanguage: [],
+            selectedCataloger: [],
             fieldErrors: {},
             updatedTime: '',
             selectedDate: new Date()
         };
         this.handleDateChange=this.handleDateChange.bind(this);
+        this.handleTagAddition=this.handleTagAddition.bind(this);
+        this.handleCreatorAddition=this.handleCreatorAddition.bind(this);
+        this.handleCoverageAddition=this.handleCoverageAddition.bind(this);
+        this.handleSubjectAddition=this.handleSubjectAddition.bind(this);
+        this.handleKeywordAddition=this.handleKeywordAddition.bind(this);
+        this.handleWorkareaAddition=this.handleWorkareaAddition.bind(this);
+        this.handleLanguageAddition=this.handleLanguageAddition.bind(this);
+        this.handleCatalogerAddition=this.handleCatalogerAddition.bind(this);
+        this.handleTagDeletion=this.handleTagDeletion.bind(this);
+        this.handleCreatorDeletion=this.handleCreatorDeletion.bind(this);
+        this.handleCoverageDeletion=this.handleCoverageDeletion.bind(this);
+        this.handleSubjectDeletion=this.handleSubjectDeletion.bind(this);
+        this.handleKeywordDeletion=this.handleKeywordDeletion.bind(this);
+        this.handleWorkareaDeletion=this.handleWorkareaDeletion.bind(this);
+        this.handleLanguageDeletion=this.handleLanguageDeletion.bind(this);
+        this.handleCatalogerDeletion=this.handleCatalogerDeletion.bind(this);
     }
     componentDidMount() {
         // this.loadData()
@@ -78,6 +95,72 @@ class UploadContent extends React.Component{
     handleDateChange(date){
         this.setState({ selectedDate: date });
     };
+    handleTagAddition(tag, tagType){
+        console.log('Oh No!!!!!');
+        this.setState((prevState, props) => {
+            const tagKey = 'selected' + tagType;
+            const selectedTags = prevState[tagKey];
+            const fieldErrors = prevState.fieldErrors;
+            selectedTags.push(tag.name);
+            fieldErrors[tagType] = null;
+            const value = {[tagKey]: selectedTags, fieldErrors};
+            console.log('Here\'s the value of \'value!', value);
+            return value;
+        })
+    }
+    handleTagDeletion(tag, tagType){
+        console.log('Oh No!!!!!');
+        this.setState((prevState, props) => {
+            const tagKey = 'selected' + tagType;
+            const selectedTags = prevState[tagKey];
+            selectedTags.splice(tag.name, 1);
+            const value = {[tagKey]: selectedTags};
+            console.log('Here\'s the value of \'value!', value);
+            return value;
+        })
+    }
+    handleCreatorAddition(creator){
+        this.handleTagAddition(creator, 'Creators')
+    }
+    handleCoverageAddition(coverage){
+        this.handleTagAddition(coverage, 'Coverage')
+    }
+    handleSubjectAddition(subject){
+        this.handleTagAddition(subject, 'Subjects')
+    }
+    handleKeywordAddition(keyword){
+        this.handleTagAddition(keyword, 'Keywords')
+    }
+    handleWorkareaAddition(workarea){
+        this.handleTagAddition(workarea, 'Workareas')
+    }
+    handleLanguageAddition(language){
+        this.handleTagAddition(language, 'Language')
+    }
+    handleCatalogerAddition(cataloger){
+        this.handleTagAddition(cataloger, 'Cataloger')
+    }
+    handleCreatorDeletion(creator){
+        this.handleTagDeletion(creator, 'Creators')
+    }
+    handleCoverageDeletion(coverage){
+        this.handleTagDeletion(coverage, 'Coverage')
+    }
+    handleSubjectDeletion(subject){
+        this.handleTagDeletion(subject, 'Subjects')
+    }
+    handleKeywordDeletion(keyword){
+        this.handleTagDeletion(keyword, 'Keywords')
+    }
+    handleWorkareaDeletion(workarea){
+        this.handleTagDeletion(workarea, 'Workareas')
+    }
+    handleLanguageDeletion(language){
+        this.handleTagDeletion(language, 'Language')
+    }
+    handleCatalogerDeletion(cataloger){
+        this.handleTagDeletion(cataloger, 'Cataloger')
+    }
 
     render(){
         return (
@@ -112,11 +195,13 @@ class UploadContent extends React.Component{
                 />
                 <div style={{marginTop: '20px'}}> </div>
                 <MuiPickersUtilsProvider utils={DateFnsUtils}>
-                    <DateTimePicker
-                        id="updated_time"
+                    <DatePicker
+                        id="updated_date"
                         label="Last Updated:"
                         value={this.state.selectedDate}
                         onChange={this.handleDateChange}
+                        leftArrowIcon={<ChevronLeft/>}
+                        rightArrowIcon={<ChevronRight/>}
                     />
                 </MuiPickersUtilsProvider>
                 <div style={{marginTop: '20px'}}> </div>
@@ -124,49 +209,63 @@ class UploadContent extends React.Component{
                     Creator(s)
                 </Typography>
                 <span>
-                            <AutoCompleteWithChips suggestions={this.state.creators} searchKey={'name'} selectedItem={[]} onChange={evt => console.log(evt)}/>
+                            <AutoCompleteWithChips suggestions={this.props.allTags['creators']}
+                                                   searchKey={'name'} selectedItem={this.state.selectedCreators}
+                                                   onAddition={this.handleCreatorAddition} onDeletion={this.handleCreatorDeletion}/>
                         </span>
                 <div style={{marginTop: '20px'}}> </div>
                 <Typography gutterBottom variant="subheading">
                     Coverage
                 </Typography>
                 <span>
-                            <AutoCompleteWithChips suggestions={this.state.coverage} searchKey={'name'} selectedItem={[]} onChange={evt => console.log(evt)}/>
+                            <AutoCompleteWithChips suggestions={this.props.allTags['coverages']}
+                                                   searchKey={'name'} selectedItem={this.state.selectedCoverage}
+                                                   onAddition={this.handleCoverageAddition} onDeletion={this.handleCoverageDeletion}/>
                         </span>
                 <div style={{marginTop: '20px'}}> </div>
                 <Typography gutterBottom variant="subheading">
                     Subject(s)
                 </Typography>
                 <span>
-                            <AutoCompleteWithChips suggestions={this.state.subjects} searchKey={'name'} selectedItem={[]} onChange={evt => console.log(evt)}/>
+                            <AutoCompleteWithChips suggestions={this.props.allTags['subjects']}
+                                                   searchKey={'name'} selectedItem={this.state.selectedSubjects}
+                                                   onAddition={this.handleSubjectAddition} onDeletion={this.handleSubjectDeletion}/>
                         </span>
                 <div style={{marginTop: '20px'}}> </div>
                 <Typography gutterBottom variant="subheading">
                     Keywords
                 </Typography>
                 <span>
-                            <AutoCompleteWithChips suggestions={this.state.keywords} searchKey={'name'} selectedItem={[]} onChange={evt => console.log(evt)}/>
+                            <AutoCompleteWithChips suggestions={this.props.allTags['keywords']}
+                                                   searchKey={'name'} selectedItem={this.state.selectedKeywords}
+                                                   onAddition={this.handleKeywordAddition} onDeletion={this.handleKeywordDeletion}/>
                         </span>
                 <div style={{marginTop: '20px'}}> </div>
                 <Typography gutterBottom variant="subheading">
                     Work Area(s)
                 </Typography>
                 <span>
-                            <AutoCompleteWithChips suggestions={this.state.workareas} searchKey={'name'} selectedItem={[]} onChange={evt => console.log(evt)}/>
+                            <AutoCompleteWithChips suggestions={this.props.allTags['workareas']}
+                                                   searchKey={'name'} selectedItem={this.state.selectedWorkareas}
+                                                   onAddition={this.handleWorkareaAddition} onDeletion={this.handleWorkareaDeletion}/>
                         </span>
                 <div style={{marginTop: '20px'}}> </div>
                 <Typography gutterBottom variant="subheading">
                     Language
                 </Typography>
                 <span>
-                            <AutoCompleteWithChips suggestions={this.state.language} searchKey={'name'} selectedItem={[]} onChange={evt => console.log(evt)}/>
+                            <AutoCompleteWithChips suggestions={this.props.allTags['languages']}
+                                                   searchKey={'name'} selectedItem={this.state.selectedLanguage}
+                                                   onAddition={this.handleLanguageAddition} onDeletion={this.handleLanguageDeletion}/>
                         </span>
                 <div style={{marginTop: '20px'}}> </div>
                 <Typography gutterBottom variant="subheading">
                     Cataloger
                 </Typography>
                 <span>
-                            <AutoCompleteWithChips suggestions={this.state.cataloger} searchKey={'name'} selectedItem={[]} onChange={evt => console.log(evt)}/>
+                            <AutoCompleteWithChips suggestions={this.props.allTags['catalogers']} searchKey={'name'}
+                                                   selectedItem={this.state.selectedCataloger}
+                                                   onAddition={this.handleCatalogerAddition} onDeletion={this.handleCatalogerDeletion}/>
                         </span>
                 <div style={{marginTop: '20px'}}> </div>
                 <input

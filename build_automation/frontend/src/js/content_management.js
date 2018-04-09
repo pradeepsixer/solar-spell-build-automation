@@ -119,7 +119,7 @@ class ContentManagement extends React.Component{
 
                     <Grid item xs={8}>
                         {this.state.currentView=='manage'&&<FileListComponent onDelete={this.handleFileDelete} allFiles={this.state.files} tagIdsTagsMap={this.tagIdTagsMap} />}
-                        {this.state.currentView=='upload'&&<UploadContent />}
+                        {this.state.currentView=='upload'&&<UploadContent tagIdsTagsMap={this.tagIdTagsMap} allTags={this.state.tags} />}
                     </Grid>
                 </Grid>
 
