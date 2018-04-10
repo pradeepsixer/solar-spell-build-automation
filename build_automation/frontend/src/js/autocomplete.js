@@ -94,21 +94,22 @@ class AutoCompleteWithChips extends React.Component {
     };
 
     handleChange(item) {
-        if (this.props.onAddition) {
-            var selectedSuggestion = null;
-            for (var i=0; i<this.props.suggestions.length; i++) {
-                if(this.props.suggestions[i][this.props.searchKey] == item) {
-                    selectedSuggestion = this.props.suggestions[i];
-                }
-            }
-            this.props.onAddition(selectedSuggestion);
-        } else {
-            let { selectedItem } = this.state;
+        let { selectedItem } = this.state;
 
-            if (selectedItem.indexOf(item) === -1) {
+        if (selectedItem.indexOf(item) === -1) {
+            if (this.props.onAddition) {
+                var selectedSuggestion = null;
+                for (var i=0; i<this.props.suggestions.length; i++) {
+                    if(this.props.suggestions[i][this.props.searchKey] == item) {
+                        selectedSuggestion = this.props.suggestions[i];
+                        break;
+                    }
+                }
+                this.props.onAddition(selectedSuggestion);
+            } else {
                 selectedItem = [...selectedItem, item];
+                this.setState({inputValue: '', selectedItem});
             }
-            this.setState({inputValue: '', selectedItem});
         }
     };
 
