@@ -5,6 +5,7 @@ import Button from 'material-ui/Button';
 class MakeBuildDirlayoutInfo extends React.Component{
     constructor(props){
         super(props);
+        console.log(props)
         this.state = {
             id: props.info.id,
             name: props.info.name,

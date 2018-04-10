@@ -5,6 +5,7 @@ import Radio, { RadioGroup } from 'material-ui/Radio';
 import Grid from 'material-ui/Grid';
 import ListSubheader from 'material-ui/List/ListSubheader';
 import List, { ListItem, ListItemIcon, ListItemText } from 'material-ui/List';
+import { FormLabel, FormControl, FormControlLabel, FormHelperText } from 'material-ui/Form';
 
 import { APP_URLS } from './url.js';
 import MakeBuildDirlayoutInfo from './make_build_dirlayout.js';
@@ -33,9 +34,9 @@ class MakeBuildComponent extends React.Component{
         clearTimeout(this.timerID);
     }
 
-    handleClick(layout, event){
-      //  console.log("clicked")
-     //   console.log(layout)
+    handleClick(event){
+        console.log("clicked")
+        console.log(event.target.value)
         this.setState({info:layout});
        // console.log(this.state.info);
     }
@@ -72,19 +73,17 @@ class MakeBuildComponent extends React.Component{
                     <List component="nav">
                             <ListSubheader disableSticky component="div">Directory Layouts</ListSubheader>
                                 <div className="container1">
-                                    this.state.dirLayouts.forEach(layout => {
-                                            <div>
-                                                <RadioGroup name="dirlayouts" selectedValue={this.state.selectedValue}
-                                                    onChange={event => this.handleClick(layout, event)}>
-                                                    <Radio value={layout.id} />{layout.name}
-                                                </RadioGroup>
-                                            </div>
-                                            /*<div key={i}>
-                                                <li onClick={event => currInstance.handleClick(layout, event)}>
-                                                    {layout.name}
-                                                </li>
-                                            </div>*/
-                                    }, this)
+                                    {  this.state.dirLayouts.map((layout,i) =>
+                                        <div key={i}>
+                                             <RadioGroup ref="dirlayouts" name="dirlayouts" value={this.state.value} onChange={event => this.handleClick(layout, event)}>
+                                                    <FormControlLabel value={layout.name} control={<Radio />} label={layout.name} />
+                                             </RadioGroup>
+                                        </div>)
+                                    }
+
+
+
+
                                 </div>
                     </List>
                 </Grid>
