@@ -139,6 +139,13 @@ class DirectoryCloneApiViewSet(ViewSet, CreateModelMixin):
             cloned_directory.parent = parent_cloned_directory
             cloned_directory.save()
             cloned_directory.individual_files.set(list(each_original_directory.individual_files.all()))
+            cloned_directory.creators.set(list(each_original_directory.creators.all()))
+            cloned_directory.coverages.set(list(each_original_directory.coverages.all()))
+            cloned_directory.subjects.set(list(each_original_directory.subjects.all()))
+            cloned_directory.keywords.set(list(each_original_directory.keywords.all()))
+            cloned_directory.workareas.set(list(each_original_directory.workareas.all()))
+            cloned_directory.languages.set(list(each_original_directory.languages.all()))
+            cloned_directory.catalogers.set(list(each_original_directory.catalogers.all()))
             cloned_directory.save()
             self.__clone_directory_tree(
                 filter_criteria_util, cloned_dir_layout,
