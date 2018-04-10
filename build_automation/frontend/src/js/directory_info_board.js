@@ -15,7 +15,7 @@ import SortableTree from 'react-sortable-tree';
 import AutoCompleteWithChips from './autocomplete.js';
 import FileSelectionComponent from './directory_file_selection.js'
 import { APP_URLS, get_url } from './url.js';
-import { convert_tags_to_filter_criteria_string, parse_filter_criteria_string } from './utils.js';
+import { buildMapFromArray } from './utils.js';
 
 import 'react-sortable-tree/style.css';
 
@@ -23,27 +23,20 @@ class DirectoryInfoBoard extends React.Component {
     constructor(props) {
         super(props);
         console.log('DirInfoBoard props ', props);
-        const tagIdsTagsMap = this.buildTagIdTagsMap(props.tags);
-        const filterCriteriaInfo  = this.getFilterCriteriaInfoFromString(props.boardData.filterCriteria, tagIdsTagsMap);
         this.state = {
             id: props.boardData.id,
             dirLayoutId: props.boardData.dirLayoutId,
             name: props.boardData.name,
-            filterCriteria: props.boardData.filterCriteria,
             parent: props.boardData.parent,
             tagTreeData: props.tagTreeData,
-            tags: props.tags,
-            tagIdsTagsMap: tagIdsTagsMap,
-            allFiles: props.allFiles,
-            fileIdFileMap: props.fileIdFileMap,
             selectedFiles: props.boardData.individualFiles,
-            selectedOperator: filterCriteriaInfo.operator,
-            selectedTags: filterCriteriaInfo.selectedItems,
             confirmDelete: false,
             fieldErrors: {}
         };
 
-        console.log(this.state);
+        this.allFiles = props.allFiles;
+        this.fileIdFileMap = props.fileIdFileMap;
+        this.tagIdsTagsMap = this.buildTagIdTagsMap(props.tags);
         this.saveDirectory = this.saveDirectory.bind(this);
         this.deleteDirectory = this.deleteDirectory.bind(this);
         this.saveCallback = this.props.onSave.bind(this);
@@ -58,11 +51,11 @@ class DirectoryInfoBoard extends React.Component {
     }
 
     buildTagIdTagsMap(tags) {
-        // Builds a map of <Tag Id> - Tag
+        // Builds a map of <Tag Id> - Tag map for each tag type.
         const tagIdTagMap = {};
-        tags.forEach(eachTag => {
-            tagIdTagMap[eachTag.id] = eachTag;
-        })
+        Object.keys(tags).forEach(eachTagType => {
+            tagIdTagMap[eachTagType] = buildMapFromArray(tags[eachTagType], 'id');
+        });
         return tagIdTagMap;
     }
 
@@ -93,25 +86,19 @@ class DirectoryInfoBoard extends React.Component {
 
     componentWillReceiveProps(props) {
         console.log('DirInfoBoard props ', props);
-        const tagIdsTagsMap = this.buildTagIdTagsMap(props.tags);
-        const filterCriteriaInfo  = this.getFilterCriteriaInfoFromString(props.boardData.filterCriteria, tagIdsTagsMap);
         this.setState({
             id: props.boardData.id,
             dirLayoutId: props.boardData.dirLayoutId,
             name: props.boardData.name,
-            filterCriteria: props.boardData.filterCriteria,
             parent: props.boardData.parent,
             tagTreeData: props.tagTreeData,
-            tags: props.tags,
-            tagIdsTagsMap: tagIdsTagsMap,
-            allFiles: props.allFiles,
-            fileIdFileMap: props.fileIdFileMap,
             selectedFiles: props.boardData.individualFiles,
-            selectedOperator: filterCriteriaInfo.operator,
-            selectedTags: filterCriteriaInfo.selectedItems,
             confirmDelete: false,
             fieldErrors: {}
         });
+        this.allFiles = props.allFiles;
+        this.tagIdsTagsMap = this.buildTagIdTagsMap(props.tags);
+        this.fileIdFileMap = props.fileIdFileMap;
     }
 
     saveDirectory(evt) {
@@ -281,33 +268,144 @@ class DirectoryInfoBoard extends React.Component {
                     />
                     <p></p>
                     <Typography gutterBottom variant="headline" component="h2">
-                        Tags
+                        Filter by Metadata
                     </Typography>
                     <Typography>
-                        Choose content which matches
+                        Filter contents to go into the folder / sub-folder by the metadata.
                     </Typography>
-                    <Grid container spacing={24}>
-                        <Grid item xs={2}>
+                    <Grid container spacing={24} style={{marginTop: '15px'}}>
+                        <Grid item xs={3}>
                             <Select
-                                value={this.state.selectedOperator}
-                                onChange={this.handleOperatorChange}
+                                value={'AND'}
                                 displayEmpty
-                                name="tag-option"
+                                name="creators-operator"
                             >
-                                <MenuItem value="AND">All of the tags</MenuItem>
-                                <MenuItem value="OR">Any of the tags</MenuItem>
+                                <MenuItem value="AND">All of the Creators</MenuItem>
+                                <MenuItem value="OR">Any of the Creators</MenuItem>
                             </Select>
                         </Grid>
-                        <Grid item xs={10}>
-                            <AutoCompleteWithChips suggestions={this.state.tags} searchKey={'name'}
-                                selectedItem={this.state.selectedTags} onAddition={this.handleChipAddition}
-                                onDeletion={this.handleChipDeletion} required={true}
+                        <Grid item xs={8}>
+                            <AutoCompleteWithChips suggestions={this.props.tags['creators']} searchKey={'name'}
+                                selectedItem={[]} onAddition={null} onDeletion={null} required={true}
                                 errorMsg={this.state.fieldErrors.selectedTags} />
                         </Grid>
                     </Grid>
-                    <div style={{marginTop: '20px'}}></div>
-                    <FileSelectionComponent allFiles={this.state.allFiles} tagIdsTagsMap={this.state.tagIdsTagsMap}
-                        selectedFiles={this.state.selectedFiles} fileIdFileMap={this.state.fileIdFileMap}
+                    <Grid container spacing={24}>
+                        <Grid item xs={3}>
+                            <Select
+                                value={'AND'}
+                                displayEmpty
+                                name="coverage-operator"
+                            >
+                                <MenuItem value="AND">All of the Coverages</MenuItem>
+                                <MenuItem value="OR">Any of the Coverages</MenuItem>
+                            </Select>
+                        </Grid>
+                        <Grid item xs={8}>
+                            <AutoCompleteWithChips suggestions={this.props.tags['coverages']} searchKey={'name'}
+                                selectedItem={[]} onAddition={null} onDeletion={null} required={true}
+                                errorMsg={this.state.fieldErrors.selectedTags} />
+                        </Grid>
+                    </Grid>
+                    <Grid container spacing={24}>
+                        <Grid item xs={3}>
+                            <Select
+                                value={'AND'}
+                                displayEmpty
+                                name="subjects-operator"
+                            >
+                                <MenuItem value="AND">All of the Subjects</MenuItem>
+                                <MenuItem value="OR">Any of the Subjects</MenuItem>
+                            </Select>
+                        </Grid>
+                        <Grid item xs={8}>
+                            <AutoCompleteWithChips suggestions={this.props.tags['subjects']} searchKey={'name'}
+                                selectedItem={[]} onAddition={null} onDeletion={null} required={true}
+                                errorMsg={this.state.fieldErrors.selectedTags} />
+                        </Grid>
+                    </Grid>
+                    <Grid container spacing={24}>
+                        <Grid item xs={3}>
+                            <Select
+                                value={'AND'}
+                                displayEmpty
+                                name="keywords-operator"
+                            >
+                                <MenuItem value="AND">All of the Keywords</MenuItem>
+                                <MenuItem value="OR">Any of the Keywords</MenuItem>
+                            </Select>
+                        </Grid>
+                        <Grid item xs={8}>
+                            <AutoCompleteWithChips suggestions={this.props.tags['keywords']} searchKey={'name'}
+                                selectedItem={[]} onAddition={null} onDeletion={null} required={true}
+                                errorMsg={this.state.fieldErrors.selectedTags} />
+                        </Grid>
+                    </Grid>
+                    <Grid container spacing={24}>
+                        <Grid item xs={3}>
+                            <Select
+                                value={'AND'}
+                                displayEmpty
+                                name="workarea-operator"
+                            >
+                                <MenuItem value="AND">All of the Work Areas</MenuItem>
+                                <MenuItem value="OR">Any of the Work Areas</MenuItem>
+                            </Select>
+                        </Grid>
+                        <Grid item xs={8}>
+                            <AutoCompleteWithChips suggestions={this.props.tags['workareas']} searchKey={'name'}
+                                selectedItem={[]} onAddition={null} onDeletion={null} required={true}
+                                errorMsg={this.state.fieldErrors.selectedTags} />
+                        </Grid>
+                    </Grid>
+                    <Grid container spacing={24}>
+                        <Grid item xs={3}>
+                            <Select
+                                value={'AND'}
+                                displayEmpty
+                                name="lang-operator"
+                            >
+                                <MenuItem value="AND">All of the Languages</MenuItem>
+                                <MenuItem value="OR">Any of the Languages</MenuItem>
+                            </Select>
+                        </Grid>
+                        <Grid item xs={8}>
+                            <AutoCompleteWithChips suggestions={this.props.tags['languages']} searchKey={'name'}
+                                selectedItem={[]} onAddition={null} onDeletion={null} required={true}
+                                errorMsg={this.state.fieldErrors.selectedTags} />
+                        </Grid>
+                    </Grid>
+                    <Grid container spacing={24}>
+                        <Grid item xs={3}>
+                            <Select
+                                value={'AND'}
+                                displayEmpty
+                                name="cataloger-operator"
+                            >
+                                <MenuItem value="AND">All of the Catalogers</MenuItem>
+                                <MenuItem value="OR">Any of the Catalogers</MenuItem>
+                            </Select>
+                        </Grid>
+                        <Grid item xs={8}>
+                            <AutoCompleteWithChips suggestions={this.props.tags['catalogers']} searchKey={'name'}
+                                selectedItem={[]} onAddition={null} onDeletion={null} required={true}
+                                errorMsg={this.state.fieldErrors.selectedTags} />
+                        </Grid>
+                    </Grid>
+                    {
+                        /*
+                    <Typography gutterBottom variant="subheading" style={{marginTop: '10px'}}>
+                        Work Areas
+                    </Typography>
+                    <Typography>
+                        Choose content matching the following Work Areas:
+                    </Typography>
+                        */
+                    }
+
+                    <div style={{marginTop: '40px'}}></div>
+                    <FileSelectionComponent allFiles={this.allFiles} tagIdsTagsMap={this.tagIdsTagsMap}
+                        selectedFiles={this.state.selectedFiles} fileIdFileMap={this.fileIdFileMap}
                         onFileSelect={this.fileSelectionCallback} onFileDeselect={this.fileDeselectionCallback}
                     />
                 </Grid>

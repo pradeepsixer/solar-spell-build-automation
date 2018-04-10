@@ -244,12 +244,11 @@ class DirectoryLayoutComponent extends React.Component {
 
     loadData() {
         const currInstance = this;
-        axios.get(APP_URLS.TAG_LIST, {
+        axios.get(APP_URLS.ALLTAGS_LIST, {
             responseType: 'json'
         }).then(function(response) {
-            const tagTreeData = currInstance.transformTagsToTreeData(response.data);
+            // const tagTreeData = currInstance.transformTagsToTreeData(response.data);
             currInstance.setState({
-                tagTreeData: tagTreeData,
                 tags: response.data
             })
         }).catch(function(error) {
@@ -401,7 +400,7 @@ class DirectoryLayoutComponent extends React.Component {
                 </ListItem>);
                 accordionItems.push(<Collapse key={'collapse-' + eachDirLayout.id} in={eachDirLayout.isOpen} timeout="auto" unmountOnExit>
                 <Button variant="raised" color="primary" onClick={evt => {this.createDirectory(eachDirLayout.id, null); }}>
-                        New Directory
+                        New Folder
                 </Button>
                 {
                     this.state.treeData[eachDirLayout.id].length > 0 &&
@@ -427,10 +426,10 @@ class DirectoryLayoutComponent extends React.Component {
                 <Grid container spacing={8}>
                     <Grid item xs={3} style={{paddingLeft: '20px'}}>
                         <Button variant="raised" color="primary" onClick={this.createDirectoryLayout}>
-                            New Directory Layout
+                            New Library Version
                         </Button>
                         <List component="nav">
-                            <ListSubheader disableSticky component="div">Directory Layouts</ListSubheader>
+                            <ListSubheader disableSticky component="div">Library Versions</ListSubheader>
                             {
                                 accordionItems
                             }
@@ -470,7 +469,7 @@ class DirectoryLayoutComponent extends React.Component {
                                 this.handleMenuClose(evt);
                             }}
                         >
-                            Create Directory
+                            Create SubFolder
                         </MenuItem>
                     </Menu>
                 </Grid>
