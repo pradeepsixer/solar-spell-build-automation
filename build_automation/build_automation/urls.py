@@ -13,7 +13,6 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
-from django.contrib import admin
 from django.urls import include, path
 from rest_framework import routers
 
@@ -38,7 +37,6 @@ router.register(r'catalogers', CatalogerViewSet)
 router.register(r'alltags', AllTagsApiViewSet, base_name='alltag')
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
     path('api/', include(router.urls)),
     path('content_management/', include('content_management.urls')),
     path('accounts/', include('django.contrib.auth.urls')),
