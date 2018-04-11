@@ -18,16 +18,24 @@ from django.urls import include, path
 from rest_framework import routers
 
 from content_management.api_views import (
-    ContentApiViewset, DirectoryCloneApiViewset, DirectoryLayoutViewSet, DirectoryViewSet, DiskSpaceViewSet,
-    TagViewSet
+    AllTagsApiViewSet, CatalogerViewSet, ContentApiViewset, CoverageViewSet, CreatorViewSet, DirectoryCloneApiViewSet,
+    DirectoryLayoutViewSet, DirectoryViewSet, DiskSpaceViewSet, KeywordViewSet, LanguageViewSet, SubjectViewSet, WorkareaViewSet
 )
 
 router = routers.SimpleRouter()
 router.register(r'contents', ContentApiViewset)
-router.register(r'tags', TagViewSet, base_name='tag')
+# router.register(r'tags', TagViewSet, base_name='tag')
 router.register(r'directories', DirectoryViewSet)
 router.register(r'dirlayouts', DirectoryLayoutViewSet)
-router.register(r'dirlayouts/(?P<id>\d+)/clone', DirectoryCloneApiViewset, base_name='dirlayout')
+router.register(r'dirlayouts/(?P<id>\d+)/clone', DirectoryCloneApiViewSet, base_name='dirlayout')
+router.register(r'creators', CreatorViewSet)
+router.register(r'coverages', CoverageViewSet)
+router.register(r'subjects', SubjectViewSet)
+router.register(r'workareas', WorkareaViewSet)
+router.register(r'keywords', KeywordViewSet)
+router.register(r'languages', LanguageViewSet)
+router.register(r'catalogers', CatalogerViewSet)
+router.register(r'alltags', AllTagsApiViewSet, base_name='alltag')
 router.register(r'diskspace', DiskSpaceViewSet, base_name='diskspace')
 
 urlpatterns = [
