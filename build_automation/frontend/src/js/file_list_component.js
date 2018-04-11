@@ -100,7 +100,7 @@ class FileListComponent extends React.Component {
     }
 
 
-        render() {
+    render() {
         return (
             <React.Fragment>
                 <Typography gutterBottom variant="headline" component="h2">

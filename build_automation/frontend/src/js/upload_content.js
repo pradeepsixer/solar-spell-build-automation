@@ -45,7 +45,10 @@ class UploadContent extends React.Component{
             selectedCataloger: [],
             fieldErrors: {},
             updatedTime: '',
-            selectedDate: new Date()
+            selectedDate: new Date(),
+            source: "",
+            copyright: "",
+            rightsStatement: "",
         };
         this.handleDateChange=this.handleDateChange.bind(this);
         this.handleTagAddition=this.handleTagAddition.bind(this);
@@ -267,6 +270,36 @@ class UploadContent extends React.Component{
                                                    selectedItem={this.state.selectedCataloger}
                                                    onAddition={this.handleCatalogerAddition} onDeletion={this.handleCatalogerDeletion}/>
                         </span>
+                <TextField
+                    id="source"
+                    label="Source"
+                    value={this.state.source}
+                    required={true}
+                    error={this.state.fieldErrors.source ? true : false}
+                    onChange={evt => this.handleTextFieldUpdate('source', evt)}
+                    fullWidth
+                    margin="normal"
+                />
+                <TextField
+                    id="copyright"
+                    label="Copyright"
+                    value={this.state.copyright}
+                    required={true}
+                    error={this.state.fieldErrors.copyright ? true : false}
+                    onChange={evt => this.handleTextFieldUpdate('copyright', evt)}
+                    fullWidth
+                    margin="normal"
+                />
+                <TextField
+                    id="rightsStatement"
+                    label="Rights Statement"
+                    value={this.state.rightsStatement}
+                    required={true}
+                    error={this.state.fieldErrors.rightsStatement ? true : false}
+                    onChange={evt => this.handleTextFieldUpdate('rightsStatement', evt)}
+                    fullWidth
+                    margin="normal"
+                />
                 <div style={{marginTop: '20px'}}> </div>
                 <input
                     accept="*"
