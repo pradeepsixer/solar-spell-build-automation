@@ -29,16 +29,13 @@ class TagManagementComponent extends React.Component {
         super(props);
         this.state={
             currentView: 'manage',
-            currentpanelState: 'creators',
+            currentpanelState: 'Coverages',
             expanded: null,
-            creatorColumns: [
-                { name: 'name', title: 'Name' },
-                { name: 'description', title: 'Description' },
-              ],
-              creatorRows: [],
+            listUrl: null,
+            detailUrl: null,
               coverageColumns: [
                 { name: 'name', title: 'Name' },
-                { name: 'description', title: 'Description' },
+                { name: 'description', title: 'Description' }
               ],
               coverageRows: [],
               subjectColumns: [
@@ -56,11 +53,6 @@ class TagManagementComponent extends React.Component {
                 { name: 'description', title: 'Description' },
               ],
               languageRows: [],
-              keywordColumns: [
-                { name: 'name', title: 'Name' },
-                { name: 'description', title: 'Description' },
-              ],
-              keywordRows: [],
               catalogerColumns: [
                 { name: 'name', title: 'Name' },
                 { name: 'description', title: 'Description' },
@@ -69,6 +61,7 @@ class TagManagementComponent extends React.Component {
         };
         this.handleChange = this.handleChange.bind(this);
         this.setCurrentView=this.setCurrentView.bind(this);
+        
     }
 
     
@@ -83,10 +76,13 @@ class TagManagementComponent extends React.Component {
         }
     }
 
-    setCurrentView(viewName, selectedPanel){
+    setCurrentView(viewName, selectedPanel, listUrl, detailUrl){
       this.setState({
         currentView: viewName,
-        currentpanelState: selectedPanel})
+        currentpanelState: selectedPanel,
+        listUrl: listUrl,
+        detailUrl: detailUrl
+      })
   }
 
   componentDidMount() {
@@ -101,10 +97,8 @@ class TagManagementComponent extends React.Component {
         const response = resp.data;
         currInstance.setState({
             subjectRows: response['subjects'],
-            creatorRows: response['creators'],
             coverageRows: response['coverages'],
             workareaRows: response['workareas'],
-            keywordRows: response['keywords'],
             languageRows: response['languages'],
             catalogerRows: response['catalogers'],
         })
@@ -116,52 +110,25 @@ class TagManagementComponent extends React.Component {
     render() {
         const { classes } = this.props;
         const { expanded } = this.state;
-        const { creatorRows, creatorColumns } = this.state; 
         const { coverageRows, coverageColumns } = this.state;  
         const { subjectRows, subjectColumns } = this.state;
         const { workareaRows, workareaColumns } = this.state;
         const { languageRows, languageColumns } = this.state;
-        const { keywordRows, keywordColumns } = this.state;
         const { catalogerRows, catalogerColumns } = this.state;
         
 
     return(
       <Grid container spacing={0}>
       <Grid item xs={4}>
-           <Button variant="raised" color="primary" onClick={e => {this.setCurrentView('manage')}}>
+           {/* <Button variant="raised" color="primary" onClick={e => {this.setCurrentView('manage')}}>
             Manage MetaData
-            </Button>
+            </Button> */}
           
           </Grid>
           { this.state.currentView=='manage' && (
         
         <Grid container spacing={0}>
         <Grid item xs={12}>
-        <ExpansionPanel expanded={expanded === 'panel1'} onChange={this.handleChange('panel1')}>
-          <ExpansionPanelSummary expandIcon={<ExpandMoreIcon/>}>
-            <Typography>Creators</Typography>
-            </ExpansionPanelSummary>
-          <ExpansionPanelDetails>
-          <Grid container>
-          <Grid item>
-          <Button variant="raised" color="primary" onClick={e => {this.setCurrentView('addTag', 'creators')}}>
-            Add New
-            </Button>
-            </Grid>
-            
-            
-          <DataGrid
-          rows={creatorRows}
-          columns={creatorColumns}
-          >
-          <Table />
-          <TableHeaderRow />
-          
-          </DataGrid>
-          </Grid>
-          
-          </ExpansionPanelDetails>
-        </ExpansionPanel>
         <ExpansionPanel expanded={expanded === 'panel2'} onChange={this.handleChange('panel2')}>
           <ExpansionPanelSummary expandIcon={<ExpandMoreIcon/>}>
             <Typography>Coverages</Typography>
@@ -169,7 +136,7 @@ class TagManagementComponent extends React.Component {
           <ExpansionPanelDetails>
           <Grid container>
           <Grid item>
-          <Button variant="raised" color="primary" onClick={e => {this.setCurrentView('addTag', 'coverages')}}>
+          <Button variant="raised" color="primary" onClick={e => {this.setCurrentView('addTag', 'Coverages', APP_URLS.COVERAGES_LIST, APP_URLS.COVERAGES_DETAIL)}}>
             Add New
             </Button>
             </Grid>
@@ -191,7 +158,7 @@ class TagManagementComponent extends React.Component {
           <ExpansionPanelDetails>
           <Grid container>
           <Grid item>
-          <Button variant="raised" color="primary" onClick={e => {this.setCurrentView('addTag', 'subjects')}}>
+          <Button variant="raised" color="primary" onClick={e => {this.setCurrentView('addTag', 'Subjects', APP_URLS.SUBJECTS_LIST,APP_URLS.SUBJECTS_DETAIL)}}>
             Add New
             </Button>
             </Grid>
@@ -213,7 +180,7 @@ class TagManagementComponent extends React.Component {
           <ExpansionPanelDetails>
           <Grid container>
           <Grid item>
-          <Button variant="raised" color="primary" onClick={e => {this.setCurrentView('addTag', 'work areas')}}>
+          <Button variant="raised" color="primary" onClick={e => {this.setCurrentView('addTag', 'Work Areas', APP_URLS.WORKAREAS_LIST, APP_URLS.WORKAREAS_DETAIL)}}>
             Add New
             </Button>
             </Grid>
@@ -235,7 +202,7 @@ class TagManagementComponent extends React.Component {
           <ExpansionPanelDetails>
           <Grid container>
           <Grid item>
-          <Button variant="raised" color="primary" onClick={e => {this.setCurrentView('addTag', 'languages')}}>
+          <Button variant="raised" color="primary" onClick={e => {this.setCurrentView('addTag', 'Languages', APP_URLS.LANGUAGES_LIST, APP_URLS.LANGUAGES_DETAIL)}}>
             Add New
             </Button>
             </Grid>
@@ -244,41 +211,18 @@ class TagManagementComponent extends React.Component {
           columns={languageColumns}
           >
           <Table />
-          <TableHeaderRow />
-          
+          <TableHeaderRow />          
           </DataGrid>
           </Grid>
           </ExpansionPanelDetails>
-        </ExpansionPanel>
-        <ExpansionPanel expanded={expanded === 'panel6'} onChange={this.handleChange('panel6')}>
-          <ExpansionPanelSummary expandIcon={<ExpandMoreIcon/>}>
-            <Typography>Keywords</Typography>
-            </ExpansionPanelSummary>
-          <ExpansionPanelDetails>
-          <Grid container>
-          <Grid item>
-          <Button variant="raised" color="primary" onClick={e => {this.setCurrentView('addTag', 'keywords')}}>
-            Add New
-            </Button>
-            </Grid>
-          <DataGrid
-          rows={keywordRows}
-          columns={keywordColumns}
-          >
-          <Table />
-          <TableHeaderRow />
-          
-          </DataGrid>
-          </Grid>
-          </ExpansionPanelDetails>
-        </ExpansionPanel>
+        </ExpansionPanel>        
         <ExpansionPanel expanded={expanded === 'panel7'} onChange={this.handleChange('panel7')}>
           <ExpansionPanelSummary expandIcon={<ExpandMoreIcon/>}>
             <Typography>Catalogers</Typography>
             </ExpansionPanelSummary>
           <ExpansionPanelDetails>
             <Grid container>
-          <Grid item><Button variant="raised" color="primary" onClick={e => {this.setCurrentView('addTag', 'catalogers')}}>
+          <Grid item><Button variant="raised" color="primary" onClick={e => {this.setCurrentView('addTag', 'Catalogers', APP_URLS.CATALOGERS_LIST, APP_URLS.CATALOGERS_DETAIL)}}>
             Add New
             </Button>
             </Grid>
@@ -297,9 +241,10 @@ class TagManagementComponent extends React.Component {
             
         </Grid>
     )}
-    {this.state.currentView=='addTag' && <TagCreation title={this.state.currentpanelState} />}
+    {this.state.currentView=='addTag' && <TagCreation title={this.state.currentpanelState} onCancel={() => this.setCurrentView('manage') } listUrl={this.state.listUrl} detailUrl={this.state.detailUrl}/> }
+
     </Grid>
-    );
+    )
            
         
         

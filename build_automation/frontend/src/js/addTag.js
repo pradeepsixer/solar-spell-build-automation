@@ -7,13 +7,14 @@ import Grid from 'material-ui/Grid';
 
 import { APP_URLS, get_url } from './url.js';
 
-
-class TagManagementComponent extends React.Component {
+import Typography from 'material-ui/Typography';
+class TagCreation extends React.Component {
     constructor(props) {
         super(props);
         this.state={
-            name: props.name,
-            desc: props.desc
+            currentView: 'addTag',
+            name: '',
+            description: ''
         };
         this.handleTextFieldUpdate = this.handleTextFieldUpdate.bind(this);
         this.saveTag = this.saveTag.bind(this);
@@ -28,27 +29,23 @@ class TagManagementComponent extends React.Component {
 
     componentWillReceiveProps(props) {
         this.setState({
-            name: props.name,
-            desc: props.desc
+            name: '',
+            description: ''
             
         });
     }
 
+    setCurrentView(viewName, selectedPanel){
+        this.setState({
+          currentView: viewName,
+          currentpanelState: selectedPanel})
+    }
+
     saveTag(evt) {
-        var targetUrl = APP_URLS.TAG_LIST;
-        const payload = {name: this.state.name, desc: this.state.desc};
+        var targetUrl = this.props.listUrl;
+        const payload = {name: this.state.name, description: this.state.description};
         const currentInstance = this;
-        if (this.state.id > 0) {
-            // Update an existing Tag.
-            targetUrl = get_url(APP_URLS.TAG_LIST, {name:this.state.name});
-            axios.patch(targetUrl, payload, {
-                responseType: 'json'
-            }).then(function(response) {
-                currentInstance.saveCallback(response.data);
-            }).catch(function(error) {
-                console.error("Error in updating the Tag", error);
-            })
-        } else {
+             {
             // Create a new Tag.
             axios.post(targetUrl, payload, {
                 responseType: 'json'
@@ -75,9 +72,19 @@ class TagManagementComponent extends React.Component {
 
     render() {
     return(
-        <Grid container spacing={0}>
+        <Grid container spacing={0} style={{paddingLeft: '20px'}}>
+        <Grid item xs={8}>
+        <Button variant="raised" color="primary" onClick={e => {this.props.onCancel()}}>
+            Cancel
+            </Button>
+        <Button variant="raised" color="secondary" onClick={evt =>this.saveTag(evt)}>    
+            Save
+            </Button>
+            </Grid>
            <Grid item xs={8}>
-          {this.props.title}
+           <Typography gutterBottom align="center" variant="headline" component="h2">
+           {this.props.title}
+                    </Typography>
           </Grid>
         <Grid item xs={8}>
            
@@ -93,12 +100,11 @@ class TagManagementComponent extends React.Component {
               id="desc"
               label="Description"
               value={this.state.desc}
-              onChange={evt => this.handleTextFieldUpdate('desc', evt)}
+              onChange={evt => this.handleTextFieldUpdate('description', evt)}
               fullWidth
               margin="normal"
             />
-            </Grid>
-            
+            </Grid> 
         </Grid>
     );
            
@@ -107,4 +113,4 @@ class TagManagementComponent extends React.Component {
     }
 }
 
-module.exports = TagManagementComponent;
+module.exports = TagCreation;
