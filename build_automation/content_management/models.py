@@ -1,3 +1,5 @@
+import os
+
 from django.db import models
 from django.urls import reverse  # Used to generate URLs by reversing the URL patterns
 
@@ -147,13 +149,25 @@ class Content(models.Model):
     class Meta:
         ordering = ['pk']
 
-
 class DirectoryLayout(models.Model):
+
+    def set_original_name(instance, file_name):
+        instance.original_file_name = file_name
+        return os.path.join("banners", "libversions", file_name)
+
     """
     The Directory Layout for each build.
     """
     name = models.CharField(max_length=50, unique=True)
     description = models.CharField(max_length=200, null=True)
+    banner_file = models.FileField(upload_to=set_original_name)
+    original_file_name = models.CharField(max_length=200, null=True)
+
+    banner_file_uploaded = False
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.existing_banner_file = self.banner_file
 
     def __str__(self):
         return "DirectoryLayout[{}]".format(self.name)

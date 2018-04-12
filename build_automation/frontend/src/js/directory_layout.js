@@ -374,7 +374,9 @@ class DirectoryLayoutComponent extends React.Component {
             infoBoardData: {
                 id: -1,
                 name: '',
-                description: ''
+                description: '',
+                original_file_name: '',
+                banner_file: ''
             }
         });
     }
@@ -490,6 +492,8 @@ class DirectoryLayoutComponent extends React.Component {
                         id: savedInfo.id,
                         name: savedInfo.name,
                         description: savedInfo.description,
+                        original_file_name: savedInfo.original_file_name,
+                        banner_file: savedInfo.banner_file,
                         isOpen: false
                     };
 
@@ -501,6 +505,8 @@ class DirectoryLayoutComponent extends React.Component {
                         if (eachDirLayout.id == savedInfo.id) {
                             eachDirLayout.name = savedInfo.name;
                             eachDirLayout.description = savedInfo.description;
+                            eachDirLayout.banner_file = savedInfo.banner_file;
+                            eachDirLayout.original_file_name = savedInfo.original_file_name;
                         }
                     });
                 }

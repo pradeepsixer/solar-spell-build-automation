@@ -225,9 +225,28 @@ class DirectoryLayoutSerializer(serializers.ModelSerializer):
         ]
     )
 
+    def create(self, validated_data):
+        dirLayout = DirectoryLayout(**validated_data)
+        dirLayout = self.__create_update(dirLayout)
+        return dirLayout
+
+    def update(self, dirLayout, validated_data):
+        dirLayout.name = validated_data.get('name', dirLayout.name)
+        dirLayout.description = validated_data.get('description', dirLayout.description)
+        dirLayout.banner_file = validated_data.get('banner_file', dirLayout.banner_file)
+        return self.__create_update(dirLayout)
+
+    def __create_update(self, dirLayout, tag_list=None):
+        request = self.context['request']
+        if 'banner_file' in request.FILES:
+            dirLayout.banner_file_uploaded = True
+        dirLayout.save()
+        return dirLayout
+
     class Meta:
         model = DirectoryLayout
-        fields = ('id', 'url', 'name', 'description')
+        fields = ('id', 'url', 'name', 'description', 'banner_file', 'original_file_name')
+        read_only_fields=('original_file_name',)
         extra_kwargs = {
             'url': {'lookup_field': 'pk'},
         }
@@ -303,7 +322,8 @@ class DirectorySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Directory
-        fields = ('id', 'url', 'name', 'dir_layout', 'individual_files', 'creators', 'coverages',
+        fields = (
+            'id', 'url', 'name', 'dir_layout', 'individual_files', 'creators', 'coverages',
             'subjects', 'keywords', 'workareas', 'languages', 'catalogers', 'parent'
         )
         validators = [
