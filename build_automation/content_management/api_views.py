@@ -137,6 +137,7 @@ class DirectoryCloneApiViewSet(ViewSet, CreateModelMixin):
             cloned_directory = Directory(name=each_original_directory.name)
             cloned_directory.dir_layout = cloned_dir_layout
             cloned_directory.parent = parent_cloned_directory
+            cloned_directory.banner_file = each_original_directory.banner_file
             cloned_directory.save()
             cloned_directory.individual_files.set(list(each_original_directory.individual_files.all()))
             cloned_directory.creators.set(list(each_original_directory.creators.all()))

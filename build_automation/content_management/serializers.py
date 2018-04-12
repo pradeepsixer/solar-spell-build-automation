@@ -226,22 +226,22 @@ class DirectoryLayoutSerializer(serializers.ModelSerializer):
     )
 
     def create(self, validated_data):
-        dirLayout = DirectoryLayout(**validated_data)
-        dirLayout = self.__create_update(dirLayout)
-        return dirLayout
+        dir_layout = DirectoryLayout(**validated_data)
+        dir_layout = self.__create_update(dir_layout)
+        return dir_layout
 
-    def update(self, dirLayout, validated_data):
-        dirLayout.name = validated_data.get('name', dirLayout.name)
-        dirLayout.description = validated_data.get('description', dirLayout.description)
-        dirLayout.banner_file = validated_data.get('banner_file', dirLayout.banner_file)
-        return self.__create_update(dirLayout)
+    def update(self, dir_layout, validated_data):
+        dir_layout.name = validated_data.get('name', dir_layout.name)
+        dir_layout.description = validated_data.get('description', dir_layout.description)
+        dir_layout.banner_file = validated_data.get('banner_file', dir_layout.banner_file)
+        return self.__create_update(dir_layout)
 
-    def __create_update(self, dirLayout, tag_list=None):
+    def __create_update(self, dir_layout):
         request = self.context['request']
         if 'banner_file' in request.FILES:
-            dirLayout.banner_file_uploaded = True
-        dirLayout.save()
-        return dirLayout
+            dir_layout.banner_file_uploaded = True
+        dir_layout.save()
+        return dir_layout
 
     class Meta:
         model = DirectoryLayout
@@ -258,10 +258,10 @@ class DirectoryNameUniqueValidator(object):
         parent = directory.get('parent')
         dir_layout = directory.get('dir_layout')
         if self.id is None:
-            matching_dirs_count = Directory.objects.filter(dir_layout=dir_layout, parent=parent, name=dir_name).count()
+            matching_dirs_count = Directory.objects.filter(dir_layout=dir_layout, parent=parent, name__iexact=dir_name).count()
         else:
             matching_dirs_count = Directory.objects.filter(
-                dir_layout=dir_layout, parent=parent, name=dir_name
+                dir_layout=dir_layout, parent=parent, name__iexact=dir_name
             ).exclude(pk=self.id).count()
         if matching_dirs_count > 0:
             raise serializers.ValidationError({'name': [{'result': 'ERROR', 'error': 'DUPLICATE_DIRECTORY'}]})
@@ -308,6 +308,9 @@ class DirectorySerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         instance.name = validated_data.get('name', instance.name)
         instance.dir_layout = validated_data.get('dir_layout', instance.dir_layout)
+        instance.banner_file = validated_data.get('banner_file', instance.banner_file)
+        instance.parent = validated_data.get('parent', instance.parent)
+        instance.save()
         instance.individual_files.set(validated_data.get('individual_files', instance.individual_files.all()))
         instance.creators.set(validated_data.get('creators', instance.creators.all()))
         instance.coverages.set(validated_data.get('coverages', instance.coverages.all()))
@@ -316,16 +319,15 @@ class DirectorySerializer(serializers.ModelSerializer):
         instance.workareas.set(validated_data.get('workareas', instance.workareas.all()))
         instance.languages.set(validated_data.get('languages', instance.languages.all()))
         instance.catalogers.set(validated_data.get('catalogers', instance.catalogers.all()))
-        instance.parent = validated_data.get('parent', instance.parent)
-        instance.save()
         return instance
 
     class Meta:
         model = Directory
         fields = (
-            'id', 'url', 'name', 'dir_layout', 'individual_files', 'creators', 'coverages',
-            'subjects', 'keywords', 'workareas', 'languages', 'catalogers', 'parent'
+            'id', 'url', 'name', 'dir_layout', 'individual_files', 'banner_file', 'original_file_name',
+            'creators', 'coverages', 'subjects', 'keywords', 'workareas', 'languages', 'catalogers', 'parent',
         )
+        read_only_fields = ('original_file_name',)
         validators = [
             DirectoryNameUniqueValidator()
         ]

@@ -180,6 +180,8 @@ class DirectoryLayoutComponent extends React.Component {
             );
             layoutDirectories[eachDir.id].parent = eachDir.parent;
             layoutDirectories[eachDir.id].dirLayoutId = eachDir.dir_layout;
+            layoutDirectories[eachDir.id].bannerFile = eachDir.banner_file;
+            layoutDirectories[eachDir.id].originalFileName = eachDir.original_file_name;
             layoutDirectories[eachDir.id].individualFiles = eachDir.individual_files;
             layoutDirectories[eachDir.id].creators = eachDir.creators;
             layoutDirectories[eachDir.id].coverages = eachDir.coverages;
@@ -354,6 +356,8 @@ class DirectoryLayoutComponent extends React.Component {
                 id: -1,
                 name: '',
                 individualFiles: [],
+                bannerFile: '',
+                originalFileName: '',
                 creators: [],
                 coverages: [],
                 subjects: [],
@@ -551,6 +555,8 @@ class DirectoryLayoutComponent extends React.Component {
                         title: (<Button fullWidth>{newValue.name}</Button>),
                         dirLayoutId: newValue.dir_layout,
                         parent: newValue.parent,
+                        bannerFile: newValue.banner_file,
+                        originalFileName: newValue.original_file_name,
                         individualFiles: newValue.individual_files,
                         creators: newValue.creators,
                         coverages: newValue.coverages,
@@ -566,6 +572,8 @@ class DirectoryLayoutComponent extends React.Component {
                     array[i].name = newValue.name;
                     array[i].title = (<Button fullWidth>{newValue.name}</Button>);
                     array[i].parent = newValue.parent;
+                    array[i].bannerFile = newValue.banner_file;
+                    array[i].originalFileName = newValue.original_file_name;
                     array[i].individualFiles = newValue.individual_files;
                     array[i].creators = newValue.creators;
                     array[i].coverages = newValue.coverages;
@@ -606,6 +614,8 @@ class DirectoryLayoutComponent extends React.Component {
                         title: (<Button>{savedInfo.name}</Button>),
                         dirLayoutId: savedInfo.dir_layout,
                         parent: savedInfo.parent,
+                        bannerFile: savedInfo.banner_file,
+                        originalFileName: savedInfo.original_file_name,
                         individualFiles: savedInfo.individual_files,
                         creators: savedInfo.creators,
                         coverages: savedInfo.coverages,

@@ -177,12 +177,19 @@ class DirectoryLayout(models.Model):
 
 
 class Directory(models.Model):
+
+    def set_original_name(instance, file_name):
+        instance.original_file_name = file_name
+        return os.path.join("banners", "folders", file_name)
+
     """
     Representation of the directory for each build.
     """
     name = models.CharField(max_length=50)
     dir_layout = models.ForeignKey(DirectoryLayout, related_name='directories', on_delete=models.CASCADE)
     parent = models.ForeignKey('self', related_name='subdirectories', on_delete=models.CASCADE, null=True)
+    banner_file = models.FileField(upload_to=set_original_name)
+    original_file_name = models.CharField(max_length=200, null=True)
     individual_files = models.ManyToManyField(Content, related_name='individual_files')
     creators = models.ManyToManyField(Creator)
     coverages = models.ManyToManyField(Coverage)
