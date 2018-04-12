@@ -149,10 +149,11 @@ class Content(models.Model):
     class Meta:
         ordering = ['pk']
 
+
 class DirectoryLayout(models.Model):
 
-    def set_original_name(instance, file_name):
-        instance.original_file_name = file_name
+    def set_original_name(self, file_name):
+        self.original_file_name = file_name
         return os.path.join("banners", "libversions", file_name)
 
     """
@@ -178,8 +179,8 @@ class DirectoryLayout(models.Model):
 
 class Directory(models.Model):
 
-    def set_original_name(instance, file_name):
-        instance.original_file_name = file_name
+    def set_original_name(self, file_name):
+        self.original_file_name = file_name
         return os.path.join("banners", "folders", file_name)
 
     """

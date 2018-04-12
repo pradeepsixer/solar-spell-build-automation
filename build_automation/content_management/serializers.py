@@ -246,7 +246,7 @@ class DirectoryLayoutSerializer(serializers.ModelSerializer):
     class Meta:
         model = DirectoryLayout
         fields = ('id', 'url', 'name', 'description', 'banner_file', 'original_file_name')
-        read_only_fields=('original_file_name',)
+        read_only_fields = ('original_file_name',)
         extra_kwargs = {
             'url': {'lookup_field': 'pk'},
         }
@@ -258,7 +258,9 @@ class DirectoryNameUniqueValidator(object):
         parent = directory.get('parent')
         dir_layout = directory.get('dir_layout')
         if self.id is None:
-            matching_dirs_count = Directory.objects.filter(dir_layout=dir_layout, parent=parent, name__iexact=dir_name).count()
+            matching_dirs_count = Directory.objects.filter(
+                dir_layout=dir_layout, parent=parent, name__iexact=dir_name
+            ).count()
         else:
             matching_dirs_count = Directory.objects.filter(
                 dir_layout=dir_layout, parent=parent, name__iexact=dir_name

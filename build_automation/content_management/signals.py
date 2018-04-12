@@ -55,15 +55,15 @@ def delete_banner_file_on_change(sender, **kwargs):
     """
     Delete the directory layout's (Library Version) existing banner file, when a new banner is uploaded.
     """
-    dirLayout = kwargs['instance']
+    dir_layout = kwargs['instance']
 
     # If a new banner file is uploaded, remove the old one.
-    if dirLayout.banner_file_uploaded:
+    if dir_layout.banner_file_uploaded:
         if (
-            dirLayout.pk is not None and dirLayout.existing_banner_file is not None and
-            len(dirLayout.existing_banner_file.name) > 0
+            dir_layout.pk is not None and dir_layout.existing_banner_file is not None and
+            len(dir_layout.existing_banner_file.name) > 0
         ):
-            current_banner_path = dirLayout.existing_banner_file.path
+            current_banner_path = dir_layout.existing_banner_file.path
             if os.path.exists(current_banner_path):
                 os.remove(current_banner_path)
 
@@ -73,7 +73,7 @@ def delete_banner_file_after_model_deletion(sender, **kwargs):
     """
     Delete the model file after the DirectoryLayout has been deleted.
     """
-    dirLayout = kwargs['instance']
+    dir_layout = kwargs['instance']
 
-    if os.path.exists(dirLayout.banner_file.path):
-        os.remove(dirLayout.banner_file.path)
+    if os.path.exists(dir_layout.banner_file.path):
+        os.remove(dir_layout.banner_file.path)
