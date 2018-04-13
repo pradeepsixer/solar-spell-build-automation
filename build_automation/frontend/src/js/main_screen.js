@@ -48,9 +48,9 @@ class MainScreen extends React.Component {
                             textColor="secondary"
                             centered
                         >
-                            <Tab value="tags" label="Tags" />
+                            <Tab value="tags" label="Metadata" />
                             <Tab value="contents" label="Contents" />
-                            <Tab value="dirlayout" label="Directory Layout" />
+                            <Tab value="dirlayout" label="Library Versions" />
                             <Tab value="builds" label="Builds" />
                             <Tab value="sysinfo" label="System Info" />
                         </Tabs>

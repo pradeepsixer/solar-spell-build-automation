@@ -10,44 +10,50 @@ import Select from 'material-ui/Select';
 import TextField from 'material-ui/TextField';
 import Typography from 'material-ui/Typography';
 
+import OpenInNew from 'material-ui-icons/OpenInNew';
+
 import SortableTree from 'react-sortable-tree';
 
 import AutoCompleteWithChips from './autocomplete.js';
 import FileSelectionComponent from './directory_file_selection.js'
 import { APP_URLS, get_url } from './url.js';
-import { convert_tags_to_filter_criteria_string, parse_filter_criteria_string } from './utils.js';
+import { buildMapFromArray } from './utils.js';
 
 import 'react-sortable-tree/style.css';
 
 class DirectoryInfoBoard extends React.Component {
     constructor(props) {
         super(props);
-        console.log('DirInfoBoard props ', props);
-        const tagIdsTagsMap = this.buildTagIdTagsMap(props.tags);
-        const filterCriteriaInfo  = this.getFilterCriteriaInfoFromString(props.boardData.filterCriteria, tagIdsTagsMap);
+        this.tagIdsTagsMap = this.buildTagIdTagsMap(props.tags);
+        const labels = this.getAutoCompleteLabelsFromTagIds(props.boardData, this.tagIdsTagsMap);
         this.state = {
             id: props.boardData.id,
             dirLayoutId: props.boardData.dirLayoutId,
             name: props.boardData.name,
-            filterCriteria: props.boardData.filterCriteria,
             parent: props.boardData.parent,
-            tagTreeData: props.tagTreeData,
-            tags: props.tags,
-            tagIdsTagsMap: tagIdsTagsMap,
-            allFiles: props.allFiles,
-            fileIdFileMap: props.fileIdFileMap,
+            bannerFile: null,
+            bannerFileName: props.boardData.originalFileName ? props.boardData.originalFileName : '',
+            creators: labels['creators'],
+            coverages: labels['coverages'],
+            subjects: labels['subjects'],
+            keywords: labels['keywords'],
+            workareas: labels['workareas'],
+            languages: labels['languages'],
+            catalogers: labels['catalogers'],
             selectedFiles: props.boardData.individualFiles,
-            selectedOperator: filterCriteriaInfo.operator,
-            selectedTags: filterCriteriaInfo.selectedItems,
             confirmDelete: false,
+            labels: labels,
             fieldErrors: {}
         };
 
-        console.log(this.state);
+        this.allFiles = props.allFiles;
+        this.tagNameTagMap = this.buildTagNameTagMap(props.tags);
+        this.fileIdFileMap = props.fileIdFileMap;
         this.saveDirectory = this.saveDirectory.bind(this);
         this.deleteDirectory = this.deleteDirectory.bind(this);
         this.saveCallback = this.props.onSave.bind(this);
         this.deleteCallback = this.props.onDelete.bind(this);
+        this.handleBannerSelection = this.handleBannerSelection.bind(this);
         this.handleChipAddition = this.handleChipAddition.bind(this);
         this.handleChipDeletion = this.handleChipDeletion.bind(this);
         this.handleOperatorChange = this.handleOperatorChange.bind(this);
@@ -58,20 +64,34 @@ class DirectoryInfoBoard extends React.Component {
     }
 
     buildTagIdTagsMap(tags) {
-        // Builds a map of <Tag Id> - Tag
+        // Builds a map of <Tag Id> - Tag map for each tag type.
         const tagIdTagMap = {};
-        tags.forEach(eachTag => {
-            tagIdTagMap[eachTag.id] = eachTag;
-        })
+        Object.keys(tags).forEach(eachTagType => {
+            tagIdTagMap[eachTagType] = buildMapFromArray(tags[eachTagType], 'id');
+        });
         return tagIdTagMap;
     }
 
     buildTagNameTagMap(tags) {
         const tagNameTagMap = {};
-        tags.forEach(eachTag => {
-            tagNameTagMap[eachTag.name] = eachTag;
-        })
+        Object.keys(tags).forEach(eachTagType => {
+            tagNameTagMap[eachTagType] = buildMapFromArray(tags[eachTagType], 'name');
+        });
         return tagNameTagMap;
+    }
+
+    getAutoCompleteLabelsFromTagIds(boardInfo, tagIdsTagsMap) {
+        const retval = {};
+        Object.keys(tagIdsTagsMap).forEach(eachTagType => {
+            const selectedTagsForDir = boardInfo[eachTagType];
+            const selectedTypeAllTags = tagIdsTagsMap[eachTagType];
+            const labels = [];
+            selectedTagsForDir.forEach(eachTagId => {
+                labels.push(selectedTypeAllTags[eachTagId].name);
+            });
+            retval[eachTagType] = labels;
+        });
+        return retval;
     }
 
     getFilterCriteriaInfoFromString(filterCriteria, tagIdTagsMap) {
@@ -87,31 +107,49 @@ class DirectoryInfoBoard extends React.Component {
             operator: filterCriteriaInfo.operator,
             selectedItems: selectedItems
         }
-        console.log(retval);
         return retval;
     }
 
     componentWillReceiveProps(props) {
-        console.log('DirInfoBoard props ', props);
-        const tagIdsTagsMap = this.buildTagIdTagsMap(props.tags);
-        const filterCriteriaInfo  = this.getFilterCriteriaInfoFromString(props.boardData.filterCriteria, tagIdsTagsMap);
+        this.tagIdsTagsMap = this.buildTagIdTagsMap(props.tags);
+        const labels = this.getAutoCompleteLabelsFromTagIds(props.boardData, this.tagIdsTagsMap);
         this.setState({
             id: props.boardData.id,
             dirLayoutId: props.boardData.dirLayoutId,
             name: props.boardData.name,
-            filterCriteria: props.boardData.filterCriteria,
             parent: props.boardData.parent,
-            tagTreeData: props.tagTreeData,
-            tags: props.tags,
-            tagIdsTagsMap: tagIdsTagsMap,
-            allFiles: props.allFiles,
-            fileIdFileMap: props.fileIdFileMap,
+            bannerFile: null,
+            bannerFileName: props.boardData.originalFileName ? props.boardData.originalFileName : '',
+            creators: labels['creators'],
+            coverages: labels['coverages'],
+            subjects: labels['subjects'],
+            keywords: labels['keywords'],
+            workareas: labels['workareas'],
+            languages: labels['languages'],
+            catalogers: labels['catalogers'],
             selectedFiles: props.boardData.individualFiles,
-            selectedOperator: filterCriteriaInfo.operator,
-            selectedTags: filterCriteriaInfo.selectedItems,
             confirmDelete: false,
             fieldErrors: {}
         });
+        this.allFiles = props.allFiles;
+        this.tagNameTagMap = this.buildTagNameTagMap(props.tags);
+        this.fileIdFileMap = props.fileIdFileMap;
+    }
+
+    getSelectedTagsIdsFromName(tagType) {
+        const matchingTagIds = [];
+        this.state[tagType].forEach(eachLabel => {
+            matchingTagIds.push(this.tagNameTagMap[tagType][eachLabel].id);
+        });
+        return matchingTagIds;
+    }
+
+    getSelectedTags() {
+        const tagTypeSelectedTagsMap = {};
+        Object.keys(this.props.tags).forEach(eachTagType => {
+            tagTypeSelectedTagsMap[eachTagType] = this.getSelectedTagsIdsFromName(eachTagType);
+        });
+        return tagTypeSelectedTagsMap;
     }
 
     saveDirectory(evt) {
@@ -120,25 +158,24 @@ class DirectoryInfoBoard extends React.Component {
             return;
         }
         var targetUrl = APP_URLS.DIRECTORY_LIST;
-        const tagNameTagMap = this.buildTagNameTagMap(this.state.tags);
-        const allSelectedTags = [];
-        this.state.selectedTags.forEach(eachTagName => {
-            allSelectedTags.push(tagNameTagMap[eachTagName]);
-        });
-        const filterCriteriaString = convert_tags_to_filter_criteria_string(allSelectedTags, this.state.selectedOperator);
-        console.log(filterCriteriaString);
-        const payload = {
-            name: this.state.name,
-            dir_layout: this.state.dirLayoutId,
-            filter_criteria: filterCriteriaString,
-            individual_files: this.state.selectedFiles,
-            parent: this.state.parent
-        };
-
+        const selectedTags = this.getSelectedTags();
+        const payload = new FormData();
+        payload.append('name', this.state.name);
+        payload.append('dir_layout', this.state.dirLayoutId);
+        this.state.selectedFiles.forEach(file => {payload.append('individual_files', file)});
+        selectedTags['creators'].forEach(creator => {payload.append('creators', creator)});
+        selectedTags['coverages'].forEach(coverage => {payload.append('coverages', coverage)});
+        selectedTags['subjects'].forEach(subject => {payload.append('subjects', subject)});
+        selectedTags['keywords'].forEach(keyword => {payload.append('keywords', keyword)});
+        selectedTags['workareas'].forEach(workarea => {payload.append('workareas', workarea)});
+        selectedTags['languages'].forEach(language => {payload.append('languages', language)});
+        selectedTags['catalogers'].forEach(cataloger => {payload.append('catalogers', cataloger)});
+        Boolean(this.state.parent) && payload.append('parent', this.state.parent);
+        Boolean(this.state.bannerFile) && payload.append('banner_file', this.state.bannerFile);
         const currInstance = this;
         if (this.state.id > 0) {
             // Update an existing directory.
-            payload.id = this.state.id;
+            payload.append('id', this.state.id);
             targetUrl = get_url(APP_URLS.DIRECTORY_DETAIL, {id:this.state.id});
             axios.patch(targetUrl, payload, {
                 responseType: 'json'
@@ -167,10 +204,6 @@ class DirectoryInfoBoard extends React.Component {
         if (!this.state.name || this.state.name.trim().length === 0) {
             hasErrors = true;
             fieldErrors['name'] = 'Name is required.';
-        }
-        if (!this.state.selectedTags || this.state.selectedTags.length === 0) {
-            hasErrors = true;
-            fieldErrors['selectedTags'] = 'Tags are required for filtering the contents.';
         }
         if (hasErrors) {
             this.setState({fieldErrors});
@@ -216,21 +249,19 @@ class DirectoryInfoBoard extends React.Component {
     }
 
     /* Called when a chip is added to the autocomplete component. */
-    handleChipAddition(addedChip) {
+    handleChipAddition(addedChip, tagType) {
         this.setState((prevState, props) => {
-            const selectedTags = prevState.selectedTags;
-            if (selectedTags.indexOf(addedChip.name) === -1) {
-                selectedTags.push(addedChip.name);
-            }
-            return {selectedTags};
+            const selectedTags = prevState[tagType];
+            selectedTags.push(addedChip.name);
+            return {[tagType]: selectedTags};
         });
     }
 
-    handleChipDeletion(deletedChip) {
+    handleChipDeletion(deletedChip, tagType) {
         this.setState((prevState, props) => {
-            const selectedTags = prevState.selectedTags;
+            const selectedTags = prevState[tagType];
             selectedTags.splice(selectedTags.indexOf(deletedChip.name), 1);
-            return {selectedTags};
+            return {[tagType]: selectedTags};
         });
     }
 
@@ -256,6 +287,15 @@ class DirectoryInfoBoard extends React.Component {
         this.setState({confirmDelete: false})
     }
 
+    handleBannerSelection(evt) {
+        evt.persist();
+        const file = evt.target.files[0];
+        this.setState({
+            bannerFile: file,
+            bannerFileName: file.name
+        });
+    }
+
     render() {
         return (
             <Grid container spacing={24}>
@@ -279,51 +319,181 @@ class DirectoryInfoBoard extends React.Component {
                       fullWidth
                       margin="normal"
                     />
+                    <TextField
+                      id="bannerimg"
+                      label="Banner Image"
+                      multiline
+                      disabled
+                      InputLabelProps={{
+                        shrink: true,
+                      }}
+                      error={this.state.fieldErrors.banner ? true : false}
+                      value={this.state.bannerFileName}
+                      margin="normal"
+                    />
+                    <input
+                        accept="image/*"
+                        className={'hidden'}
+                        id="raised-button-file"
+                        type="file"
+                        onChange={ this.handleBannerSelection }
+                     />
+                    <label htmlFor="raised-button-file">
+                        <Button variant="raised" component="span">
+                            Browse
+                        </Button>
+                    </label>
+                    {
+                        this.props.boardData.bannerFile &&
+                            <OpenInNew onClick={evt => window.open(this.props.boardData.bannerFile, "_blank")}
+                                className="handPointer" title="Open in new window"/>
+                    }
                     <p></p>
                     <Typography gutterBottom variant="headline" component="h2">
-                        Tags
+                        Filter by Metadata
                     </Typography>
                     <Typography>
-                        Choose content which matches
+                        Filter contents to go into the folder / sub-folder by the metadata.
                     </Typography>
-                    <Grid container spacing={24}>
-                        <Grid item xs={2}>
+                    <Grid container spacing={24} style={{marginTop: '15px'}}>
+                        <Grid item xs={3}>
                             <Select
-                                value={this.state.selectedOperator}
-                                onChange={this.handleOperatorChange}
+                                value={'AND'}
                                 displayEmpty
-                                name="tag-option"
+                                name="creators-operator"
                             >
-                                <MenuItem value="AND">All of the tags</MenuItem>
-                                <MenuItem value="OR">Any of the tags</MenuItem>
+                                <MenuItem value="AND">All of the Creators</MenuItem>
+                                <MenuItem value="OR">Any of the Creators</MenuItem>
                             </Select>
                         </Grid>
-                        <Grid item xs={10}>
-                            <AutoCompleteWithChips suggestions={this.state.tags} searchKey={'name'}
-                                selectedItem={this.state.selectedTags} onAddition={this.handleChipAddition}
-                                onDeletion={this.handleChipDeletion} required={true}
+                        <Grid item xs={8}>
+                            <AutoCompleteWithChips suggestions={this.props.tags['creators']} searchKey={'name'}
+                                selectedItem={this.state.creators} onAddition={addedTag => {this.handleChipAddition(addedTag, 'creators')}} onDeletion={deletedTag => {this.handleChipDeletion(deletedTag, 'creators')}} required={true}
                                 errorMsg={this.state.fieldErrors.selectedTags} />
                         </Grid>
                     </Grid>
-                    <div style={{marginTop: '20px'}}></div>
-                    <FileSelectionComponent allFiles={this.state.allFiles} tagIdsTagsMap={this.state.tagIdsTagsMap}
-                        selectedFiles={this.state.selectedFiles} fileIdFileMap={this.state.fileIdFileMap}
+                    <Grid container spacing={24}>
+                        <Grid item xs={3}>
+                            <Select
+                                value={'AND'}
+                                displayEmpty
+                                name="coverage-operator"
+                            >
+                                <MenuItem value="AND">All of the Coverages</MenuItem>
+                                <MenuItem value="OR">Any of the Coverages</MenuItem>
+                            </Select>
+                        </Grid>
+                        <Grid item xs={8}>
+                            <AutoCompleteWithChips suggestions={this.props.tags['coverages']} searchKey={'name'}
+                                selectedItem={this.state.coverages} onAddition={addedTag => {this.handleChipAddition(addedTag, 'coverages')}} onDeletion={deletedTag => {this.handleChipDeletion(deletedTag, 'coverages')}} required={true}
+                                errorMsg={this.state.fieldErrors.selectedTags} />
+                        </Grid>
+                    </Grid>
+                    <Grid container spacing={24}>
+                        <Grid item xs={3}>
+                            <Select
+                                value={'AND'}
+                                displayEmpty
+                                name="subjects-operator"
+                            >
+                                <MenuItem value="AND">All of the Subjects</MenuItem>
+                                <MenuItem value="OR">Any of the Subjects</MenuItem>
+                            </Select>
+                        </Grid>
+                        <Grid item xs={8}>
+                            <AutoCompleteWithChips suggestions={this.props.tags['subjects']} searchKey={'name'}
+                                selectedItem={this.state.subjects} onAddition={addedTag => {this.handleChipAddition(addedTag, 'subjects')}} onDeletion={deletedTag => {this.handleChipDeletion(deletedTag, 'subjects')}} required={true}
+                                errorMsg={this.state.fieldErrors.selectedTags} />
+                        </Grid>
+                    </Grid>
+                    <Grid container spacing={24}>
+                        <Grid item xs={3}>
+                            <Select
+                                value={'AND'}
+                                displayEmpty
+                                name="keywords-operator"
+                            >
+                                <MenuItem value="AND">All of the Keywords</MenuItem>
+                                <MenuItem value="OR">Any of the Keywords</MenuItem>
+                            </Select>
+                        </Grid>
+                        <Grid item xs={8}>
+                            <AutoCompleteWithChips suggestions={this.props.tags['keywords']} searchKey={'name'}
+                                selectedItem={this.state.keywords} onAddition={addedTag => {this.handleChipAddition(addedTag, 'keywords')}} onDeletion={deletedTag => {this.handleChipDeletion(deletedTag, 'keywords')}} required={true}
+                                errorMsg={this.state.fieldErrors.selectedTags} />
+                        </Grid>
+                    </Grid>
+                    <Grid container spacing={24}>
+                        <Grid item xs={3}>
+                            <Select
+                                value={'AND'}
+                                displayEmpty
+                                name="workarea-operator"
+                            >
+                                <MenuItem value="AND">All of the Work Areas</MenuItem>
+                                <MenuItem value="OR">Any of the Work Areas</MenuItem>
+                            </Select>
+                        </Grid>
+                        <Grid item xs={8}>
+                            <AutoCompleteWithChips suggestions={this.props.tags['workareas']} searchKey={'name'}
+                                selectedItem={this.state.workareas} onAddition={addedTag => {this.handleChipAddition(addedTag, 'workareas')}} onDeletion={deletedTag => {this.handleChipDeletion(deletedTag, 'workareas')}} required={true}
+                                errorMsg={this.state.fieldErrors.selectedTags} />
+                        </Grid>
+                    </Grid>
+                    <Grid container spacing={24}>
+                        <Grid item xs={3}>
+                            <Select
+                                value={'AND'}
+                                displayEmpty
+                                name="lang-operator"
+                            >
+                                <MenuItem value="AND">All of the Languages</MenuItem>
+                                <MenuItem value="OR">Any of the Languages</MenuItem>
+                            </Select>
+                        </Grid>
+                        <Grid item xs={8}>
+                            <AutoCompleteWithChips suggestions={this.props.tags['languages']} searchKey={'name'}
+                                selectedItem={this.state.languages} onAddition={addedTag => {this.handleChipAddition(addedTag, 'languages')}} onDeletion={deletedTag => {this.handleChipDeletion(deletedTag, 'languages')}} required={true}
+                                errorMsg={this.state.fieldErrors.selectedTags} />
+                        </Grid>
+                    </Grid>
+                    <Grid container spacing={24}>
+                        <Grid item xs={3}>
+                            <Select
+                                value={'AND'}
+                                displayEmpty
+                                name="cataloger-operator"
+                            >
+                                <MenuItem value="AND">All of the Catalogers</MenuItem>
+                                <MenuItem value="OR">Any of the Catalogers</MenuItem>
+                            </Select>
+                        </Grid>
+                        <Grid item xs={8}>
+                            <AutoCompleteWithChips suggestions={this.props.tags['catalogers']} searchKey={'name'}
+                                selectedItem={this.state.catalogers} onAddition={addedTag => {this.handleChipAddition(addedTag, 'catalogers')}} onDeletion={deletedTag => {this.handleChipDeletion(deletedTag, 'catalogers')}} required={true}
+                                errorMsg={this.state.fieldErrors.selectedTags} />
+                        </Grid>
+                    </Grid>
+                    {
+                        /*
+                    <Typography gutterBottom variant="subheading" style={{marginTop: '10px'}}>
+                        Work Areas
+                    </Typography>
+                    <Typography>
+                        Choose content matching the following Work Areas:
+                    </Typography>
+                        */
+                    }
+
+                    <div style={{marginTop: '40px'}}></div>
+                    <FileSelectionComponent allFiles={this.allFiles} tagIdsTagsMap={this.tagIdsTagsMap}
+                        selectedFiles={this.state.selectedFiles} fileIdFileMap={this.fileIdFileMap}
                         onFileSelect={this.fileSelectionCallback} onFileDeselect={this.fileDeselectionCallback}
                     />
                 </Grid>
                 <Grid item xs={3}>
                     {
-                        this.state.tagTreeData.length > 0 ?
-                            (<SortableTree
-                                treeData={this.state.tagTreeData}
-                                onChange={newTreeData => {
-                                    this.setState({tagTreeData: newTreeData});
-                                }}
-                                canDrag={false}
-                                generateNodeProps={nodeInfo => ({
-                                    onClick: (evt) => this.handleTagClick(nodeInfo, evt),
-                                })}
-                            />) : 'No Tags Available'
+                        'Metadata goes here'
                     }
                 </Grid>
                 <Dialog

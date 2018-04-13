@@ -10,13 +10,18 @@ import {
     PagingState,
 } from '@devexpress/dx-react-grid';
 import {
+    ColumnChooser,
     Grid,
     Table,
     TableHeaderRow,
     TableFilterRow,
     TableColumnResizing,
+    TableColumnVisibility,
+    Toolbar,
     PagingPanel,
 } from '@devexpress/dx-react-grid-material-ui';
+
+import { TableRow } from 'material-ui/Table';
 
 import Chip from 'material-ui/Chip';
 import Menu, { MenuItem } from 'material-ui/Menu';
@@ -26,11 +31,20 @@ import OpenInNew from 'material-ui-icons/OpenInNew';
 var __tagIdsTagsMap = {};
 
 function ChippedTagsFormatter(input) {
-    const {row, value} = input;
+    if (!input) {
+        return [];
+    }
+    const {row, column, value} = input;
     const allChips = [];
-    value.forEach(eachTagId => {
-        allChips.push(<Chip key={row.id + '_' + eachTagId} label={__tagIdsTagsMap[eachTagId]['name']} />);
-    });
+    var columnName = column['name'];
+    if(Array.isArray(value)) {
+        value.forEach(eachTagId => {
+            allChips.push(<Chip key={row.id + '_' + columnName + '_' + eachTagId} label={__tagIdsTagsMap[columnName][eachTagId]['name']} />);
+        });
+    } else if (Number.isInteger(value)) {
+        columnName += 's'; // To match the languages, catalogers and coverages.
+        allChips.push(<Chip key={row.id + '_' + columnName + '_' + input} label={__tagIdsTagsMap[columnName][value]['name']} />);
+    }
     return allChips;
 };
 
@@ -122,7 +136,7 @@ class FileSelectionComponent extends React.Component {
 
     tableRowComponent(obj, menuName)  {
         const {row, children} = obj;
-        return(<tr onContextMenu={evt => this.handleFilesRightClick(evt, row, menuName)}>{children}</tr>);
+        return(<TableRow onContextMenu={evt => this.handleFilesRightClick(evt, row, menuName)}>{children}</TableRow>);
     }
 
     render() {
@@ -136,10 +150,16 @@ class FileSelectionComponent extends React.Component {
                     columns={[
                         { name: 'name', title: 'Name' },
                         { name: 'description', title: 'Description' },
-                        { name: 'tag_ids', title: 'Tags' },
+                        { name: 'creators', title: 'Creators' },
+                        { name: 'coverage', title: 'Coverage' },
+                        { name: 'subjects', title: 'Subjects' },
+                        { name: 'keywords', title: 'Keywords' },
+                        { name: 'workareas', title: 'Workareas' },
+                        { name: 'language', title: 'Language' },
+                        { name: 'cataloger', title: 'Cataloger' },
                     ]}
                 >
-                    <ChippedTagsTypeProvider for={['tag_ids']} />
+                    <ChippedTagsTypeProvider for={['creators', 'coverage', 'subjects', 'keywords', 'workareas', 'language', 'cataloger']} />
                     <LinkTypeProvider for={['content_file']} />
                     <FilteringState defaultFilters={[]} columnExtensions={[{columnName: 'content_file', filteringEnabled: false}]} />
                     <IntegratedFiltering />
@@ -150,9 +170,18 @@ class FileSelectionComponent extends React.Component {
                         defaultColumnWidths={[
                             { columnName: 'name', width: 230 },
                             { columnName: 'description', width: 250 },
-                            { columnName: 'tag_ids', width: 420 },
+                            { columnName: 'creators', width: 420 },
+                            { columnName: 'coverage', width: 420 },
+                            { columnName: 'subjects', width: 420 },
+                            { columnName: 'keywords', width: 420 },
+                            { columnName: 'workareas', width: 420 },
+                            { columnName: 'language', width: 80 },
+                            { columnName: 'cataloger', width: 80 },
                         ]} />
                     <TableHeaderRow />
+                    <TableColumnVisibility/>
+                    <Toolbar />
+                    <ColumnChooser />
                     <TableFilterRow />
                     <PagingPanel pageSizes={[5, 10, 20]} />
                 </Grid>
@@ -189,10 +218,16 @@ class FileSelectionComponent extends React.Component {
                     columns={[
                         { name: 'name', title: 'Name' },
                         { name: 'description', title: 'Description' },
-                        { name: 'tag_ids', title: 'Tags' },
+                        { name: 'creators', title: 'Creators' },
+                        { name: 'coverage', title: 'Coverage' },
+                        { name: 'subjects', title: 'Subjects' },
+                        { name: 'keywords', title: 'Keywords' },
+                        { name: 'workareas', title: 'Workareas' },
+                        { name: 'language', title: 'Language' },
+                        { name: 'cataloger', title: 'Cataloger' },
                     ]}
                 >
-                    <ChippedTagsTypeProvider for={['tag_ids']} />
+                    <ChippedTagsTypeProvider for={['creators', 'coverage', 'subjects', 'keywords', 'workareas', 'language', 'cataloger']} />
                     <LinkTypeProvider for={['content_file']} />
                     <FilteringState defaultFilters={[]} columnExtensions={[{columnName: 'content_file', filteringEnabled: false}]} />
                     <IntegratedFiltering />
@@ -203,9 +238,18 @@ class FileSelectionComponent extends React.Component {
                         defaultColumnWidths={[
                             { columnName: 'name', width: 230 },
                             { columnName: 'description', width: 250 },
-                            { columnName: 'tag_ids', width: 420 },
+                            { columnName: 'creators', width: 420 },
+                            { columnName: 'coverage', width: 120 },
+                            { columnName: 'subjects', width: 420 },
+                            { columnName: 'keywords', width: 420 },
+                            { columnName: 'workareas', width: 420 },
+                            { columnName: 'language', width: 120 },
+                            { columnName: 'cataloger', width: 200 },
                         ]} />
                     <TableHeaderRow />
+                    <TableColumnVisibility/>
+                    <Toolbar />
+                    <ColumnChooser />
                     <TableFilterRow />
                     <PagingPanel pageSizes={[5, 10, 20]} />
                 </Grid>

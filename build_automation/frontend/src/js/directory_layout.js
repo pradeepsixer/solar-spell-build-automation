@@ -1,6 +1,6 @@
 import axios from 'axios';
 import React from 'react';
-// import {default as LodashObject} from 'lodash/fp/object';
+import cloneDeep from 'lodash/fp/cloneDeep';
 
 import AppBar from 'material-ui/AppBar';
 import Button from 'material-ui/Button';
@@ -71,15 +71,6 @@ const BOARD_TYPES = {
  *                              For BOARD_TYPES.DIRECTORY, this will be <Directory> object.
  *                                      For more details, refer treeData above.
  *
- *      tagTreeData: Object - A Tree Data containing all the tags. Each <Tag> will be like
- *              {
- *                  id: Integer - Tag Id
- *                  name: String - Name of the Tag
- *                  description: String - Description of the Tag
- *                  title: String - Currently, the same as name.
- *                  parent: Integer - The parent <Tag>'s id (if present, else null).
- *                  children: [ <Directory> ]
- *              }
  * }
  */
 class DirectoryLayoutComponent extends React.Component {
@@ -92,7 +83,6 @@ class DirectoryLayoutComponent extends React.Component {
             treeData: [],
             infoBoardType: BOARD_TYPES.NONE,
             infoBoardData: {},
-            tagTreeData: [],
             allFiles: [],
             fileIdFileMap: {},
             dirContextMenu: {
@@ -178,30 +168,29 @@ class DirectoryLayoutComponent extends React.Component {
         inputData.forEach(eachDir => {
             const currentLayoutInfo = directoryLayoutInfo[eachDir.dir_layout];
             const layoutDirectories = currentLayoutInfo.directories;
-            if (layoutDirectories[eachDir.id]) {
-                layoutDirectories[eachDir.id].id = eachDir.id;
-                layoutDirectories[eachDir.id].name = eachDir.name;
-                layoutDirectories[eachDir.id].title = (
-                    <Button fullWidth>{eachDir.name}</Button>
-                );
-                layoutDirectories[eachDir.id].parent = eachDir.parent;
-                layoutDirectories[eachDir.id].dirLayoutId = eachDir.dir_layout;
-                layoutDirectories[eachDir.id].filterCriteria = eachDir.filter_criteria;
-                layoutDirectories[eachDir.id].individualFiles = eachDir.individual_files;
-            } else {
+            if (! layoutDirectories[eachDir.id]) {
                 layoutDirectories[eachDir.id] = {
-                    id: eachDir.id,
-                    name: eachDir.name,
-                    title: (
-                        <Button fullWidth>{eachDir.name}</Button>
-                    ),
-                    dirLayoutId: eachDir.dir_layout,
-                    parent: eachDir.parent,
-                    filterCriteria: eachDir.filter_criteria,
-                    individualFiles: eachDir.individual_files,
                     children: []
-                };
+                }
             }
+            layoutDirectories[eachDir.id].id = eachDir.id;
+            layoutDirectories[eachDir.id].name = eachDir.name;
+            layoutDirectories[eachDir.id].title = (
+                <Button fullWidth>{eachDir.name}</Button>
+            );
+            layoutDirectories[eachDir.id].parent = eachDir.parent;
+            layoutDirectories[eachDir.id].dirLayoutId = eachDir.dir_layout;
+            layoutDirectories[eachDir.id].bannerFile = eachDir.banner_file;
+            layoutDirectories[eachDir.id].originalFileName = eachDir.original_file_name;
+            layoutDirectories[eachDir.id].individualFiles = eachDir.individual_files;
+            layoutDirectories[eachDir.id].creators = eachDir.creators;
+            layoutDirectories[eachDir.id].coverages = eachDir.coverages;
+            layoutDirectories[eachDir.id].subjects = eachDir.subjects;
+            layoutDirectories[eachDir.id].keywords = eachDir.keywords;
+            layoutDirectories[eachDir.id].workareas = eachDir.workareas;
+            layoutDirectories[eachDir.id].languages = eachDir.languages;
+            layoutDirectories[eachDir.id].catalogers = eachDir.catalogers;
+
             if (eachDir.parent) {
                 /* Since the directory has a parent, it is a subdirectory, so add it to the children
                  * list of its parent directory
@@ -227,7 +216,7 @@ class DirectoryLayoutComponent extends React.Component {
             const treeData = currentLayoutInfo.treeData;
             topLevelDirectories.forEach(topLevelDirId => {
                 treeData.push(layoutDirectories[topLevelDirId]);
-            })
+            });
             retval[eachLayoutId] = treeData;
         });
 
@@ -244,12 +233,10 @@ class DirectoryLayoutComponent extends React.Component {
 
     loadData() {
         const currInstance = this;
-        axios.get(APP_URLS.TAG_LIST, {
+        axios.get(APP_URLS.ALLTAGS_LIST, {
             responseType: 'json'
         }).then(function(response) {
-            const tagTreeData = currInstance.transformTagsToTreeData(response.data);
             currInstance.setState({
-                tagTreeData: tagTreeData,
                 tags: response.data
             })
         }).catch(function(error) {
@@ -323,7 +310,6 @@ class DirectoryLayoutComponent extends React.Component {
     }
 
     handleDirectoryLeftClick(nodeInfo, evt) {
-        console.log(nodeInfo);
         const evtTarget = evt.target;
         /* This is used to determine whether the click event was directed at the tree node,
          * or at the expand/collapse buttons in the SortableTree. */
@@ -351,7 +337,6 @@ class DirectoryLayoutComponent extends React.Component {
     }
 
     handleMenuClose(evt) {
-        console.log(evt);
         this.setState({
             dirContextMenu: {
                 selectedDirectory: null,
@@ -364,18 +349,26 @@ class DirectoryLayoutComponent extends React.Component {
         /*
          * If the parentDirId is null, there is no parent directory and will be created at the root.
          */
-        console.log(dirLayoutId, parentDirId);
-        this.setState({
+        this.setState((prevState, props) => {
+            return {
             infoBoardType: BOARD_TYPES.DIRECTORY,
             infoBoardData: {
                 id: -1,
                 name: '',
-                filterCriteria: '',
                 individualFiles: [],
+                bannerFile: '',
+                originalFileName: '',
+                creators: [],
+                coverages: [],
+                subjects: [],
+                keywords: [],
+                workareas: [],
+                languages: [],
+                catalogers: [],
                 dirLayoutId: dirLayoutId,
-                parent: parentDirId
+                parent: parentDirId,
             }
-        });
+        }});
     }
 
     createDirectoryLayout(evt) {
@@ -385,7 +378,9 @@ class DirectoryLayoutComponent extends React.Component {
             infoBoardData: {
                 id: -1,
                 name: '',
-                description: ''
+                description: '',
+                original_file_name: '',
+                banner_file: ''
             }
         });
     }
@@ -401,7 +396,7 @@ class DirectoryLayoutComponent extends React.Component {
                 </ListItem>);
                 accordionItems.push(<Collapse key={'collapse-' + eachDirLayout.id} in={eachDirLayout.isOpen} timeout="auto" unmountOnExit>
                 <Button variant="raised" color="primary" onClick={evt => {this.createDirectory(eachDirLayout.id, null); }}>
-                        New Directory
+                        New Folder
                 </Button>
                 {
                     this.state.treeData[eachDirLayout.id].length > 0 &&
@@ -427,10 +422,10 @@ class DirectoryLayoutComponent extends React.Component {
                 <Grid container spacing={8}>
                     <Grid item xs={3} style={{paddingLeft: '20px'}}>
                         <Button variant="raised" color="primary" onClick={this.createDirectoryLayout}>
-                            New Directory Layout
+                            New Library Version
                         </Button>
                         <List component="nav">
-                            <ListSubheader disableSticky component="div">Directory Layouts</ListSubheader>
+                            <ListSubheader disableSticky component="div">Library Versions</ListSubheader>
                             {
                                 accordionItems
                             }
@@ -450,7 +445,7 @@ class DirectoryLayoutComponent extends React.Component {
                         }
                         {
                             this.state.infoBoardType == BOARD_TYPES.DIRECTORY &&
-                                <DirectoryInfoBoard boardData={this.state.infoBoardData} onSave={this.saveDirectoryCallback} onDelete={this.deleteDirectoryCallback} tagTreeData={this.state.tagTreeData} tags={this.state.tags} allFiles={this.state.allFiles} fileIdFileMap={this.state.fileIdFileMap} />
+                                <DirectoryInfoBoard boardData={this.state.infoBoardData} onSave={this.saveDirectoryCallback} onDelete={this.deleteDirectoryCallback} tags={this.state.tags} allFiles={this.state.allFiles} fileIdFileMap={this.state.fileIdFileMap} />
                         }
                         {
                             this.state.infoBoardType == BOARD_TYPES.NONE &&
@@ -470,7 +465,7 @@ class DirectoryLayoutComponent extends React.Component {
                                 this.handleMenuClose(evt);
                             }}
                         >
-                            Create Directory
+                            Create SubFolder
                         </MenuItem>
                     </Menu>
                 </Grid>
@@ -501,6 +496,8 @@ class DirectoryLayoutComponent extends React.Component {
                         id: savedInfo.id,
                         name: savedInfo.name,
                         description: savedInfo.description,
+                        original_file_name: savedInfo.original_file_name,
+                        banner_file: savedInfo.banner_file,
                         isOpen: false
                     };
 
@@ -512,6 +509,8 @@ class DirectoryLayoutComponent extends React.Component {
                         if (eachDirLayout.id == savedInfo.id) {
                             eachDirLayout.name = savedInfo.name;
                             eachDirLayout.description = savedInfo.description;
+                            eachDirLayout.banner_file = savedInfo.banner_file;
+                            eachDirLayout.original_file_name = savedInfo.original_file_name;
                         }
                     });
                 }
@@ -550,14 +549,22 @@ class DirectoryLayoutComponent extends React.Component {
             if (array[i].id == directoryId) {
                 if (created) {
                     // If the operation is a create operation
-                    array[i].children.push({
+                    array[i].children = array[i].children.concat({
                         id: newValue.id,
                         name: newValue.name,
                         title: (<Button fullWidth>{newValue.name}</Button>),
                         dirLayoutId: newValue.dir_layout,
                         parent: newValue.parent,
-                        filterCriteria: newValue.filter_criteria,
+                        bannerFile: newValue.banner_file,
+                        originalFileName: newValue.original_file_name,
                         individualFiles: newValue.individual_files,
+                        creators: newValue.creators,
+                        coverages: newValue.coverages,
+                        subjects: newValue.subjects,
+                        keywords: newValue.keywords,
+                        workareas: newValue.workareas,
+                        languages: newValue.languages,
+                        catalogers: newValue.catalogers,
                         children: []
                     });
                 } else {
@@ -565,8 +572,16 @@ class DirectoryLayoutComponent extends React.Component {
                     array[i].name = newValue.name;
                     array[i].title = (<Button fullWidth>{newValue.name}</Button>);
                     array[i].parent = newValue.parent;
-                    array[i].filterCriteria = newValue.filter_criteria;
+                    array[i].bannerFile = newValue.banner_file;
+                    array[i].originalFileName = newValue.original_file_name;
                     array[i].individualFiles = newValue.individual_files;
+                    array[i].creators = newValue.creators;
+                    array[i].coverages = newValue.coverages;
+                    array[i].subjects = newValue.subjects;
+                    array[i].keywords = newValue.keywords;
+                    array[i].workareas = newValue.workareas;
+                    array[i].languages = newValue.languages;
+                    array[i].catalogers = newValue.catalogers;
                 }
                 return true;
             }
@@ -584,7 +599,7 @@ class DirectoryLayoutComponent extends React.Component {
         this.setState((prevState, props) => {
             const dirLayoutId = savedInfo.dir_layout;
             const newState = {
-                treeData: prevState.treeData
+                treeData: Object.assign(prevState.treeData)
             }
 
             if (created) {
@@ -593,14 +608,22 @@ class DirectoryLayoutComponent extends React.Component {
                     this.updateDirectoryEntry(savedInfo.parent, newState.treeData[dirLayoutId], savedInfo, created);
                 } else {
                     // Add it as a top level directory for the layout.
-                    newState.treeData[dirLayoutId].push({
+                    newState.treeData[dirLayoutId] = newState.treeData[dirLayoutId].concat({
                         id: savedInfo.id,
                         name: savedInfo.name,
                         title: (<Button>{savedInfo.name}</Button>),
                         dirLayoutId: savedInfo.dir_layout,
                         parent: savedInfo.parent,
-                        filterCriteria: savedInfo.filter_criteria,
+                        bannerFile: savedInfo.banner_file,
+                        originalFileName: savedInfo.original_file_name,
                         individualFiles: savedInfo.individual_files,
+                        creators: savedInfo.creators,
+                        coverages: savedInfo.coverages,
+                        subjects: savedInfo.subjects,
+                        keywords: savedInfo.keywords,
+                        workareas: savedInfo.workareas,
+                        languages: savedInfo.languages,
+                        catalogers: savedInfo.catalogers,
                         children: []
                     });
                 }
@@ -635,7 +658,7 @@ class DirectoryLayoutComponent extends React.Component {
             const newState = {
                 infoBoardType: BOARD_TYPES.NONE,
                 infoBoardData: {},
-                treeData: prevState.treeData,
+                treeData: cloneDeep(prevState.treeData),
                 breadCrumb: ' '
             };
 
