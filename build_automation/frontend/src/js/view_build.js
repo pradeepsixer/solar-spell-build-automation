@@ -13,7 +13,6 @@ import DownloadBuild from './download_build.js';
 class ViewBuildComponent extends React.Component{
     constructor(props){
         super(props)
-        console.log(props);
         this.state = {
             id: props.built.id,
             name: props.built.name,
@@ -115,7 +114,7 @@ class ViewBuildComponent extends React.Component{
         else {
             elements = (
                 <div>
-                    <p>Building...Please wait <CircularProgress/> </p>
+                    Building...Please wait <CircularProgress/>
 
                 </div>
             )

@@ -16,7 +16,8 @@ class MakeBuildComponent extends React.Component{
         this.state = {
           dirLayouts: [],
           info: {},
-          currentLayout : {}
+          currentLayout : {},
+          value : ''
     };
 
     this.handleClick = this.handleClick.bind(this)
@@ -34,10 +35,12 @@ class MakeBuildComponent extends React.Component{
         clearTimeout(this.timerID);
     }
 
-    handleClick(event){
+    handleClick(layout, event){
         console.log("clicked")
-        console.log(event.target.value)
-        this.setState({info:layout});
+        console.log(layout)
+        this.setState({
+            value: event.target.value,
+            info:layout});
        // console.log(this.state.info);
     }
 
@@ -75,7 +78,7 @@ class MakeBuildComponent extends React.Component{
                                 <div className="container1">
                                     {  this.state.dirLayouts.map((layout,i) =>
                                         <div key={i}>
-                                             <RadioGroup ref="dirlayouts" name="dirlayouts" value={this.state.value} onChange={event => this.handleClick(layout, event)}>
+                                             <RadioGroup ref="dirlayout" name="dirlayout" value={this.state.value} onChange={event => this.handleClick(layout, event)}>
                                                     <FormControlLabel value={layout.name} control={<Radio />} label={layout.name} />
                                              </RadioGroup>
                                         </div>)

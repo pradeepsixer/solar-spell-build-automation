@@ -5,7 +5,6 @@ import Button from 'material-ui/Button';
 class MakeBuildDirlayoutInfo extends React.Component{
     constructor(props){
         super(props);
-        console.log(props)
         this.state = {
             id: props.info.id,
             name: props.info.name,
@@ -46,7 +45,7 @@ class MakeBuildDirlayoutInfo extends React.Component{
                 <label>Name</label>
                 <TextField
                   id="name"
-                  value={this.state.name}
+                  value={this.state.name || ''}
                   fullWidth
                   margin="normal"
                 />
@@ -56,7 +55,7 @@ class MakeBuildDirlayoutInfo extends React.Component{
                   id="description"
                   multiline
                   fullWidth
-                  value={this.state.description}
+                  value={this.state.description || ''}
                   margin="normal"
                 />
                 <Button variant="raised" color="primary" onClick={this.submitHandler}>
