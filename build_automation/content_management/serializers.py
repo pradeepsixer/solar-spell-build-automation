@@ -296,7 +296,8 @@ class DirectorySerializer(serializers.ModelSerializer):
         del validated_data_copy['workareas']
         del validated_data_copy['languages']
         del validated_data_copy['catalogers']
-        directory = Directory.objects.create(**validated_data_copy)
+        directory = Directory(**validated_data_copy)
+        self.__create_update(directory)
         directory.individual_files.set(validated_data['individual_files'])
         directory.creators.set(validated_data['creators'])
         directory.coverages.set(validated_data['coverages'])
@@ -312,7 +313,7 @@ class DirectorySerializer(serializers.ModelSerializer):
         instance.dir_layout = validated_data.get('dir_layout', instance.dir_layout)
         instance.banner_file = validated_data.get('banner_file', instance.banner_file)
         instance.parent = validated_data.get('parent', instance.parent)
-        instance.save()
+        self.__create_update(instance)
         instance.individual_files.set(validated_data.get('individual_files', instance.individual_files.all()))
         instance.creators.set(validated_data.get('creators', instance.creators.all()))
         instance.coverages.set(validated_data.get('coverages', instance.coverages.all()))
@@ -322,6 +323,13 @@ class DirectorySerializer(serializers.ModelSerializer):
         instance.languages.set(validated_data.get('languages', instance.languages.all()))
         instance.catalogers.set(validated_data.get('catalogers', instance.catalogers.all()))
         return instance
+
+    def __create_update(self, directory):
+        request = self.context['request']
+        if 'banner_file' in request.FILES:
+            directory.banner_file_uploaded = True
+        directory.save()
+        return directory
 
     class Meta:
         model = Directory

@@ -68,12 +68,46 @@ def delete_banner_file_on_change(sender, **kwargs):
                 os.remove(current_banner_path)
 
 
-@receiver(pre_save, sender=DirectoryLayout)
+@receiver(post_delete, sender=DirectoryLayout)
 def delete_banner_file_after_model_deletion(sender, **kwargs):
     """
     Delete the model file after the DirectoryLayout has been deleted.
     """
     dir_layout = kwargs['instance']
 
-    if os.path.exists(dir_layout.banner_file.path):
+    if (
+        dir_layout.banner_file is not None and len(dir_layout.existing_banner_file.name) > 0 and
+        os.path.exists(dir_layout.banner_file.path)
+    ):
         os.remove(dir_layout.banner_file.path)
+
+@receiver(pre_save, sender=DirectoryLayout)
+def delete_dir_banner_file_on_change(sender, **kwargs):
+    """
+    Delete the Directory's existing banner file, when a new banner is uploaded.
+    """
+    directory = kwargs['instance']
+
+    # If a new banner file is uploaded, remove the old one.
+    if directory.banner_file_uploaded:
+        if (
+            directory.pk is not None and directory.existing_banner_file is not None and
+            len(directory.existing_banner_file.name) > 0
+        ):
+            current_banner_path = directory.existing_banner_file.path
+            if os.path.exists(current_banner_path):
+                os.remove(current_banner_path)
+
+
+@receiver(post_delete, sender=DirectoryLayout)
+def delete_dir_banner_file_after_model_deletion(sender, **kwargs):
+    """
+    Delete the model file after the Directory has been deleted.
+    """
+    directory = kwargs['instance']
+
+    if (
+        directory.banner_file is not None and len(directory.existing_banner_file.name) > 0 and
+        os.path.exists(directory.banner_file.path)
+    ):
+        os.remove(directory.banner_file.path)

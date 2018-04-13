@@ -1,3 +1,6 @@
+import os
+
+from django.core.files.base import ContentFile
 from rest_framework import filters, status
 from rest_framework.mixins import CreateModelMixin, ListModelMixin
 from rest_framework.response import Response
@@ -118,6 +121,9 @@ class DirectoryCloneApiViewSet(ViewSet, CreateModelMixin):
             name=original_layout.name + self.CLONE_SUFFIX, description=original_layout.description
         )
         cloned_layout.pk = None
+        dup_banner = ContentFile(original_layout.banner_file.read())
+        dup_banner.name = original_layout.original_file_name
+        cloned_layout.banner_file = dup_banner
         cloned_layout.save()
 
         dir_queryset = Directory.objects.filter(dir_layout=original_layout, parent=None)
@@ -137,7 +143,14 @@ class DirectoryCloneApiViewSet(ViewSet, CreateModelMixin):
             cloned_directory = Directory(name=each_original_directory.name)
             cloned_directory.dir_layout = cloned_dir_layout
             cloned_directory.parent = parent_cloned_directory
-            cloned_directory.banner_file = each_original_directory.banner_file
+            if (
+                each_original_directory.banner_file is not None and
+                len(each_original_directory.banner_file.name) > 0 and
+                os.path.exists(each_original_directory.banner_file.path)
+            ) :
+                dup_banner = ContentFile(each_original_directory.banner_file.read())
+                dup_banner.name = each_original_directory.original_file_name
+                cloned_directory.banner_file = dup_banner
             cloned_directory.save()
             cloned_directory.individual_files.set(list(each_original_directory.individual_files.all()))
             cloned_directory.creators.set(list(each_original_directory.creators.all()))

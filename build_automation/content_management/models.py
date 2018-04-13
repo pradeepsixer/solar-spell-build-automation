@@ -189,7 +189,7 @@ class Directory(models.Model):
     name = models.CharField(max_length=50)
     dir_layout = models.ForeignKey(DirectoryLayout, related_name='directories', on_delete=models.CASCADE)
     parent = models.ForeignKey('self', related_name='subdirectories', on_delete=models.CASCADE, null=True)
-    banner_file = models.FileField(upload_to=set_original_name)
+    banner_file = models.FileField(upload_to=set_original_name, null=True)
     original_file_name = models.CharField(max_length=200, null=True)
     individual_files = models.ManyToManyField(Content, related_name='individual_files')
     creators = models.ManyToManyField(Creator)
@@ -199,6 +199,8 @@ class Directory(models.Model):
     workareas = models.ManyToManyField(Workarea)
     languages = models.ManyToManyField(Language)
     catalogers = models.ManyToManyField(Cataloger)
+
+    banner_file_uploaded = False
 
     def __str__(self):
         return "Directory[{}]".format(self.name)

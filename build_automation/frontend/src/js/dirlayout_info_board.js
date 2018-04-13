@@ -82,7 +82,7 @@ class DirlayoutInfoBoard extends React.Component {
         if (this.state.id > 0) {
             // Update an existing directory layout.
             targetUrl = get_url(APP_URLS.DIRLAYOUT_DETAIL, {id:this.state.id});
-            axios.put(targetUrl, payload, {
+            axios.patch(targetUrl, payload, {
                 responseType: 'json'
             }).then(function(response) {
                 currentInstance.saveCallback(response.data, DIRLAYOUT_SAVE_TYPE.UPDATE);
