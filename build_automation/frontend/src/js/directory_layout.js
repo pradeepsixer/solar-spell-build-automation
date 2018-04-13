@@ -24,7 +24,6 @@ import { DIRLAYOUT_SAVE_TYPE } from './constants.js';
 import { APP_URLS } from './url.js';
 
 import 'react-sortable-tree/style.css';
-import '../css/style.css';
 
 const BOARD_TYPES = {
     DIRLAYOUT: 1,
@@ -398,6 +397,7 @@ class DirectoryLayoutComponent extends React.Component {
                 <Button variant="raised" color="primary" onClick={evt => {this.createDirectory(eachDirLayout.id, null); }}>
                         New Folder
                 </Button>
+                <div className={'autoScrollX'}>
                 {
                     this.state.treeData[eachDirLayout.id].length > 0 &&
                     <SortableTree
@@ -414,6 +414,7 @@ class DirectoryLayoutComponent extends React.Component {
                     })}
                     />
                 }
+                </div>
                 </Collapse>);
                 accordionItems.push(<Divider key={'divider_' + eachDirLayout.id} />);
             });
