@@ -1,3 +1,5 @@
+import os
+
 from django.db import models
 from django.urls import reverse  # Used to generate URLs by reversing the URL patterns
 
@@ -149,11 +151,24 @@ class Content(models.Model):
 
 
 class DirectoryLayout(models.Model):
+
+    def set_original_name(self, file_name):
+        self.original_file_name = file_name
+        return os.path.join("banners", "libversions", file_name)
+
     """
     The Directory Layout for each build.
     """
     name = models.CharField(max_length=50, unique=True)
     description = models.CharField(max_length=200, null=True)
+    banner_file = models.FileField(upload_to=set_original_name)
+    original_file_name = models.CharField(max_length=200, null=True)
+
+    banner_file_uploaded = False
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.existing_banner_file = self.banner_file
 
     def __str__(self):
         return "DirectoryLayout[{}]".format(self.name)
@@ -163,12 +178,19 @@ class DirectoryLayout(models.Model):
 
 
 class Directory(models.Model):
+
+    def set_original_name(self, file_name):
+        self.original_file_name = file_name
+        return os.path.join("banners", "folders", file_name)
+
     """
     Representation of the directory for each build.
     """
     name = models.CharField(max_length=50)
     dir_layout = models.ForeignKey(DirectoryLayout, related_name='directories', on_delete=models.CASCADE)
     parent = models.ForeignKey('self', related_name='subdirectories', on_delete=models.CASCADE, null=True)
+    banner_file = models.FileField(upload_to=set_original_name, null=True)
+    original_file_name = models.CharField(max_length=200, null=True)
     individual_files = models.ManyToManyField(Content, related_name='individual_files')
     creators = models.ManyToManyField(Creator)
     coverages = models.ManyToManyField(Coverage)
@@ -177,6 +199,8 @@ class Directory(models.Model):
     workareas = models.ManyToManyField(Workarea)
     languages = models.ManyToManyField(Language)
     catalogers = models.ManyToManyField(Cataloger)
+
+    banner_file_uploaded = False
 
     def __str__(self):
         return "Directory[{}]".format(self.name)

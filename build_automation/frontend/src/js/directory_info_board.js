@@ -10,6 +10,8 @@ import Select from 'material-ui/Select';
 import TextField from 'material-ui/TextField';
 import Typography from 'material-ui/Typography';
 
+import OpenInNew from 'material-ui-icons/OpenInNew';
+
 import SortableTree from 'react-sortable-tree';
 
 import AutoCompleteWithChips from './autocomplete.js';
@@ -22,25 +24,36 @@ import 'react-sortable-tree/style.css';
 class DirectoryInfoBoard extends React.Component {
     constructor(props) {
         super(props);
-        console.log('DirInfoBoard props ', props);
+        this.tagIdsTagsMap = this.buildTagIdTagsMap(props.tags);
+        const labels = this.getAutoCompleteLabelsFromTagIds(props.boardData, this.tagIdsTagsMap);
         this.state = {
             id: props.boardData.id,
             dirLayoutId: props.boardData.dirLayoutId,
             name: props.boardData.name,
             parent: props.boardData.parent,
-            tagTreeData: props.tagTreeData,
+            bannerFile: null,
+            bannerFileName: props.boardData.originalFileName ? props.boardData.originalFileName : '',
+            creators: labels['creators'],
+            coverages: labels['coverages'],
+            subjects: labels['subjects'],
+            keywords: labels['keywords'],
+            workareas: labels['workareas'],
+            languages: labels['languages'],
+            catalogers: labels['catalogers'],
             selectedFiles: props.boardData.individualFiles,
             confirmDelete: false,
+            labels: labels,
             fieldErrors: {}
         };
 
         this.allFiles = props.allFiles;
+        this.tagNameTagMap = this.buildTagNameTagMap(props.tags);
         this.fileIdFileMap = props.fileIdFileMap;
-        this.tagIdsTagsMap = this.buildTagIdTagsMap(props.tags);
         this.saveDirectory = this.saveDirectory.bind(this);
         this.deleteDirectory = this.deleteDirectory.bind(this);
         this.saveCallback = this.props.onSave.bind(this);
         this.deleteCallback = this.props.onDelete.bind(this);
+        this.handleBannerSelection = this.handleBannerSelection.bind(this);
         this.handleChipAddition = this.handleChipAddition.bind(this);
         this.handleChipDeletion = this.handleChipDeletion.bind(this);
         this.handleOperatorChange = this.handleOperatorChange.bind(this);
@@ -61,10 +74,24 @@ class DirectoryInfoBoard extends React.Component {
 
     buildTagNameTagMap(tags) {
         const tagNameTagMap = {};
-        tags.forEach(eachTag => {
-            tagNameTagMap[eachTag.name] = eachTag;
-        })
+        Object.keys(tags).forEach(eachTagType => {
+            tagNameTagMap[eachTagType] = buildMapFromArray(tags[eachTagType], 'name');
+        });
         return tagNameTagMap;
+    }
+
+    getAutoCompleteLabelsFromTagIds(boardInfo, tagIdsTagsMap) {
+        const retval = {};
+        Object.keys(tagIdsTagsMap).forEach(eachTagType => {
+            const selectedTagsForDir = boardInfo[eachTagType];
+            const selectedTypeAllTags = tagIdsTagsMap[eachTagType];
+            const labels = [];
+            selectedTagsForDir.forEach(eachTagId => {
+                labels.push(selectedTypeAllTags[eachTagId].name);
+            });
+            retval[eachTagType] = labels;
+        });
+        return retval;
     }
 
     getFilterCriteriaInfoFromString(filterCriteria, tagIdTagsMap) {
@@ -80,25 +107,49 @@ class DirectoryInfoBoard extends React.Component {
             operator: filterCriteriaInfo.operator,
             selectedItems: selectedItems
         }
-        console.log(retval);
         return retval;
     }
 
     componentWillReceiveProps(props) {
-        console.log('DirInfoBoard props ', props);
+        this.tagIdsTagsMap = this.buildTagIdTagsMap(props.tags);
+        const labels = this.getAutoCompleteLabelsFromTagIds(props.boardData, this.tagIdsTagsMap);
         this.setState({
             id: props.boardData.id,
             dirLayoutId: props.boardData.dirLayoutId,
             name: props.boardData.name,
             parent: props.boardData.parent,
-            tagTreeData: props.tagTreeData,
+            bannerFile: null,
+            bannerFileName: props.boardData.originalFileName ? props.boardData.originalFileName : '',
+            creators: labels['creators'],
+            coverages: labels['coverages'],
+            subjects: labels['subjects'],
+            keywords: labels['keywords'],
+            workareas: labels['workareas'],
+            languages: labels['languages'],
+            catalogers: labels['catalogers'],
             selectedFiles: props.boardData.individualFiles,
             confirmDelete: false,
             fieldErrors: {}
         });
         this.allFiles = props.allFiles;
-        this.tagIdsTagsMap = this.buildTagIdTagsMap(props.tags);
+        this.tagNameTagMap = this.buildTagNameTagMap(props.tags);
         this.fileIdFileMap = props.fileIdFileMap;
+    }
+
+    getSelectedTagsIdsFromName(tagType) {
+        const matchingTagIds = [];
+        this.state[tagType].forEach(eachLabel => {
+            matchingTagIds.push(this.tagNameTagMap[tagType][eachLabel].id);
+        });
+        return matchingTagIds;
+    }
+
+    getSelectedTags() {
+        const tagTypeSelectedTagsMap = {};
+        Object.keys(this.props.tags).forEach(eachTagType => {
+            tagTypeSelectedTagsMap[eachTagType] = this.getSelectedTagsIdsFromName(eachTagType);
+        });
+        return tagTypeSelectedTagsMap;
     }
 
     saveDirectory(evt) {
@@ -107,25 +158,24 @@ class DirectoryInfoBoard extends React.Component {
             return;
         }
         var targetUrl = APP_URLS.DIRECTORY_LIST;
-        const tagNameTagMap = this.buildTagNameTagMap(this.state.tags);
-        const allSelectedTags = [];
-        this.state.selectedTags.forEach(eachTagName => {
-            allSelectedTags.push(tagNameTagMap[eachTagName]);
-        });
-        const filterCriteriaString = convert_tags_to_filter_criteria_string(allSelectedTags, this.state.selectedOperator);
-        console.log(filterCriteriaString);
-        const payload = {
-            name: this.state.name,
-            dir_layout: this.state.dirLayoutId,
-            filter_criteria: filterCriteriaString,
-            individual_files: this.state.selectedFiles,
-            parent: this.state.parent
-        };
-
+        const selectedTags = this.getSelectedTags();
+        const payload = new FormData();
+        payload.append('name', this.state.name);
+        payload.append('dir_layout', this.state.dirLayoutId);
+        this.state.selectedFiles.forEach(file => {payload.append('individual_files', file)});
+        selectedTags['creators'].forEach(creator => {payload.append('creators', creator)});
+        selectedTags['coverages'].forEach(coverage => {payload.append('coverages', coverage)});
+        selectedTags['subjects'].forEach(subject => {payload.append('subjects', subject)});
+        selectedTags['keywords'].forEach(keyword => {payload.append('keywords', keyword)});
+        selectedTags['workareas'].forEach(workarea => {payload.append('workareas', workarea)});
+        selectedTags['languages'].forEach(language => {payload.append('languages', language)});
+        selectedTags['catalogers'].forEach(cataloger => {payload.append('catalogers', cataloger)});
+        Boolean(this.state.parent) && payload.append('parent', this.state.parent);
+        Boolean(this.state.bannerFile) && payload.append('banner_file', this.state.bannerFile);
         const currInstance = this;
         if (this.state.id > 0) {
             // Update an existing directory.
-            payload.id = this.state.id;
+            payload.append('id', this.state.id);
             targetUrl = get_url(APP_URLS.DIRECTORY_DETAIL, {id:this.state.id});
             axios.patch(targetUrl, payload, {
                 responseType: 'json'
@@ -154,10 +204,6 @@ class DirectoryInfoBoard extends React.Component {
         if (!this.state.name || this.state.name.trim().length === 0) {
             hasErrors = true;
             fieldErrors['name'] = 'Name is required.';
-        }
-        if (!this.state.selectedTags || this.state.selectedTags.length === 0) {
-            hasErrors = true;
-            fieldErrors['selectedTags'] = 'Tags are required for filtering the contents.';
         }
         if (hasErrors) {
             this.setState({fieldErrors});
@@ -203,21 +249,19 @@ class DirectoryInfoBoard extends React.Component {
     }
 
     /* Called when a chip is added to the autocomplete component. */
-    handleChipAddition(addedChip) {
+    handleChipAddition(addedChip, tagType) {
         this.setState((prevState, props) => {
-            const selectedTags = prevState.selectedTags;
-            if (selectedTags.indexOf(addedChip.name) === -1) {
-                selectedTags.push(addedChip.name);
-            }
-            return {selectedTags};
+            const selectedTags = prevState[tagType];
+            selectedTags.push(addedChip.name);
+            return {[tagType]: selectedTags};
         });
     }
 
-    handleChipDeletion(deletedChip) {
+    handleChipDeletion(deletedChip, tagType) {
         this.setState((prevState, props) => {
-            const selectedTags = prevState.selectedTags;
+            const selectedTags = prevState[tagType];
             selectedTags.splice(selectedTags.indexOf(deletedChip.name), 1);
-            return {selectedTags};
+            return {[tagType]: selectedTags};
         });
     }
 
@@ -243,6 +287,15 @@ class DirectoryInfoBoard extends React.Component {
         this.setState({confirmDelete: false})
     }
 
+    handleBannerSelection(evt) {
+        evt.persist();
+        const file = evt.target.files[0];
+        this.setState({
+            bannerFile: file,
+            bannerFileName: file.name
+        });
+    }
+
     render() {
         return (
             <Grid container spacing={24}>
@@ -258,14 +311,42 @@ class DirectoryInfoBoard extends React.Component {
                     }
                     <TextField
                       id="name"
-                      label="Name"
-                      required
+                      label="Name *"
                       error={this.state.fieldErrors.name ? true: false}
                       value={this.state.name}
                       onChange={evt => this.handleTextFieldUpdate('name', evt)}
                       fullWidth
                       margin="normal"
                     />
+                    <TextField
+                      id="bannerimg"
+                      label="Banner Image"
+                      multiline
+                      disabled
+                      InputLabelProps={{
+                        shrink: true,
+                      }}
+                      error={this.state.fieldErrors.banner ? true : false}
+                      value={this.state.bannerFileName}
+                      margin="normal"
+                    />
+                    <input
+                        accept="image/*"
+                        className={'hidden'}
+                        id="raised-button-file"
+                        type="file"
+                        onChange={ this.handleBannerSelection }
+                     />
+                    <label htmlFor="raised-button-file">
+                        <Button variant="raised" component="span">
+                            Browse
+                        </Button>
+                    </label>
+                    {
+                        this.props.boardData.bannerFile &&
+                            <OpenInNew onClick={evt => window.open(this.props.boardData.bannerFile, "_blank")}
+                                className="handPointer" title="Open in new window"/>
+                    }
                     <p></p>
                     <Typography gutterBottom variant="headline" component="h2">
                         Filter by Metadata
@@ -286,7 +367,7 @@ class DirectoryInfoBoard extends React.Component {
                         </Grid>
                         <Grid item xs={8}>
                             <AutoCompleteWithChips suggestions={this.props.tags['creators']} searchKey={'name'}
-                                selectedItem={[]} onAddition={null} onDeletion={null} required={true}
+                                selectedItem={this.state.creators} onAddition={addedTag => {this.handleChipAddition(addedTag, 'creators')}} onDeletion={deletedTag => {this.handleChipDeletion(deletedTag, 'creators')}} required={true}
                                 errorMsg={this.state.fieldErrors.selectedTags} />
                         </Grid>
                     </Grid>
@@ -303,7 +384,7 @@ class DirectoryInfoBoard extends React.Component {
                         </Grid>
                         <Grid item xs={8}>
                             <AutoCompleteWithChips suggestions={this.props.tags['coverages']} searchKey={'name'}
-                                selectedItem={[]} onAddition={null} onDeletion={null} required={true}
+                                selectedItem={this.state.coverages} onAddition={addedTag => {this.handleChipAddition(addedTag, 'coverages')}} onDeletion={deletedTag => {this.handleChipDeletion(deletedTag, 'coverages')}} required={true}
                                 errorMsg={this.state.fieldErrors.selectedTags} />
                         </Grid>
                     </Grid>
@@ -320,7 +401,7 @@ class DirectoryInfoBoard extends React.Component {
                         </Grid>
                         <Grid item xs={8}>
                             <AutoCompleteWithChips suggestions={this.props.tags['subjects']} searchKey={'name'}
-                                selectedItem={[]} onAddition={null} onDeletion={null} required={true}
+                                selectedItem={this.state.subjects} onAddition={addedTag => {this.handleChipAddition(addedTag, 'subjects')}} onDeletion={deletedTag => {this.handleChipDeletion(deletedTag, 'subjects')}} required={true}
                                 errorMsg={this.state.fieldErrors.selectedTags} />
                         </Grid>
                     </Grid>
@@ -337,7 +418,7 @@ class DirectoryInfoBoard extends React.Component {
                         </Grid>
                         <Grid item xs={8}>
                             <AutoCompleteWithChips suggestions={this.props.tags['keywords']} searchKey={'name'}
-                                selectedItem={[]} onAddition={null} onDeletion={null} required={true}
+                                selectedItem={this.state.keywords} onAddition={addedTag => {this.handleChipAddition(addedTag, 'keywords')}} onDeletion={deletedTag => {this.handleChipDeletion(deletedTag, 'keywords')}} required={true}
                                 errorMsg={this.state.fieldErrors.selectedTags} />
                         </Grid>
                     </Grid>
@@ -354,7 +435,7 @@ class DirectoryInfoBoard extends React.Component {
                         </Grid>
                         <Grid item xs={8}>
                             <AutoCompleteWithChips suggestions={this.props.tags['workareas']} searchKey={'name'}
-                                selectedItem={[]} onAddition={null} onDeletion={null} required={true}
+                                selectedItem={this.state.workareas} onAddition={addedTag => {this.handleChipAddition(addedTag, 'workareas')}} onDeletion={deletedTag => {this.handleChipDeletion(deletedTag, 'workareas')}} required={true}
                                 errorMsg={this.state.fieldErrors.selectedTags} />
                         </Grid>
                     </Grid>
@@ -371,7 +452,7 @@ class DirectoryInfoBoard extends React.Component {
                         </Grid>
                         <Grid item xs={8}>
                             <AutoCompleteWithChips suggestions={this.props.tags['languages']} searchKey={'name'}
-                                selectedItem={[]} onAddition={null} onDeletion={null} required={true}
+                                selectedItem={this.state.languages} onAddition={addedTag => {this.handleChipAddition(addedTag, 'languages')}} onDeletion={deletedTag => {this.handleChipDeletion(deletedTag, 'languages')}} required={true}
                                 errorMsg={this.state.fieldErrors.selectedTags} />
                         </Grid>
                     </Grid>
@@ -388,7 +469,7 @@ class DirectoryInfoBoard extends React.Component {
                         </Grid>
                         <Grid item xs={8}>
                             <AutoCompleteWithChips suggestions={this.props.tags['catalogers']} searchKey={'name'}
-                                selectedItem={[]} onAddition={null} onDeletion={null} required={true}
+                                selectedItem={this.state.catalogers} onAddition={addedTag => {this.handleChipAddition(addedTag, 'catalogers')}} onDeletion={deletedTag => {this.handleChipDeletion(deletedTag, 'catalogers')}} required={true}
                                 errorMsg={this.state.fieldErrors.selectedTags} />
                         </Grid>
                     </Grid>
@@ -411,17 +492,7 @@ class DirectoryInfoBoard extends React.Component {
                 </Grid>
                 <Grid item xs={3}>
                     {
-                        this.state.tagTreeData.length > 0 ?
-                            (<SortableTree
-                                treeData={this.state.tagTreeData}
-                                onChange={newTreeData => {
-                                    this.setState({tagTreeData: newTreeData});
-                                }}
-                                canDrag={false}
-                                generateNodeProps={nodeInfo => ({
-                                    onClick: (evt) => this.handleTagClick(nodeInfo, evt),
-                                })}
-                            />) : 'No Tags Available'
+                        'Metadata goes here'
                     }
                 </Grid>
                 <Dialog

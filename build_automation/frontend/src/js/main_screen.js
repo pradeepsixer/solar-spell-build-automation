@@ -9,6 +9,8 @@ import Paper from 'material-ui/Paper';
 import Tabs, { Tab } from 'material-ui/Tabs';
 import Typography from 'material-ui/Typography';
 
+import '../css/style.css';
+
 class MainScreen extends React.Component {
     constructor(props) {
         super(props);
