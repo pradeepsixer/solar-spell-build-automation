@@ -175,9 +175,8 @@ class DirlayoutInfoBoard extends React.Component {
                 }
                 <TextField
                   id="name"
-                  label="Name"
+                  label="Name *"
                   value={this.state.name}
-                  required={true}
                   error={this.state.fieldErrors.name ? true : false}
                   onChange={evt => this.handleTextFieldUpdate('name', evt)}
                   fullWidth
@@ -185,10 +184,9 @@ class DirlayoutInfoBoard extends React.Component {
                 />
                 <TextField
                   id="description"
-                  label="Description"
+                  label="Description *"
                   multiline
                   fullWidth
-                  required={true}
                   error={this.state.fieldErrors.description ? true : false}
                   value={this.state.description}
                   onChange={evt => this.handleTextFieldUpdate('description', evt)}

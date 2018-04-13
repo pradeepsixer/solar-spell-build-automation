@@ -595,12 +595,32 @@ class DirectoryLayoutComponent extends React.Component {
         return false;
     }
 
+    updateBoardData(boardData, directory) {
+        boardData.id = directory.id;
+        boardData.name = directory.name;
+        boardData.dirLayoutId = directory.dir_layout;
+        boardData.bannerFile = directory.banner_file;
+        boardData.originalFileName = directory.original_file_name;
+        boardData.individualFiles = directory.individual_files;
+        boardData.creators = directory.creators;
+        boardData.coverages = directory.coverages;
+        boardData.subjects = directory.subjects;
+        boardData.keywords = directory.keywords;
+        boardData.workareas = directory.workareas;
+        boardData.languages = directory.languages;
+        boardData.catalogers = directory.catalogers;
+        boardData.parent = directory.parent;
+    }
+
     saveDirectoryCallback(savedInfo, created=false) {
         this.setState((prevState, props) => {
             const dirLayoutId = savedInfo.dir_layout;
             const newState = {
-                treeData: Object.assign(prevState.treeData)
-            }
+                treeData: cloneDeep(prevState.treeData),
+                infoBoardData: cloneDeep(prevState.treeData)
+            };
+
+            this.updateBoardData(newState.infoBoardData, savedInfo);
 
             if (created) {
                 if (savedInfo.parent) {

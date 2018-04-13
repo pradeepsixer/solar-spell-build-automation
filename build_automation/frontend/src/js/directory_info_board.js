@@ -311,8 +311,7 @@ class DirectoryInfoBoard extends React.Component {
                     }
                     <TextField
                       id="name"
-                      label="Name"
-                      required
+                      label="Name *"
                       error={this.state.fieldErrors.name ? true: false}
                       value={this.state.name}
                       onChange={evt => this.handleTextFieldUpdate('name', evt)}
