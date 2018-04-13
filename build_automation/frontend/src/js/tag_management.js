@@ -11,14 +11,26 @@ import ExpansionPanel, {
   } from 'material-ui/ExpansionPanel';
 
 import {
-    // State or Local Processing Plugins
+  DataTypeProvider,
+    FilteringState,
+    IntegratedFiltering,
+    IntegratedPaging,
+    PagingState,
   } from '@devexpress/dx-react-grid';
 import {
-    Grid as DataGrid,
-    Table,
-    TableHeaderRow
+  ColumnChooser,
+  Grid as DataGrid,
+  Table,
+  TableHeaderRow,
+  TableFilterRow,
+  TableColumnResizing,
+  TableColumnVisibility,
+  Toolbar,
+  PagingPanel,
   } from '@devexpress/dx-react-grid-material-ui';
 
+import { TableRow } from 'material-ui/Table';
+import Menu, { MenuItem } from 'material-ui/Menu';
 import Typography from 'material-ui/Typography';
 import ExpandMoreIcon from 'material-ui-icons/ExpandMore';
 import {APP_URLS} from "./url";
@@ -28,6 +40,10 @@ class TagManagementComponent extends React.Component {
     constructor(props) {
         super(props);
         this.state={
+          selectedTagsMenu: {
+            selectedTag: null,
+            AnchorPos: null
+          },
             currentView: 'manage',
             currentpanelState: 'Coverages',
             expanded: null,
@@ -61,6 +77,8 @@ class TagManagementComponent extends React.Component {
         };
         this.handleChange = this.handleChange.bind(this);
         this.setCurrentView=this.setCurrentView.bind(this);
+        this.handleFilesRightClick = this.handleTagsRightClick.bind(this);
+        this.handleMenuClose = this.handleMenuClose.bind(this);
         
     }
 
@@ -107,6 +125,32 @@ class TagManagementComponent extends React.Component {
         // TODO : Show the error message.
     });}
    
+    tableRowComponent(obj, menuName)  {
+      const {row, children} = obj;
+      return(<TableRow onContextMenu={evt => this.handleTagsRightClick(evt, row, menuName)}>{children}</TableRow>);
+  }
+
+  handleTagsRightClick(evt, row, menuName) {
+    this.setState({
+        [menuName]: {
+            selectedFile: row,
+            AnchorPos: {top:evt.clientY, left:evt.clientX}
+        }
+    });
+    evt.preventDefault();
+}
+  
+  
+  
+  handleMenuClose(evt, menuName) {
+    this.setState({
+        [menuName]: {
+            selectedTag: null,
+            AnchorPos: null
+        }
+    });
+}
+
     render() {
         const { classes } = this.props;
         const { expanded } = this.state;
@@ -144,8 +188,17 @@ class TagManagementComponent extends React.Component {
           rows={coverageRows}
           columns={coverageColumns}
           >
-          <Table />
+          <FilteringState defaultFilters={[]} columnExtensions={[{columnName: 'name', filteringEnabled: true}]} />
+                    <IntegratedFiltering />
+                    <PagingState defaultCurrentPage={0} defaultPageSize={10} />
+                    <IntegratedPaging />
+                    <Table rowComponent={obj => {return this.tableRowComponent(obj, 'selectedTagsMenu')}} />
           <TableHeaderRow />
+          <TableColumnVisibility/>
+                    <Toolbar />
+                    <ColumnChooser />
+                    <TableFilterRow />
+                    <PagingPanel pageSizes={[5, 10, 20]} />
           
           </DataGrid>
           </Grid>
@@ -166,9 +219,17 @@ class TagManagementComponent extends React.Component {
           rows={subjectRows}
           columns={subjectColumns}
           >
-          <Table />
+          <FilteringState defaultFilters={[]} columnExtensions={[{columnName: 'name', filteringEnabled: true}]} />
+                    <IntegratedFiltering />
+                    <PagingState defaultCurrentPage={0} defaultPageSize={10} />
+                    <IntegratedPaging />
+                    <Table rowComponent={obj => {return this.tableRowComponent(obj, 'selectedTagsMenu')}} />
           <TableHeaderRow />
-          
+          <TableColumnVisibility/>
+                    <Toolbar />
+                    <ColumnChooser />
+                    <TableFilterRow />
+                    <PagingPanel pageSizes={[5, 10, 20]} />
           </DataGrid>
           </Grid>
           </ExpansionPanelDetails>
@@ -188,9 +249,17 @@ class TagManagementComponent extends React.Component {
           rows={workareaRows}
           columns={workareaColumns}
           >
-          <Table />
+          <FilteringState defaultFilters={[]} columnExtensions={[{columnName: 'name', filteringEnabled: true}]} />
+                    <IntegratedFiltering />
+                    <PagingState defaultCurrentPage={0} defaultPageSize={10} />
+                    <IntegratedPaging />
+                    <Table rowComponent={obj => {return this.tableRowComponent(obj, 'selectedTagsMenu')}} />
           <TableHeaderRow />
-          
+          <TableColumnVisibility/>
+                    <Toolbar />
+                    <ColumnChooser />
+                    <TableFilterRow />
+                    <PagingPanel pageSizes={[5, 10, 20]} />
           </DataGrid>
           </Grid>
           </ExpansionPanelDetails>
@@ -210,8 +279,17 @@ class TagManagementComponent extends React.Component {
           rows={languageRows}
           columns={languageColumns}
           >
-          <Table />
-          <TableHeaderRow />          
+          <FilteringState defaultFilters={[]} columnExtensions={[{columnName: 'name', filteringEnabled: true}]} />
+                    <IntegratedFiltering />
+                    <PagingState defaultCurrentPage={0} defaultPageSize={10} />
+                    <IntegratedPaging />
+                    <Table rowComponent={obj => {return this.tableRowComponent(obj, 'selectedTagsMenu')}} />
+          <TableHeaderRow /> 
+          <TableColumnVisibility/>
+                    <Toolbar />
+                    <ColumnChooser />
+                    <TableFilterRow />
+                    <PagingPanel pageSizes={[5, 10, 20]} />         
           </DataGrid>
           </Grid>
           </ExpansionPanelDetails>
@@ -230,13 +308,43 @@ class TagManagementComponent extends React.Component {
           rows={catalogerRows}
           columns={catalogerColumns}
           >
-          <Table />
+          <FilteringState defaultFilters={[]} columnExtensions={[{columnName: 'name', filteringEnabled: true}]} />
+                    <IntegratedFiltering />
+                    <PagingState defaultCurrentPage={0} defaultPageSize={10} />
+                    <IntegratedPaging />
+                    <Table rowComponent={obj => {return this.tableRowComponent(obj, 'selectedTagsMenu')}} />
           <TableHeaderRow />
-          
+          <TableColumnVisibility/>
+                    <Toolbar />
+                    <ColumnChooser />
+                    <TableFilterRow />
+                    <PagingPanel pageSizes={[5, 10, 20]} /> 
           </DataGrid>
           </Grid>
           </ExpansionPanelDetails>
         </ExpansionPanel>  
+        <Menu
+                    id="selected-tags-menu"
+                    anchorPosition={this.state.selectedTagsMenu.AnchorPos}
+                    anchorReference={'anchorPosition'}
+                    open={Boolean(this.state.selectedTagsMenu.AnchorPos)}
+                    onClose={evt => {this.handleMenuClose(evt, 'selectedTagsMenu')}}
+                >
+                    <MenuItem
+                        onClick={evt => {
+                            this.handleMenuClose(evt, 'selectedFilesMenu');
+                        }}
+                    > 
+                    Edit
+                    </MenuItem>
+                    <MenuItem
+                        onClick={evt => {
+                            this.handleMenuClose(evt, 'selectedFilesMenu');
+                        }}
+                    >
+                      Delete
+                    </MenuItem>
+                </Menu>
             </Grid>
             
         </Grid>
