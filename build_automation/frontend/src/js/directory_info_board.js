@@ -10,6 +10,8 @@ import Select from 'material-ui/Select';
 import TextField from 'material-ui/TextField';
 import Typography from 'material-ui/Typography';
 
+import OpenInNew from 'material-ui-icons/OpenInNew';
+
 import SortableTree from 'react-sortable-tree';
 
 import AutoCompleteWithChips from './autocomplete.js';
@@ -29,6 +31,8 @@ class DirectoryInfoBoard extends React.Component {
             dirLayoutId: props.boardData.dirLayoutId,
             name: props.boardData.name,
             parent: props.boardData.parent,
+            bannerFile: null,
+            bannerFileName: props.boardData.originalFileName ? props.boardData.originalFileName : '',
             creators: labels['creators'],
             coverages: labels['coverages'],
             subjects: labels['subjects'],
@@ -49,6 +53,7 @@ class DirectoryInfoBoard extends React.Component {
         this.deleteDirectory = this.deleteDirectory.bind(this);
         this.saveCallback = this.props.onSave.bind(this);
         this.deleteCallback = this.props.onDelete.bind(this);
+        this.handleBannerSelection = this.handleBannerSelection.bind(this);
         this.handleChipAddition = this.handleChipAddition.bind(this);
         this.handleChipDeletion = this.handleChipDeletion.bind(this);
         this.handleOperatorChange = this.handleOperatorChange.bind(this);
@@ -113,6 +118,8 @@ class DirectoryInfoBoard extends React.Component {
             dirLayoutId: props.boardData.dirLayoutId,
             name: props.boardData.name,
             parent: props.boardData.parent,
+            bannerFile: null,
+            bannerFileName: props.boardData.originalFileName ? props.boardData.originalFileName : '',
             creators: labels['creators'],
             coverages: labels['coverages'],
             subjects: labels['subjects'],
@@ -152,23 +159,23 @@ class DirectoryInfoBoard extends React.Component {
         }
         var targetUrl = APP_URLS.DIRECTORY_LIST;
         const selectedTags = this.getSelectedTags();
-        const payload = {
-            name: this.state.name,
-            dir_layout: this.state.dirLayoutId,
-            individual_files: this.state.selectedFiles,
-            creators: selectedTags['creators'],
-            coverages: selectedTags['coverages'],
-            subjects: selectedTags['subjects'],
-            keywords: selectedTags['keywords'],
-            workareas: selectedTags['workareas'],
-            languages: selectedTags['languages'],
-            catalogers: selectedTags['catalogers'],
-            parent: this.state.parent
-        };
+        const payload = new FormData();
+        payload.append('name', this.state.name);
+        payload.append('dir_layout', this.state.dirLayoutId);
+        this.state.selectedFiles.forEach(file => {payload.append('individual_files', file)});
+        selectedTags['creators'].forEach(creator => {payload.append('creators', creator)});
+        selectedTags['coverages'].forEach(coverage => {payload.append('coverages', coverage)});
+        selectedTags['subjects'].forEach(subject => {payload.append('subjects', subject)});
+        selectedTags['keywords'].forEach(keyword => {payload.append('keywords', keyword)});
+        selectedTags['workareas'].forEach(workarea => {payload.append('workareas', workarea)});
+        selectedTags['languages'].forEach(language => {payload.append('languages', language)});
+        selectedTags['catalogers'].forEach(cataloger => {payload.append('catalogers', cataloger)});
+        Boolean(this.state.parent) && payload.append('parent', this.state.parent);
+        Boolean(this.state.bannerFile) && payload.append('banner_file', this.state.bannerFile);
         const currInstance = this;
         if (this.state.id > 0) {
             // Update an existing directory.
-            payload.id = this.state.id;
+            payload.append('id', this.state.id);
             targetUrl = get_url(APP_URLS.DIRECTORY_DETAIL, {id:this.state.id});
             axios.patch(targetUrl, payload, {
                 responseType: 'json'
@@ -280,6 +287,15 @@ class DirectoryInfoBoard extends React.Component {
         this.setState({confirmDelete: false})
     }
 
+    handleBannerSelection(evt) {
+        evt.persist();
+        const file = evt.target.files[0];
+        this.setState({
+            bannerFile: file,
+            bannerFileName: file.name
+        });
+    }
+
     render() {
         return (
             <Grid container spacing={24}>
@@ -295,14 +311,42 @@ class DirectoryInfoBoard extends React.Component {
                     }
                     <TextField
                       id="name"
-                      label="Name"
-                      required
+                      label="Name *"
                       error={this.state.fieldErrors.name ? true: false}
                       value={this.state.name}
                       onChange={evt => this.handleTextFieldUpdate('name', evt)}
                       fullWidth
                       margin="normal"
                     />
+                    <TextField
+                      id="bannerimg"
+                      label="Banner Image"
+                      multiline
+                      disabled
+                      InputLabelProps={{
+                        shrink: true,
+                      }}
+                      error={this.state.fieldErrors.banner ? true : false}
+                      value={this.state.bannerFileName}
+                      margin="normal"
+                    />
+                    <input
+                        accept="image/*"
+                        className={'hidden'}
+                        id="raised-button-file"
+                        type="file"
+                        onChange={ this.handleBannerSelection }
+                     />
+                    <label htmlFor="raised-button-file">
+                        <Button variant="raised" component="span">
+                            Browse
+                        </Button>
+                    </label>
+                    {
+                        this.props.boardData.bannerFile &&
+                            <OpenInNew onClick={evt => window.open(this.props.boardData.bannerFile, "_blank")}
+                                className="handPointer" title="Open in new window"/>
+                    }
                     <p></p>
                     <Typography gutterBottom variant="headline" component="h2">
                         Filter by Metadata

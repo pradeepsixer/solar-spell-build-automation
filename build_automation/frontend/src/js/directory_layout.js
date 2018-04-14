@@ -24,7 +24,6 @@ import { DIRLAYOUT_SAVE_TYPE } from './constants.js';
 import { APP_URLS } from './url.js';
 
 import 'react-sortable-tree/style.css';
-import '../css/style.css';
 
 const BOARD_TYPES = {
     DIRLAYOUT: 1,
@@ -180,6 +179,8 @@ class DirectoryLayoutComponent extends React.Component {
             );
             layoutDirectories[eachDir.id].parent = eachDir.parent;
             layoutDirectories[eachDir.id].dirLayoutId = eachDir.dir_layout;
+            layoutDirectories[eachDir.id].bannerFile = eachDir.banner_file;
+            layoutDirectories[eachDir.id].originalFileName = eachDir.original_file_name;
             layoutDirectories[eachDir.id].individualFiles = eachDir.individual_files;
             layoutDirectories[eachDir.id].creators = eachDir.creators;
             layoutDirectories[eachDir.id].coverages = eachDir.coverages;
@@ -354,6 +355,8 @@ class DirectoryLayoutComponent extends React.Component {
                 id: -1,
                 name: '',
                 individualFiles: [],
+                bannerFile: '',
+                originalFileName: '',
                 creators: [],
                 coverages: [],
                 subjects: [],
@@ -374,7 +377,9 @@ class DirectoryLayoutComponent extends React.Component {
             infoBoardData: {
                 id: -1,
                 name: '',
-                description: ''
+                description: '',
+                original_file_name: '',
+                banner_file: ''
             }
         });
     }
@@ -392,6 +397,7 @@ class DirectoryLayoutComponent extends React.Component {
                 <Button variant="raised" color="primary" onClick={evt => {this.createDirectory(eachDirLayout.id, null); }}>
                         New Folder
                 </Button>
+                <div className={'autoScrollX'}>
                 {
                     this.state.treeData[eachDirLayout.id].length > 0 &&
                     <SortableTree
@@ -408,6 +414,7 @@ class DirectoryLayoutComponent extends React.Component {
                     })}
                     />
                 }
+                </div>
                 </Collapse>);
                 accordionItems.push(<Divider key={'divider_' + eachDirLayout.id} />);
             });
@@ -490,6 +497,8 @@ class DirectoryLayoutComponent extends React.Component {
                         id: savedInfo.id,
                         name: savedInfo.name,
                         description: savedInfo.description,
+                        original_file_name: savedInfo.original_file_name,
+                        banner_file: savedInfo.banner_file,
                         isOpen: false
                     };
 
@@ -501,6 +510,8 @@ class DirectoryLayoutComponent extends React.Component {
                         if (eachDirLayout.id == savedInfo.id) {
                             eachDirLayout.name = savedInfo.name;
                             eachDirLayout.description = savedInfo.description;
+                            eachDirLayout.banner_file = savedInfo.banner_file;
+                            eachDirLayout.original_file_name = savedInfo.original_file_name;
                         }
                     });
                 }
@@ -545,6 +556,8 @@ class DirectoryLayoutComponent extends React.Component {
                         title: (<Button fullWidth>{newValue.name}</Button>),
                         dirLayoutId: newValue.dir_layout,
                         parent: newValue.parent,
+                        bannerFile: newValue.banner_file,
+                        originalFileName: newValue.original_file_name,
                         individualFiles: newValue.individual_files,
                         creators: newValue.creators,
                         coverages: newValue.coverages,
@@ -560,6 +573,8 @@ class DirectoryLayoutComponent extends React.Component {
                     array[i].name = newValue.name;
                     array[i].title = (<Button fullWidth>{newValue.name}</Button>);
                     array[i].parent = newValue.parent;
+                    array[i].bannerFile = newValue.banner_file;
+                    array[i].originalFileName = newValue.original_file_name;
                     array[i].individualFiles = newValue.individual_files;
                     array[i].creators = newValue.creators;
                     array[i].coverages = newValue.coverages;
@@ -581,12 +596,32 @@ class DirectoryLayoutComponent extends React.Component {
         return false;
     }
 
+    updateBoardData(boardData, directory) {
+        boardData.id = directory.id;
+        boardData.name = directory.name;
+        boardData.dirLayoutId = directory.dir_layout;
+        boardData.bannerFile = directory.banner_file;
+        boardData.originalFileName = directory.original_file_name;
+        boardData.individualFiles = directory.individual_files;
+        boardData.creators = directory.creators;
+        boardData.coverages = directory.coverages;
+        boardData.subjects = directory.subjects;
+        boardData.keywords = directory.keywords;
+        boardData.workareas = directory.workareas;
+        boardData.languages = directory.languages;
+        boardData.catalogers = directory.catalogers;
+        boardData.parent = directory.parent;
+    }
+
     saveDirectoryCallback(savedInfo, created=false) {
         this.setState((prevState, props) => {
             const dirLayoutId = savedInfo.dir_layout;
             const newState = {
-                treeData: Object.assign(prevState.treeData)
-            }
+                treeData: cloneDeep(prevState.treeData),
+                infoBoardData: cloneDeep(prevState.treeData)
+            };
+
+            this.updateBoardData(newState.infoBoardData, savedInfo);
 
             if (created) {
                 if (savedInfo.parent) {
@@ -600,6 +635,8 @@ class DirectoryLayoutComponent extends React.Component {
                         title: (<Button>{savedInfo.name}</Button>),
                         dirLayoutId: savedInfo.dir_layout,
                         parent: savedInfo.parent,
+                        bannerFile: savedInfo.banner_file,
+                        originalFileName: savedInfo.original_file_name,
                         individualFiles: savedInfo.individual_files,
                         creators: savedInfo.creators,
                         coverages: savedInfo.coverages,

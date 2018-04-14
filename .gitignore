@@ -281,4 +281,4 @@ typings/
 .next
 
 # SolarSPELL Specific Settings
-build_automation/content_management/static
+build_automation/frontend/static

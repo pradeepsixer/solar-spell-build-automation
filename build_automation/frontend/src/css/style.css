@@ -22,6 +22,10 @@ body {
     margin-right: 5px;
 }
 
+.autoScrollX {
+    overflow-x: auto;
+}
+
 /* React Sortable Tree - Display hand pointer when hovering over the row. */
 .rst__row:hover {
     cursor: pointer;

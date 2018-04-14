@@ -4,9 +4,9 @@
   "description": "Front-end for SolarSPELL build automation using ReactJS",
   "main": "index.js",
   "scripts": {
-    "clean": "rm -rf dist/ ../content_management/static/",
-    "build": "npm run-script clean; webpack --mode=production && cp -r dist/ ../content_management/static/",
-    "build-dev": "npm run-script clean; webpack --mode=development && cp -r dist/ ../content_management/static/",
+    "clean": "rm -rf static/",
+    "build": "npm run-script clean; webpack --mode=production",
+    "build-dev": "npm run-script clean; webpack --mode=development",
     "winclean": "rd /s /q dist ..\\content_management\\static",
     "winbuild": "npm run-script winclean & webpack --mode=production && xcopy dist ..\\content_management\\static\\ /E",
     "winbuild-dev": "npm run-script winclean & webpack --mode=development && xcopy dist ..\\content_management\\static\\ /E",
