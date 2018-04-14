@@ -33,19 +33,20 @@ import { TableRow } from 'material-ui/Table';
 import Menu, { MenuItem } from 'material-ui/Menu';
 import Typography from 'material-ui/Typography';
 import ExpandMoreIcon from 'material-ui-icons/ExpandMore';
-import {APP_URLS} from "./url";
-
+import {APP_URLS, get_url} from "./url";
+import cloneDeep from 'lodash/fp/cloneDeep';
 
 class TagManagementComponent extends React.Component {
     constructor(props) {
         super(props);
         this.state={
+          currentPanel: null,
           selectedTagsMenu: {
             selectedTag: null,
             AnchorPos: null
           },
             currentView: 'manage',
-            currentpanelState: 'Coverages',
+            currentTitle: 'Coverages',
             expanded: null,
             listUrl: null,
             detailUrl: null,
@@ -77,9 +78,11 @@ class TagManagementComponent extends React.Component {
         };
         this.handleChange = this.handleChange.bind(this);
         this.setCurrentView=this.setCurrentView.bind(this);
+        this.setUrls=this.setUrls.bind(this);
         this.handleFilesRightClick = this.handleTagsRightClick.bind(this);
         this.handleMenuClose = this.handleMenuClose.bind(this);
-        
+        this.deleteTag = this.deleteTag.bind(this);
+        this.handleAccordionClick=this.handleAccordionClick.bind(this);
     }
 
     
@@ -94,18 +97,29 @@ class TagManagementComponent extends React.Component {
         }
     }
 
-    setCurrentView(viewName, selectedPanel, listUrl, detailUrl){
+    handleAccordionClick(panel){
       this.setState({
-        currentView: viewName,
-        currentpanelState: selectedPanel,
+        currentPanel: panel
+      });
+    }
+
+    setUrls(listUrl, detailUrl){
+      this.setState({
         listUrl: listUrl,
         detailUrl: detailUrl
       })
-  }
+    }
+
+    setCurrentView(viewName, selectedPanel){
+      this.setState({
+        currentView: viewName,
+        currentTitle: selectedPanel
+      })
+    }
 
   componentDidMount() {
     this.loadData()
-}
+  }
   
   loadData() {
     const currInstance = this;
@@ -133,14 +147,42 @@ class TagManagementComponent extends React.Component {
   handleTagsRightClick(evt, row, menuName) {
     this.setState({
         [menuName]: {
-            selectedFile: row,
+            selectedTag: row,
             AnchorPos: {top:evt.clientY, left:evt.clientX}
         }
     });
     evt.preventDefault();
 }
+
+deleteTagCallback(deletedItemId){
+    var tagDataKey = this.state.currentPanel + "Rows";
+    this.setState((prevState, props) => {
+      const newState = {
+        [tagDataKey]: prevState[tagDataKey]
+      }
+    for (var i=0; i<newState[tagDataKey].length; i++) {
+      if (newState[tagDataKey][i].id == deletedItemId) {
+        newState[tagDataKey].splice(i, 1);
+          break;
+        }
+      }
+      
+      return newState;
+  });
+}
   
-  
+deleteTag() {
+  const selectedTagId = this.state.selectedTagsMenu.selectedTag.id;
+  const targetUrl = get_url(this.state.detailUrl, {id: selectedTagId});
+  const currentInstance = this;
+  axios.delete(targetUrl, {
+      responseType: 'json'
+  }).then(function(response) {
+     currentInstance.deleteTagCallback(selectedTagId);
+  }).catch(function(error) {
+      console.error("Error in deleting the meta data", error);
+  })
+}
   
   handleMenuClose(evt, menuName) {
     this.setState({
@@ -173,14 +215,14 @@ class TagManagementComponent extends React.Component {
         
         <Grid container spacing={0}>
         <Grid item xs={12}>
-        <ExpansionPanel expanded={expanded === 'panel2'} onChange={this.handleChange('panel2')}>
-          <ExpansionPanelSummary expandIcon={<ExpandMoreIcon/>}>
+        <ExpansionPanel expanded={expanded === 'coverage'} onChange={this.handleChange('coverage')} onClick={e=>{this.handleAccordionClick('coverage')}}>
+          <ExpansionPanelSummary expandIcon={<ExpandMoreIcon/>} onClick={e =>{this.setUrls(APP_URLS.COVERAGES_LIST, APP_URLS.COVERAGES_DETAIL)}}>
             <Typography>Coverages</Typography>
             </ExpansionPanelSummary>
           <ExpansionPanelDetails>
           <Grid container>
           <Grid item>
-          <Button variant="raised" color="primary" onClick={e => {this.setCurrentView('addTag', 'Coverages', APP_URLS.COVERAGES_LIST, APP_URLS.COVERAGES_DETAIL)}}>
+          <Button variant="raised" color="primary" onClick={e => {this.setCurrentView('addTag', 'Coverages')}}>
             Add New
             </Button>
             </Grid>
@@ -204,14 +246,14 @@ class TagManagementComponent extends React.Component {
           </Grid>
           </ExpansionPanelDetails>
         </ExpansionPanel>
-        <ExpansionPanel expanded={expanded === 'panel3'} onChange={this.handleChange('panel3')}>
-          <ExpansionPanelSummary expandIcon={<ExpandMoreIcon/>}>
+        <ExpansionPanel expanded={expanded === 'subject'} onChange={this.handleChange('subject')} onClick={e=>{this.handleAccordionClick('subject')}}>
+          <ExpansionPanelSummary expandIcon={<ExpandMoreIcon/>} onClick={e =>{this.setUrls(APP_URLS.SUBJECTS_LIST, APP_URLS.SUBJECTS_DETAIL)}}>
             <Typography>Subjects</Typography>
             </ExpansionPanelSummary>
           <ExpansionPanelDetails>
           <Grid container>
           <Grid item>
-          <Button variant="raised" color="primary" onClick={e => {this.setCurrentView('addTag', 'Subjects', APP_URLS.SUBJECTS_LIST,APP_URLS.SUBJECTS_DETAIL)}}>
+          <Button variant="raised" color="primary" onClick={e => {this.setCurrentView('addTag', 'Subjects')}}>
             Add New
             </Button>
             </Grid>
@@ -234,14 +276,14 @@ class TagManagementComponent extends React.Component {
           </Grid>
           </ExpansionPanelDetails>
         </ExpansionPanel>
-        <ExpansionPanel expanded={expanded === 'panel4'} onChange={this.handleChange('panel4')}>
-          <ExpansionPanelSummary expandIcon={<ExpandMoreIcon/>}>
+        <ExpansionPanel expanded={expanded === 'workarea'} onChange={this.handleChange('workarea')} onClick={e=>{this.handleAccordionClick('workarea')}}>
+          <ExpansionPanelSummary expandIcon={<ExpandMoreIcon/>} onClick={e =>{this.setUrls(APP_URLS.WORKAREAS_LIST, APP_URLS.WORKAREAS_DETAIL)}}>
             <Typography>Work Areas</Typography>
             </ExpansionPanelSummary>
           <ExpansionPanelDetails>
           <Grid container>
           <Grid item>
-          <Button variant="raised" color="primary" onClick={e => {this.setCurrentView('addTag', 'Work Areas', APP_URLS.WORKAREAS_LIST, APP_URLS.WORKAREAS_DETAIL)}}>
+          <Button variant="raised" color="primary" onClick={e => {this.setCurrentView('addTag', 'Work Areas')}}>
             Add New
             </Button>
             </Grid>
@@ -264,14 +306,14 @@ class TagManagementComponent extends React.Component {
           </Grid>
           </ExpansionPanelDetails>
         </ExpansionPanel>
-        <ExpansionPanel expanded={expanded === 'panel5'} onChange={this.handleChange('panel5')}>
-          <ExpansionPanelSummary expandIcon={<ExpandMoreIcon/>}>
+        <ExpansionPanel expanded={expanded === 'language'} onChange={this.handleChange('language')} onClick={e=>{this.handleAccordionClick('language')}}>
+          <ExpansionPanelSummary expandIcon={<ExpandMoreIcon/>} onClick={e =>{this.setUrls(APP_URLS.LANGUAGES_LIST, APP_URLS.LANGUAGES_DETAIL)}}>
             <Typography>Languages</Typography>
             </ExpansionPanelSummary>
           <ExpansionPanelDetails>
           <Grid container>
           <Grid item>
-          <Button variant="raised" color="primary" onClick={e => {this.setCurrentView('addTag', 'Languages', APP_URLS.LANGUAGES_LIST, APP_URLS.LANGUAGES_DETAIL)}}>
+          <Button variant="raised" color="primary" onClick={e => {this.setCurrentView('addTag', 'Languages')}}>
             Add New
             </Button>
             </Grid>
@@ -294,13 +336,13 @@ class TagManagementComponent extends React.Component {
           </Grid>
           </ExpansionPanelDetails>
         </ExpansionPanel>        
-        <ExpansionPanel expanded={expanded === 'panel7'} onChange={this.handleChange('panel7')}>
-          <ExpansionPanelSummary expandIcon={<ExpandMoreIcon/>}>
+        <ExpansionPanel expanded={expanded === 'cataloger'} onChange={this.handleChange('cataloger')} onClick={e=>{this.handleAccordionClick('cataloger')}}>
+          <ExpansionPanelSummary expandIcon={<ExpandMoreIcon/>} onClick={e =>{this.setUrls(APP_URLS.CATALOGERS_LIST, APP_URLS.CATALOGERS_DETAIL)}}>
             <Typography>Catalogers</Typography>
             </ExpansionPanelSummary>
           <ExpansionPanelDetails>
             <Grid container>
-          <Grid item><Button variant="raised" color="primary" onClick={e => {this.setCurrentView('addTag', 'Catalogers', APP_URLS.CATALOGERS_LIST, APP_URLS.CATALOGERS_DETAIL)}}>
+          <Grid item><Button variant="raised" color="primary" onClick={e => {this.setCurrentView('addTag', 'Catalogers')}}>
             Add New
             </Button>
             </Grid>
@@ -332,14 +374,15 @@ class TagManagementComponent extends React.Component {
                 >
                     <MenuItem
                         onClick={evt => {
-                            this.handleMenuClose(evt, 'selectedFilesMenu');
+                            this.handleMenuClose(evt, 'selectedTagsMenu');
                         }}
                     > 
                     Edit
                     </MenuItem>
                     <MenuItem
                         onClick={evt => {
-                            this.handleMenuClose(evt, 'selectedFilesMenu');
+                          this.deleteTag();
+                            this.handleMenuClose(evt, 'selectedTagsMenu');
                         }}
                     >
                       Delete
@@ -349,7 +392,7 @@ class TagManagementComponent extends React.Component {
             
         </Grid>
     )}
-    {this.state.currentView=='addTag' && <TagCreation title={this.state.currentpanelState} onCancel={() => this.setCurrentView('manage') } listUrl={this.state.listUrl} detailUrl={this.state.detailUrl}/> }
+    {this.state.currentView=='addTag' && <TagCreation title={this.state.currentTitle} onCancel={() => this.setCurrentView('manage') } listUrl={this.state.listUrl} detailUrl={this.state.detailUrl}/> }
 
     </Grid>
     )
