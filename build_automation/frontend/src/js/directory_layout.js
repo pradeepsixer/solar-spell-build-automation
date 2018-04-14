@@ -4,14 +4,15 @@ import cloneDeep from 'lodash/fp/cloneDeep';
 
 import AppBar from 'material-ui/AppBar';
 import Button from 'material-ui/Button';
+import ChevronRight from 'material-ui-icons/ChevronRight';
 import Collapse from 'material-ui/transitions/Collapse';
 import ExpandLess from 'material-ui-icons/ExpandLess';
 import ExpandMore from 'material-ui-icons/ExpandMore';
-import ChevronRight from 'material-ui-icons/ChevronRight';
 import Grid from 'material-ui/Grid';
 import ListSubheader from 'material-ui/List/ListSubheader';
 import List, { ListItem, ListItemIcon, ListItemText } from 'material-ui/List';
 import Menu, { MenuItem } from 'material-ui/Menu';
+import Snackbar from 'material-ui/Snackbar';
 import Typography from 'material-ui/Typography';
 import Divider from 'material-ui/Divider';
 
@@ -90,6 +91,8 @@ class DirectoryLayoutComponent extends React.Component {
             },
             selectedDirLayout: null,
             breadCrumb: ' ',
+            message: null,
+            messageType: 'info'
         };
         this.handleDirectoryLayoutClick = this.handleDirectoryLayoutClick.bind(this);
         this.handleDirectoryLeftClick = this.handleDirectoryLeftClick.bind(this);
@@ -102,6 +105,7 @@ class DirectoryLayoutComponent extends React.Component {
         this.deleteDirectoryCallback = this.deleteDirectoryCallback.bind(this);
         this.removeDirectoryEntry = this.removeDirectoryEntry.bind(this);
         this.handleMenuClose = this.handleMenuClose.bind(this);
+        this.handleCloseSnackbar = this.handleCloseSnackbar.bind(this);
     }
 
     componentDidMount() {
@@ -448,10 +452,6 @@ class DirectoryLayoutComponent extends React.Component {
                             this.state.infoBoardType == BOARD_TYPES.DIRECTORY &&
                                 <DirectoryInfoBoard boardData={this.state.infoBoardData} onSave={this.saveDirectoryCallback} onDelete={this.deleteDirectoryCallback} tags={this.state.tags} allFiles={this.state.allFiles} fileIdFileMap={this.state.fileIdFileMap} />
                         }
-                        {
-                            this.state.infoBoardType == BOARD_TYPES.NONE &&
-                                <span>Nothing to show here.</span>
-                        }
                     </Grid>
                     <Menu
                         id="simple-menu"
@@ -469,6 +469,16 @@ class DirectoryLayoutComponent extends React.Component {
                             Create SubFolder
                         </MenuItem>
                     </Menu>
+                    <Snackbar
+                        anchorOrigin={{
+                            vertical: 'bottom',
+                            horizontal: 'right',
+                        }}
+                        open={Boolean(this.state.message)}
+                        autoHideDuration={6000}
+                        onClose={this.handleCloseSnackbar}
+                        message={<span>{this.state.message}</span>}
+                    />
                 </Grid>
                 );
         } else {
@@ -480,10 +490,21 @@ class DirectoryLayoutComponent extends React.Component {
         return elements;
     }
 
+    handleCloseSnackbar() {
+        this.setState({
+            message: null,
+            messageType: 'info'
+        })
+    }
+
     saveDirLayoutCallback(savedInfo, saveType) {
         if (saveType == DIRLAYOUT_SAVE_TYPE.CLONE) {
             // TODO : Create a new endpoint for getting the directories associated with a layout, and reload just them.
             this.loadData();
+            this.setState({
+                message: 'Successfully cloned the library version.',
+                messageType: 'info'
+            });
         } else {
             this.setState((prevState, props) => {
                 const newState = {

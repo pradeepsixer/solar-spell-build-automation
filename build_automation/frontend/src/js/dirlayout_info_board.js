@@ -3,6 +3,7 @@ import React from 'react';
 
 import Button from 'material-ui/Button';
 import Dialog, { DialogActions, DialogContent, DialogContentText, DialogTitle } from 'material-ui/Dialog';
+import Snackbar from 'material-ui/Snackbar';
 import TextField from 'material-ui/TextField';
 
 import OpenInNew from 'material-ui-icons/OpenInNew';
@@ -20,10 +21,13 @@ class DirlayoutInfoBoard extends React.Component {
             fieldErrors: {},
             confirmDelete: false,
             bannerFile: null,
-            bannerFileName: props.boardData.original_file_name ? props.boardData.original_file_name : ''
+            bannerFileName: props.boardData.original_file_name ? props.boardData.original_file_name : '',
+            message: null,
+            messageType: 'info',
         };
         this.handleTextFieldUpdate = this.handleTextFieldUpdate.bind(this);
         this.handleBannerSelection = this.handleBannerSelection.bind(this);
+        this.handleCloseSnackbar = this.handleCloseSnackbar.bind(this);
         this.saveDirLayout = this.saveDirLayout.bind(this);
         this.cloneDirLayout = this.cloneDirLayout.bind(this);
         this.deleteDirLayout = this.deleteDirLayout.bind(this);
@@ -60,14 +64,19 @@ class DirlayoutInfoBoard extends React.Component {
     handleBannerSelection(evt) {
         evt.persist();
         const file = evt.target.files[0];
-        this.setState({
-            bannerFile: file,
-            bannerFileName: file.name
+        this.setState((prevState, props) => {
+            const newState = {
+                bannerFile: file,
+                bannerFileName: file.name,
+                fieldErrors: prevState.fieldErrors,
+            };
+            newState.fieldErrors['banner'] = null;
+            return newState;
         });
     }
 
     saveDirLayout(evt) {
-        if (!this.is_valid_state()) {
+        if (!this.is_valid_state(!(this.state.id > 0))) {
             // If it is in an invalid state, do not proceed with the save operation.
             return;
         }
@@ -86,9 +95,17 @@ class DirlayoutInfoBoard extends React.Component {
                 responseType: 'json'
             }).then(function(response) {
                 currentInstance.saveCallback(response.data, DIRLAYOUT_SAVE_TYPE.UPDATE);
+                currentInstance.setState({
+                    message: 'Save successful',
+                    messageType: 'info'
+                });
             }).catch(function(error) {
-                console.error("Error in updating the directory layout ", error);
+                console.error("Error in updating the library version info.", error);
                 console.error(error.response.data);
+                currentInstance.setState({
+                    message: 'Error in updating the library version.',
+                    messageType: 'error'
+                });
             })
         } else {
             // Create a new directory layout.
@@ -96,14 +113,22 @@ class DirlayoutInfoBoard extends React.Component {
                 responseType: 'json'
             }).then(function(response) {
                 currentInstance.saveCallback(response.data, DIRLAYOUT_SAVE_TYPE.CREATE);
+                currentInstance.setState({
+                    message: 'Save successful',
+                    messageType: 'info'
+                });
             }).catch(function(error) {
                 console.error("Error in creating a new directory layout ", error);
                 console.error(error.response.data);
+                currentInstance.setState({
+                    message: 'Error in creating the library version.',
+                    messageType: 'error'
+                });
             })
         }
     }
 
-    is_valid_state() {
+    is_valid_state(is_save) {
         var hasErrors = false;
         const fieldErrors = {};
         if (!this.state.name || this.state.name.trim().length === 0) {
@@ -113,6 +138,10 @@ class DirlayoutInfoBoard extends React.Component {
         if (!this.state.description || this.state.description.trim().length === 0) {
             hasErrors = true;
             fieldErrors['description'] = 'Description is required.';
+        }
+        if (is_save && !this.state.bannerFile) {
+            hasErrors = true;
+            fieldErrors['banner'] = 'Banner file is required.';
         }
         if (hasErrors) {
             this.setState({fieldErrors});
@@ -130,6 +159,10 @@ class DirlayoutInfoBoard extends React.Component {
         }).catch(function(error) {
             console.error("Error in cloning the directory layout", error);
             console.error(error.response.data);
+            currentInstance.setState({
+                message: 'Error in cloning the library version.',
+                messageType: 'error'
+            });
         })
     }
 
@@ -146,9 +179,17 @@ class DirlayoutInfoBoard extends React.Component {
             responseType: 'json'
         }).then(function(response) {
             currentInstance.deleteCallback(currentInstance.state.id);
+            currentInstance.setState({
+                message: 'Successfully deleted the library version.',
+                messageType: 'info'
+            });
         }).catch(function(error) {
             console.error("Error in deleting the directory layout ", error);
-        })
+            currentInstance.setState({
+                message: 'Error in deleting the library version.',
+                messageType: 'error'
+            });
+        });
     }
 
     closeConfirmDialog() {
@@ -242,8 +283,32 @@ class DirlayoutInfoBoard extends React.Component {
                         </Button>
                     </DialogActions>
                 </Dialog>
+                <Snackbar
+                    anchorOrigin={{
+                        vertical: 'bottom',
+                        horizontal: 'right',
+                    }}
+                    open={Boolean(this.state.message)}
+                    autoHideDuration={6000}
+                    onClose={this.handleCloseSnackbar}
+                    message={<span>{this.state.message}</span>}
+                    SnackbarContentProps={{
+                        "style": this.getErrorClass()
+                    }}
+                />
             </div>
         );
+    }
+
+    getErrorClass() {
+        return this.state.messageType === "error" ? {backgroundColor: '#B71C1C', fontWeight: 'normal'} : {};
+    }
+
+    handleCloseSnackbar() {
+        this.setState({
+            message: null,
+            messageType: 'info'
+        })
     }
 }
 

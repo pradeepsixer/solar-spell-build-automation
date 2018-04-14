@@ -7,6 +7,7 @@ import Divider from 'material-ui/Divider';
 import Grid from 'material-ui/Grid';
 import { MenuItem } from 'material-ui/Menu';
 import Select from 'material-ui/Select';
+import Snackbar from 'material-ui/Snackbar';
 import TextField from 'material-ui/TextField';
 import Typography from 'material-ui/Typography';
 
@@ -43,7 +44,9 @@ class DirectoryInfoBoard extends React.Component {
             selectedFiles: props.boardData.individualFiles,
             confirmDelete: false,
             labels: labels,
-            fieldErrors: {}
+            fieldErrors: {},
+            message: null,
+            messageType: 'info'
         };
 
         this.allFiles = props.allFiles;
@@ -57,6 +60,7 @@ class DirectoryInfoBoard extends React.Component {
         this.handleChipAddition = this.handleChipAddition.bind(this);
         this.handleChipDeletion = this.handleChipDeletion.bind(this);
         this.handleOperatorChange = this.handleOperatorChange.bind(this);
+        this.handleCloseSnackbar = this.handleCloseSnackbar.bind(this);
         this.fileSelectionCallback = this.fileSelectionCallback.bind(this);
         this.fileDeselectionCallback = this.fileDeselectionCallback.bind(this);
         this.confirmDeleteDirectory = this.confirmDeleteDirectory.bind(this);
@@ -153,7 +157,7 @@ class DirectoryInfoBoard extends React.Component {
     }
 
     saveDirectory(evt) {
-        if (!this.is_valid_state()) {
+        if (!this.is_valid_state(!(this.state.id > 0))) {
             // If it is in an invalid state, do not proceed with the save operation.
             return;
         }
@@ -181,9 +185,17 @@ class DirectoryInfoBoard extends React.Component {
                 responseType: 'json'
             }).then(function(response) {
                 currInstance.saveCallback(response.data);
+                currInstance.setState({
+                    message: 'Save successful',
+                    messageType: 'info'
+                });
             }).catch(function(error) {
                 console.error("Error in updating the directory", error);
                 console.error(error.response.data);
+                currInstance.setState({
+                    message: 'Error in updating the folder',
+                    messageType: 'error'
+                });
             });
         } else {
             // Create a new directory.
@@ -191,14 +203,22 @@ class DirectoryInfoBoard extends React.Component {
                 responseType: 'json'
             }).then(function(response) {
                 currInstance.saveCallback(response.data, true);
+                currInstance.setState({
+                    message: 'Save successful',
+                    messageType: 'info'
+                });
             }).catch(function(error) {
                 console.error("Error in creating a new directory", error);
                 console.error(error.response.data);
+                currInstance.setState({
+                    message: 'Error in creating the folder',
+                    messageType: 'error'
+                });
             });
         }
     }
 
-    is_valid_state() {
+    is_valid_state(is_save) {
         var hasErrors = false;
         const fieldErrors = {};
         if (!this.state.name || this.state.name.trim().length === 0) {
@@ -224,8 +244,16 @@ class DirectoryInfoBoard extends React.Component {
             responseType: 'json'
         }).then(function(response) {
             currentInstance.deleteCallback(currentInstance.state.dirLayoutId, currentInstance.state.id);
+            currentInstance.setState({
+                message: 'Successfully deleted the folder.',
+                messageType: 'info'
+            });
         }).catch(function(error) {
             console.error("Error in deleting the directory", error);
+            currentInstance.setState({
+                message: 'Error in deleting the folder.',
+                messageType: 'error'
+            });
         });
     }
 
@@ -290,9 +318,14 @@ class DirectoryInfoBoard extends React.Component {
     handleBannerSelection(evt) {
         evt.persist();
         const file = evt.target.files[0];
-        this.setState({
-            bannerFile: file,
-            bannerFileName: file.name
+        this.setState((prevState, props) => {
+            const newState = {
+                bannerFile: file,
+                bannerFileName: file.name,
+                fieldErrors: prevState.fieldErrors,
+            };
+            newState.fieldErrors['banner'] = null;
+            return newState;
         });
     }
 
@@ -516,8 +549,32 @@ class DirectoryInfoBoard extends React.Component {
                         </Button>
                     </DialogActions>
                 </Dialog>
+                <Snackbar
+                    anchorOrigin={{
+                        vertical: 'bottom',
+                        horizontal: 'right',
+                    }}
+                    open={Boolean(this.state.message)}
+                    autoHideDuration={6000}
+                    onClose={this.handleCloseSnackbar}
+                    message={<span>{this.state.message}</span>}
+                    SnackbarContentProps={{
+                        "style": this.getErrorClass()
+                    }}
+                />
             </Grid>
         );
+    }
+
+    getErrorClass() {
+        return this.state.messageType === "error" ? {backgroundColor: '#B71C1C', fontWeight: 'normal'} : {};
+    }
+
+    handleCloseSnackbar() {
+        this.setState({
+            message: null,
+            messageType: 'info'
+        })
     }
 
     handleTagClick(nodeInfo, evt) {
