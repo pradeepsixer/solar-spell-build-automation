@@ -344,7 +344,7 @@ class DirectoryInfoBoard extends React.Component {
     render() {
         return (
             <Grid container spacing={24}>
-                <Grid item xs={9}>
+                <Grid item xs={12}>
                     <Button variant="raised" color="primary" onClick={this.saveDirectory}>
                         Save
                     </Button>
@@ -534,11 +534,6 @@ class DirectoryInfoBoard extends React.Component {
                         selectedFiles={this.state.selectedFiles} fileIdFileMap={this.fileIdFileMap}
                         onFileSelect={this.fileSelectionCallback} onFileDeselect={this.fileDeselectionCallback}
                     />
-                </Grid>
-                <Grid item xs={3}>
-                    {
-                        'Metadata goes here'
-                    }
                 </Grid>
                 <Dialog
                     open={this.state.confirmDelete}
