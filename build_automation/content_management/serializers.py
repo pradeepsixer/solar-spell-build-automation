@@ -220,7 +220,7 @@ class DirectoryLayoutSerializer(serializers.ModelSerializer):
         validators=[
             UniqueValidator(
                 queryset=DirectoryLayout.objects.all(),
-                message=('Duplicate layout exists')
+                message=('DUPLICATE_LAYOUT_NAME')
             )
         ]
     )

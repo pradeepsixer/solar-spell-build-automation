@@ -16,6 +16,7 @@ import OpenInNew from 'material-ui-icons/OpenInNew';
 import SortableTree from 'react-sortable-tree';
 
 import AutoCompleteWithChips from './autocomplete.js';
+import { HTTP_STATUS } from './constants.js';
 import FileSelectionComponent from './directory_file_selection.js'
 import { APP_URLS, get_url } from './url.js';
 import { buildMapFromArray } from './utils.js';
@@ -192,8 +193,12 @@ class DirectoryInfoBoard extends React.Component {
             }).catch(function(error) {
                 console.error("Error in updating the directory", error);
                 console.error(error.response.data);
+                let errorMsg = 'Error in updating the folder';
+                if (!(JSON.stringify(error.response.data).indexOf('DUPLICATE_DIRECTORY') === -1)) {
+                    errorMsg = (<React.Fragment><b>ERROR:</b> There is another folder under the same name within the current folder. Please change the name, and try again.</React.Fragment>);
+                }
                 currInstance.setState({
-                    message: 'Error in updating the folder',
+                    message: errorMsg,
                     messageType: 'error'
                 });
             });
@@ -210,8 +215,12 @@ class DirectoryInfoBoard extends React.Component {
             }).catch(function(error) {
                 console.error("Error in creating a new directory", error);
                 console.error(error.response.data);
+                let errorMsg = 'Error in creating the folder';
+                if (!(JSON.stringify(error.response.data).indexOf('DUPLICATE_DIRECTORY') === -1)) {
+                    errorMsg = (<React.Fragment><b>ERROR:</b> There is another folder under the same name within the current folder. Please change the name, and try again.</React.Fragment>);
+                }
                 currInstance.setState({
-                    message: 'Error in creating the folder',
+                    message: errorMsg,
                     messageType: 'error'
                 });
             });
@@ -251,7 +260,7 @@ class DirectoryInfoBoard extends React.Component {
         }).catch(function(error) {
             console.error("Error in deleting the directory", error);
             currentInstance.setState({
-                message: 'Error in deleting the folder.',
+                message: 'Error in deleting the folder. Please reload the page, and try again.',
                 messageType: 'error'
             });
         });
@@ -555,10 +564,9 @@ class DirectoryInfoBoard extends React.Component {
                 <Snackbar
                     anchorOrigin={{
                         vertical: 'bottom',
-                        horizontal: 'right',
+                        horizontal: 'left',
                     }}
                     open={Boolean(this.state.message)}
-                    autoHideDuration={6000}
                     onClose={this.handleCloseSnackbar}
                     message={<span>{this.state.message}</span>}
                     SnackbarContentProps={{
