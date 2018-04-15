@@ -23,6 +23,7 @@ import DirectoryInfoBoard from './directory_info_board.js';
 
 import { DIRLAYOUT_SAVE_TYPE } from './constants.js';
 import { APP_URLS } from './url.js';
+import { buildMapFromArray } from './utils.js';
 
 import 'react-sortable-tree/style.css';
 
@@ -90,10 +91,13 @@ class DirectoryLayoutComponent extends React.Component {
                 AnchorPos: null
             },
             selectedDirLayout: null,
-            breadCrumb: ' ',
+            breadCrumb: [],
             message: null,
             messageType: 'info'
         };
+        this.directoryIdDirectoryMap = null;
+
+        this.getBreadCrumbs = this.getBreadCrumbs.bind(this);
         this.handleDirectoryLayoutClick = this.handleDirectoryLayoutClick.bind(this);
         this.handleDirectoryLeftClick = this.handleDirectoryLeftClick.bind(this);
         this.handleDirectoryRightClick = this.handleDirectoryRightClick.bind(this);
@@ -268,6 +272,7 @@ class DirectoryLayoutComponent extends React.Component {
                     responseType: 'json',
                 }).then(function(response) {
                     const directories = response.data;
+                    currInstance.directoryIdDirectoryMap = buildMapFromArray(response.data, 'id');
                     const transformedData = currInstance.transformDirectoriesToTreeData(dirLayouts, directories);
                     dirLayouts.forEach(eachDirLayout => {
                         eachDirLayout.isOpen = false;
@@ -278,7 +283,7 @@ class DirectoryLayoutComponent extends React.Component {
                         treeData: transformedData,
                         infoBoardType: BOARD_TYPES.NONE,
                         infoBoardData: {},
-                        breadCrumb: ' '
+                        breadCrumb: []
                     }));
                 }).catch(function(error) {
                     console.error('Error has occurred when trying to get the directories', error);
@@ -296,8 +301,8 @@ class DirectoryLayoutComponent extends React.Component {
                 accordionData: prevState.accordionData,
                 infoBoardType: BOARD_TYPES.DIRLAYOUT,
                 infoBoardData: targetDirLayout,
-                selectedDirLayout: targetDirLayout.id,
-                breadCrumb: targetDirLayout.name
+                selectedDirLayout: targetDirLayout,
+                breadCrumb: this.getBreadCrumbs(targetDirLayout, null)
             };
 
             newState.accordionData.forEach(eachDirLayout => {
@@ -312,15 +317,28 @@ class DirectoryLayoutComponent extends React.Component {
         });
     }
 
+    getBreadCrumbs(dirLayout, currentDir) {
+        const breadCrumbs = [];
+        while (currentDir) {
+            breadCrumbs.unshift(currentDir.name);
+            currentDir = this.directoryIdDirectoryMap[currentDir.parent];
+        }
+        breadCrumbs.unshift(dirLayout.name);
+        return breadCrumbs;
+    }
+
     handleDirectoryLeftClick(nodeInfo, evt) {
         const evtTarget = evt.target;
         /* This is used to determine whether the click event was directed at the tree node,
          * or at the expand/collapse buttons in the SortableTree. */
         if (!(evtTarget.className.includes('expandButton') || evtTarget.className.includes('collapseButton'))) {
-            this.setState({
-                infoBoardType: BOARD_TYPES.DIRECTORY,
-                infoBoardData: nodeInfo.node
-            })
+            this.setState((prevState, props) => {
+                return {
+                    breadCrumb: this.getBreadCrumbs(prevState.selectedDirLayout, nodeInfo.node),
+                    infoBoardType: BOARD_TYPES.DIRECTORY,
+                    infoBoardData: nodeInfo.node
+                }
+            });
         }
     }
 
@@ -331,7 +349,7 @@ class DirectoryLayoutComponent extends React.Component {
         if (!(evtTarget.className.includes('expandButton') || evtTarget.className.includes('collapseButton'))) {
             this.setState({
                 dirContextMenu: {
-                    selectedDirectory: nodeInfo.node.id,
+                    selectedDirectory: nodeInfo.node,
                     AnchorPos: {top:evt.clientY, left:evt.clientX}
                 }
             });
@@ -348,12 +366,13 @@ class DirectoryLayoutComponent extends React.Component {
         });
     }
 
-    createDirectory(dirLayoutId, parentDirId) {
+    createDirectory(dirLayout, parentDir) {
         /*
          * If the parentDirId is null, there is no parent directory and will be created at the root.
          */
         this.setState((prevState, props) => {
             return {
+            breadCrumb: this.getBreadCrumbs(dirLayout, parentDir),
             infoBoardType: BOARD_TYPES.DIRECTORY,
             infoBoardData: {
                 id: -1,
@@ -368,15 +387,15 @@ class DirectoryLayoutComponent extends React.Component {
                 workareas: [],
                 languages: [],
                 catalogers: [],
-                dirLayoutId: dirLayoutId,
-                parent: parentDirId,
+                dirLayoutId: dirLayout.id,
+                parent: Boolean(parentDir) ? parentDir.id : null,
             }
         }});
     }
 
     createDirectoryLayout(evt) {
         this.setState({
-            breadCrumb: '',
+            breadCrumb: [],
             infoBoardType: BOARD_TYPES.DIRLAYOUT,
             infoBoardData: {
                 id: -1,
@@ -391,14 +410,14 @@ class DirectoryLayoutComponent extends React.Component {
     render() {
         var elements = null;
         if (this.state.isLoaded) {
-            var accordionItems = [];
+            const accordionItems = [];
             this.state.accordionData.forEach(eachDirLayout => {
                 accordionItems.push(<ListItem button key={eachDirLayout.id} onClick={evt => this.handleDirectoryLayoutClick(eachDirLayout, evt)}>
                     <ListItemText inset primary={ eachDirLayout.name } />
                 { eachDirLayout.isOpen ? <ExpandLess /> : <ExpandMore /> }
                 </ListItem>);
                 accordionItems.push(<Collapse key={'collapse-' + eachDirLayout.id} in={eachDirLayout.isOpen} timeout="auto" unmountOnExit>
-                <Button variant="raised" color="primary" onClick={evt => {this.createDirectory(eachDirLayout.id, null); }}>
+                <Button variant="raised" color="primary" onClick={evt => {this.createDirectory(eachDirLayout, null); }}>
                         New Folder
                 </Button>
                 <div className={'autoScrollX'}>
@@ -423,6 +442,15 @@ class DirectoryLayoutComponent extends React.Component {
                 accordionItems.push(<Divider key={'divider_' + eachDirLayout.id} />);
             });
 
+            const breadCrumbItems = [];
+            for (let i=0; i<this.state.breadCrumb.length; i++) {
+                const eachCrumb = this.state.breadCrumb[i];
+                breadCrumbItems.push(<span key={'bcrumb_' + i}>
+                    {eachCrumb}
+                    <ChevronRight style={{verticalAlign: 'middle'}}/>
+                    </span>);
+            }
+
             elements = (
                 <Grid container spacing={8}>
                     <Grid item xs={3} style={{paddingLeft: '20px'}}>
@@ -437,10 +465,11 @@ class DirectoryLayoutComponent extends React.Component {
                         </List>
                     </Grid>
                     <Grid item xs={8}>
-                        <AppBar position="static" style={{ minHeight: '50px', margin: 'auto', padding: '10px auto 10px 10px'}}>
-                            <Typography gutterBottom variant="subheading" style={{color: '#ffffff', verticalAlign: 'middle'}}>
-                            {this.state.breadCrumb}
-                            <ChevronRight style={{verticalAlign: 'middle'}}/>
+                        <AppBar position="static" style={{ minHeight: '50px', margin: 'auto', padding: '13px 0px 7px 10px'}}>
+                            <Typography gutterBottom variant="subheading" style={{color: '#ffffff'}}>
+                            {
+                                breadCrumbItems
+                            }
                             </Typography>
                         </AppBar>
                         <div style={{marginTop: '20px'}}> </div>
@@ -510,7 +539,7 @@ class DirectoryLayoutComponent extends React.Component {
                 const newState = {
                     accordionData: prevState.accordionData,
                     infoBoardData: savedInfo,
-                    breadCrumb: savedInfo.name,
+                    breadCrumb: [savedInfo.name],
                 };
 
                 if (saveType == DIRLAYOUT_SAVE_TYPE.CREATE) {
@@ -550,7 +579,7 @@ class DirectoryLayoutComponent extends React.Component {
                 accordionData: prevState.accordionData,
                 treeData: prevState.treeData,
                 selectedDirLayout: null,
-                breadCrumb: ' '
+                breadCrumb: []
             };
 
             delete newState.treeData[deletedItemId];
@@ -638,6 +667,7 @@ class DirectoryLayoutComponent extends React.Component {
         this.setState((prevState, props) => {
             const dirLayoutId = savedInfo.dir_layout;
             const newState = {
+                breadCrumb: this.getBreadCrumbs(prevState.selectedDirLayout, savedInfo),
                 treeData: cloneDeep(prevState.treeData),
                 infoBoardData: cloneDeep(prevState.treeData)
             };
@@ -701,7 +731,7 @@ class DirectoryLayoutComponent extends React.Component {
                 infoBoardType: BOARD_TYPES.NONE,
                 infoBoardData: {},
                 treeData: cloneDeep(prevState.treeData),
-                breadCrumb: ' '
+                breadCrumb: []
             };
 
             this.removeDirectoryEntry(directoryId, newState.treeData[dirLayoutId]);
