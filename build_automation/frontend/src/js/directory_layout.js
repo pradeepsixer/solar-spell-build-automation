@@ -417,8 +417,8 @@ class DirectoryLayoutComponent extends React.Component {
                 { eachDirLayout.isOpen ? <ExpandLess /> : <ExpandMore /> }
                 </ListItem>);
                 accordionItems.push(<Collapse key={'collapse-' + eachDirLayout.id} in={eachDirLayout.isOpen} timeout="auto" unmountOnExit>
-                <Button variant="raised" color="primary" onClick={evt => {this.createDirectory(eachDirLayout, null); }}>
-                        New Folder
+                <Button variant="raised" color="primary" onClick={evt => {this.createDirectory(eachDirLayout, null); }} style={{display: 'block', marginLeft: 'auto', marginRight: 'auto'}}>
+                        New Top Folder
                 </Button>
                 <div className={'autoScrollX'}>
                 {
@@ -454,7 +454,7 @@ class DirectoryLayoutComponent extends React.Component {
             elements = (
                 <Grid container spacing={8}>
                     <Grid item xs={3} style={{paddingLeft: '20px'}}>
-                        <Button variant="raised" color="primary" onClick={this.createDirectoryLayout}>
+                        <Button variant="raised" color="primary" onClick={this.createDirectoryLayout} style={{display: 'block', marginLeft: 'auto', marginRight: 'auto'}}>
                             New Library Version
                         </Button>
                         <List component="nav">

@@ -402,6 +402,7 @@ class DirectoryInfoBoard extends React.Component {
                     <Grid container spacing={24} style={{marginTop: '15px'}}>
                         <Grid item xs={3}>
                             <Select
+                                fullWidth
                                 value={'AND'}
                                 displayEmpty
                                 name="creators-operator"
@@ -419,6 +420,7 @@ class DirectoryInfoBoard extends React.Component {
                     <Grid container spacing={24}>
                         <Grid item xs={3}>
                             <Select
+                                fullWidth
                                 value={'AND'}
                                 displayEmpty
                                 name="coverage-operator"
@@ -436,6 +438,7 @@ class DirectoryInfoBoard extends React.Component {
                     <Grid container spacing={24}>
                         <Grid item xs={3}>
                             <Select
+                                fullWidth
                                 value={'AND'}
                                 displayEmpty
                                 name="subjects-operator"
@@ -453,6 +456,7 @@ class DirectoryInfoBoard extends React.Component {
                     <Grid container spacing={24}>
                         <Grid item xs={3}>
                             <Select
+                                fullWidth
                                 value={'AND'}
                                 displayEmpty
                                 name="keywords-operator"
@@ -470,6 +474,7 @@ class DirectoryInfoBoard extends React.Component {
                     <Grid container spacing={24}>
                         <Grid item xs={3}>
                             <Select
+                                fullWidth
                                 value={'AND'}
                                 displayEmpty
                                 name="workarea-operator"
@@ -487,6 +492,7 @@ class DirectoryInfoBoard extends React.Component {
                     <Grid container spacing={24}>
                         <Grid item xs={3}>
                             <Select
+                                fullWidth
                                 value={'AND'}
                                 displayEmpty
                                 name="lang-operator"
@@ -504,6 +510,7 @@ class DirectoryInfoBoard extends React.Component {
                     <Grid container spacing={24}>
                         <Grid item xs={3}>
                             <Select
+                                fullWidth
                                 value={'AND'}
                                 displayEmpty
                                 name="cataloger-operator"
