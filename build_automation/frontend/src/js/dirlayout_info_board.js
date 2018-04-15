@@ -64,6 +64,9 @@ class DirlayoutInfoBoard extends React.Component {
     handleBannerSelection(evt) {
         evt.persist();
         const file = evt.target.files[0];
+        if (!Boolean(file)) { // If there is no file selected.
+            return;
+        }
         this.setState((prevState, props) => {
             const newState = {
                 bannerFile: file,

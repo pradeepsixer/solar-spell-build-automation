@@ -318,6 +318,9 @@ class DirectoryInfoBoard extends React.Component {
     handleBannerSelection(evt) {
         evt.persist();
         const file = evt.target.files[0];
+        if (!Boolean(file)) { // If there is no file selected.
+            return;
+        }
         this.setState((prevState, props) => {
             const newState = {
                 bannerFile: file,
@@ -338,7 +341,7 @@ class DirectoryInfoBoard extends React.Component {
                     </Button>
                     {
                         this.state.id > 0 &&
-                        <Button variant="raised" onClick={this.confirmDeleteDirectory}>
+                        <Button variant="raised" color="secondary" onClick={this.confirmDeleteDirectory}>
                         Delete
                         </Button>
                     }
