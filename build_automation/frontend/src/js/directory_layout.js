@@ -197,6 +197,13 @@ class DirectoryLayoutComponent extends React.Component {
             layoutDirectories[eachDir.id].workareas = eachDir.workareas;
             layoutDirectories[eachDir.id].languages = eachDir.languages;
             layoutDirectories[eachDir.id].catalogers = eachDir.catalogers;
+            layoutDirectories[eachDir.id].creatorsNeedAll = eachDir.creators_need_all;
+            layoutDirectories[eachDir.id].coveragesNeedAll = eachDir.coverages_need_all;
+            layoutDirectories[eachDir.id].subjectsNeedAll = eachDir.subjects_need_all;
+            layoutDirectories[eachDir.id].keywordsNeedAll = eachDir.keywords_need_all;
+            layoutDirectories[eachDir.id].workareasNeedAll = eachDir.workareas_need_all;
+            layoutDirectories[eachDir.id].languagesNeedAll = eachDir.languages_need_all;
+            layoutDirectories[eachDir.id].catalogersNeedAll = eachDir.catalogers_need_all;
 
             if (eachDir.parent) {
                 /* Since the directory has a parent, it is a subdirectory, so add it to the children
@@ -387,6 +394,13 @@ class DirectoryLayoutComponent extends React.Component {
                 workareas: [],
                 languages: [],
                 catalogers: [],
+                creatorsNeedAll: true,
+                coveragesNeedAll: true,
+                subjectsNeedAll: true,
+                keywordsNeedAll: true,
+                workareasNeedAll: true,
+                languagesNeedAll: true,
+                catalogersNeedAll: true,
                 dirLayoutId: dirLayout.id,
                 parent: Boolean(parentDir) ? parentDir.id : null,
             }
@@ -616,6 +630,13 @@ class DirectoryLayoutComponent extends React.Component {
                         workareas: newValue.workareas,
                         languages: newValue.languages,
                         catalogers: newValue.catalogers,
+                        creatorsNeedAll: newValue.creators_need_all,
+                        coveragesNeedAll: newValue.coverages_need_all,
+                        subjectsNeedAll: newValue.subjects_need_all,
+                        keywordsNeedAll: newValue.keywords_need_all,
+                        workareasNeedAll: newValue.workareas_need_all,
+                        languagesNeedAll: newValue.languages_need_all,
+                        catalogersNeedAll: newValue.catalogers_need_all,
                         children: []
                     });
                 } else {
@@ -633,6 +654,13 @@ class DirectoryLayoutComponent extends React.Component {
                     array[i].workareas = newValue.workareas;
                     array[i].languages = newValue.languages;
                     array[i].catalogers = newValue.catalogers;
+                    array[i].creatorsNeedAll = newValue.creators_need_all;
+                    array[i].coveragesNeedAll = newValue.coverages_need_all;
+                    array[i].subjectsNeedAll = newValue.subjects_need_all;
+                    array[i].keywordsNeedAll = newValue.keywords_need_all;
+                    array[i].workareasNeedAll = newValue.workareas_need_all;
+                    array[i].languagesNeedAll = newValue.languages_need_all;
+                    array[i].catalogersNeedAll = newValue.catalogers_need_all;
                 }
                 return true;
             }
@@ -660,6 +688,13 @@ class DirectoryLayoutComponent extends React.Component {
         boardData.workareas = directory.workareas;
         boardData.languages = directory.languages;
         boardData.catalogers = directory.catalogers;
+        boardData.creatorsNeedAll = directory.creators_need_all;
+        boardData.coveragesNeedAll = directory.coverages_need_all;
+        boardData.subjectsNeedAll = directory.subjects_need_all;
+        boardData.keywordsNeedAll = directory.keywords_need_all;
+        boardData.workareasNeedAll = directory.workareas_need_all;
+        boardData.languagesNeedAll = directory.languages_need_all;
+        boardData.catalogersNeedAll = directory.catalogers_need_all;
         boardData.parent = directory.parent;
     }
 
@@ -696,6 +731,13 @@ class DirectoryLayoutComponent extends React.Component {
                         workareas: savedInfo.workareas,
                         languages: savedInfo.languages,
                         catalogers: savedInfo.catalogers,
+                        creatorsNeedAll: savedInfo.creators_need_all,
+                        coveragesNeedAll: savedInfo.coverages_need_all,
+                        subjectsNeedAll: savedInfo.subjects_need_all,
+                        keywordsNeedAll: savedInfo.keywords_need_all,
+                        workareasNeedAll: savedInfo.workareas_need_all,
+                        languagesNeedAll: savedInfo.languages_need_all,
+                        catalogersNeedAll: savedInfo.catalogers_need_all,
                         children: []
                     });
                 }

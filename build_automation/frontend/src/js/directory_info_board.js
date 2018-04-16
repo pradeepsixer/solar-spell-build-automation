@@ -42,6 +42,13 @@ class DirectoryInfoBoard extends React.Component {
             workareas: labels['workareas'],
             languages: labels['languages'],
             catalogers: labels['catalogers'],
+            creatorsNeedAll: (props.boardData.creatorsNeedAll ? 'All' : 'Any'),
+            coveragesNeedAll: (props.boardData.coveragesNeedAll ? 'All' : 'Any'),
+            subjectsNeedAll: (props.boardData.subjectsNeedAll ? 'All' : 'Any'),
+            keywordsNeedAll: (props.boardData.keywordsNeedAll ? 'All' : 'Any'),
+            workareasNeedAll: (props.boardData.workareasNeedAll ? 'All' : 'Any'),
+            languagesNeedAll: (props.boardData.languagesNeedAll ? 'All' : 'Any'),
+            catalogersNeedAll: (props.boardData.catalogersNeedAll ? 'All' : 'Any'),
             selectedFiles: props.boardData.individualFiles,
             confirmDelete: false,
             labels: labels,
@@ -132,6 +139,13 @@ class DirectoryInfoBoard extends React.Component {
             workareas: labels['workareas'],
             languages: labels['languages'],
             catalogers: labels['catalogers'],
+            creatorsNeedAll: (props.boardData.creatorsNeedAll ? 'All' : 'Any'),
+            coveragesNeedAll: (props.boardData.coveragesNeedAll ? 'All' : 'Any'),
+            subjectsNeedAll: (props.boardData.subjectsNeedAll ? 'All' : 'Any'),
+            keywordsNeedAll: (props.boardData.keywordsNeedAll ? 'All' : 'Any'),
+            workareasNeedAll: (props.boardData.workareasNeedAll ? 'All' : 'Any'),
+            languagesNeedAll: (props.boardData.languagesNeedAll ? 'All' : 'Any'),
+            catalogersNeedAll: (props.boardData.catalogersNeedAll ? 'All' : 'Any'),
             selectedFiles: props.boardData.individualFiles,
             confirmDelete: false,
             fieldErrors: {}
@@ -175,6 +189,13 @@ class DirectoryInfoBoard extends React.Component {
         selectedTags['workareas'].forEach(workarea => {payload.append('workareas', workarea)});
         selectedTags['languages'].forEach(language => {payload.append('languages', language)});
         selectedTags['catalogers'].forEach(cataloger => {payload.append('catalogers', cataloger)});
+        payload.append('creators_need_all', (this.state.creatorsNeedAll === 'All'));
+        payload.append('coverages_need_all', (this.state.coveragesNeedAll === 'All'));
+        payload.append('subjects_need_all', (this.state.subjectsNeedAll === 'All'));
+        payload.append('keywords_need_all', (this.state.keywordsNeedAll === 'All'));
+        payload.append('workareas_need_all', (this.state.workareasNeedAll === 'All'));
+        payload.append('languages_need_all', (this.state.languagesNeedAll === 'All'));
+        payload.append('catalogers_need_all', (this.state.catalogersNeedAll === 'All'));
         Boolean(this.state.parent) && payload.append('parent', this.state.parent);
         Boolean(this.state.bannerFile) && payload.append('banner_file', this.state.bannerFile);
         const currInstance = this;
@@ -278,10 +299,9 @@ class DirectoryInfoBoard extends React.Component {
         })
     }
 
-    handleOperatorChange(evt) {
-        console.log(evt.target.value);
+    handleOperatorChange(evt, targetElem) {
         this.setState({
-            selectedOperator: evt.target.value
+            [targetElem]: evt.target.value
         })
     }
 
@@ -403,12 +423,13 @@ class DirectoryInfoBoard extends React.Component {
                         <Grid item xs={3}>
                             <Select
                                 fullWidth
-                                value={'AND'}
+                                value={this.state.creatorsNeedAll}
                                 displayEmpty
                                 name="creators-operator"
+                                onChange={evt => this.handleOperatorChange(evt, 'creatorsNeedAll')}
                             >
-                                <MenuItem value="AND">All of the Creators</MenuItem>
-                                <MenuItem value="OR">Any of the Creators</MenuItem>
+                                <MenuItem value="All">All of the Creators</MenuItem>
+                                <MenuItem value="Any">Any of the Creators</MenuItem>
                             </Select>
                         </Grid>
                         <Grid item xs={8}>
@@ -421,12 +442,13 @@ class DirectoryInfoBoard extends React.Component {
                         <Grid item xs={3}>
                             <Select
                                 fullWidth
-                                value={'AND'}
+                                value={this.state.coveragesNeedAll}
                                 displayEmpty
                                 name="coverage-operator"
+                                onChange={evt => this.handleOperatorChange(evt, 'coveragesNeedAll')}
                             >
-                                <MenuItem value="AND">All of the Coverages</MenuItem>
-                                <MenuItem value="OR">Any of the Coverages</MenuItem>
+                                <MenuItem value="All">All of the Coverages</MenuItem>
+                                <MenuItem value="Any">Any of the Coverages</MenuItem>
                             </Select>
                         </Grid>
                         <Grid item xs={8}>
@@ -439,12 +461,13 @@ class DirectoryInfoBoard extends React.Component {
                         <Grid item xs={3}>
                             <Select
                                 fullWidth
-                                value={'AND'}
+                                value={this.state.subjectsNeedAll}
                                 displayEmpty
                                 name="subjects-operator"
+                                onChange={evt => this.handleOperatorChange(evt, 'subjectsNeedAll')}
                             >
-                                <MenuItem value="AND">All of the Subjects</MenuItem>
-                                <MenuItem value="OR">Any of the Subjects</MenuItem>
+                                <MenuItem value="All">All of the Subjects</MenuItem>
+                                <MenuItem value="Any">Any of the Subjects</MenuItem>
                             </Select>
                         </Grid>
                         <Grid item xs={8}>
@@ -457,12 +480,13 @@ class DirectoryInfoBoard extends React.Component {
                         <Grid item xs={3}>
                             <Select
                                 fullWidth
-                                value={'AND'}
+                                value={this.state.keywordsNeedAll}
                                 displayEmpty
                                 name="keywords-operator"
+                                onChange={evt => this.handleOperatorChange(evt, 'keywordsNeedAll')}
                             >
-                                <MenuItem value="AND">All of the Keywords</MenuItem>
-                                <MenuItem value="OR">Any of the Keywords</MenuItem>
+                                <MenuItem value="All">All of the Keywords</MenuItem>
+                                <MenuItem value="Any">Any of the Keywords</MenuItem>
                             </Select>
                         </Grid>
                         <Grid item xs={8}>
@@ -475,12 +499,13 @@ class DirectoryInfoBoard extends React.Component {
                         <Grid item xs={3}>
                             <Select
                                 fullWidth
-                                value={'AND'}
+                                value={this.state.workareasNeedAll}
                                 displayEmpty
                                 name="workarea-operator"
+                                onChange={evt => this.handleOperatorChange(evt, 'workareasNeedAll')}
                             >
-                                <MenuItem value="AND">All of the Work Areas</MenuItem>
-                                <MenuItem value="OR">Any of the Work Areas</MenuItem>
+                                <MenuItem value="All">All of the Work Areas</MenuItem>
+                                <MenuItem value="Any">Any of the Work Areas</MenuItem>
                             </Select>
                         </Grid>
                         <Grid item xs={8}>
@@ -493,12 +518,13 @@ class DirectoryInfoBoard extends React.Component {
                         <Grid item xs={3}>
                             <Select
                                 fullWidth
-                                value={'AND'}
+                                value={this.state.languagesNeedAll}
                                 displayEmpty
                                 name="lang-operator"
+                                onChange={evt => this.handleOperatorChange(evt, 'languagesNeedAll')}
                             >
-                                <MenuItem value="AND">All of the Languages</MenuItem>
-                                <MenuItem value="OR">Any of the Languages</MenuItem>
+                                <MenuItem value="All">All of the Languages</MenuItem>
+                                <MenuItem value="Any">Any of the Languages</MenuItem>
                             </Select>
                         </Grid>
                         <Grid item xs={8}>
@@ -511,12 +537,13 @@ class DirectoryInfoBoard extends React.Component {
                         <Grid item xs={3}>
                             <Select
                                 fullWidth
-                                value={'AND'}
+                                value={this.state.catalogersNeedAll}
                                 displayEmpty
                                 name="cataloger-operator"
+                                onChange={evt => this.handleOperatorChange(evt, 'catalogersNeedAll')}
                             >
-                                <MenuItem value="AND">All of the Catalogers</MenuItem>
-                                <MenuItem value="OR">Any of the Catalogers</MenuItem>
+                                <MenuItem value="All">All of the Catalogers</MenuItem>
+                                <MenuItem value="Any">Any of the Catalogers</MenuItem>
                             </Select>
                         </Grid>
                         <Grid item xs={8}>
