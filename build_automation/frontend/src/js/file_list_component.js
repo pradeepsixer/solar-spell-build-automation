@@ -1,7 +1,9 @@
 import React from 'react';
 import Typography from 'material-ui/Typography';
 import Chip from 'material-ui/Chip';
+import Button from 'material-ui/Button';
 import Menu, { MenuItem } from 'material-ui/Menu';
+import Dialog, { DialogActions, DialogContent, DialogContentText, DialogTitle } from 'material-ui/Dialog';
 import axios from 'axios';
 import { APP_URLS, get_url } from './url.js';
 
@@ -51,11 +53,16 @@ class FileListComponent extends React.Component {
                 selectedFile: null,
                 AnchorPos: null
             },
-            allFiles: props.allFiles
+            allFiles: props.allFiles,
+            confirmDelete: false,
+            selectedFile: null
         };
         console.log(props);
         __tagIdsTagsMap = props.tagIdsTagsMap;
         this.deleteCallback = props.onDelete;
+        this.closeConfirmDialog = this.closeConfirmDialog.bind(this);
+        this.deleteFile = this.deleteFile.bind(this);
+        this.handleFilesRightClick = this.handleFilesRightClick.bind(this);
     }
 
     componentWillReceiveProps(props) {
@@ -64,11 +71,13 @@ class FileListComponent extends React.Component {
     }
 
     handleFilesRightClick(evt, row, menuName) {
+        console.log(menuName, row, 'This is the value!');
         this.setState({
             [menuName]: {
                 selectedFile: row,
                 AnchorPos: {top:evt.clientY, left:evt.clientX}
-            }
+            },
+            selectedFile: row
         });
         evt.preventDefault();
     }
@@ -98,6 +107,17 @@ class FileListComponent extends React.Component {
             console.error("Error in deleting the file ", error);
         });
     }
+
+    confirmDeleteContent() {
+        this.setState({
+            confirmDelete: true
+        })
+    }
+
+    closeConfirmDialog() {
+        this.setState({confirmDelete: false})
+    }
+
 
 
     render() {
@@ -168,12 +188,33 @@ class FileListComponent extends React.Component {
                     <MenuItem
                         onClick={evt => {
                             this.handleMenuClose(evt, 'allFilesMenu');
-                            this.deleteFile(this.state.allFilesMenu.selectedFile);
+                            this.confirmDeleteContent();
                         }}
                     >
                         Delete this file
                     </MenuItem>
                 </Menu>
+                <Dialog
+                    open={this.state.confirmDelete}
+                    onClose={this.closeConfirmDialog}
+                    aria-labelledby="alert-dialog-title"
+                    aria-describedby="alert-dialog-description"
+                >
+                    <DialogTitle id="alert-dialog-title">{"Confirm Delete?"}</DialogTitle>
+                    <DialogContent>
+                        <DialogContentText id="alert-dialog-description">
+                            Are you sure you want to delete this file {this.state.name}?
+                        </DialogContentText>
+                    </DialogContent>
+                    <DialogActions>
+                        <Button onClick={this.closeConfirmDialog} color="primary">
+                            No
+                        </Button>
+                        <Button onClick={evt => {this.closeConfirmDialog(); this.deleteFile(this.state.selectedFile);}} color="primary" autoFocus>
+                            Yes
+                        </Button>
+                    </DialogActions>
+                </Dialog>
             </React.Fragment>
         );
     }
