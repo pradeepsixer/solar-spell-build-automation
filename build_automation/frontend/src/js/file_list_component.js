@@ -60,6 +60,7 @@ class FileListComponent extends React.Component {
         console.log(props);
         __tagIdsTagsMap = props.tagIdsTagsMap;
         this.deleteCallback = props.onDelete;
+        this.editCallback = props.onEdit;
         this.closeConfirmDialog = this.closeConfirmDialog.bind(this);
         this.deleteFile = this.deleteFile.bind(this);
         this.handleFilesRightClick = this.handleFilesRightClick.bind(this);
@@ -171,8 +172,9 @@ class FileListComponent extends React.Component {
                 >
                     <MenuItem
                         onClick={evt => {
-                            this.handleMenuClose(evt, 'allFilesMenu');
-                            this.addFileToSelection(this.state.allFilesMenu.selectedFile);
+                            // this.handleMenuClose(evt, 'allFilesMenu');
+                            console.log('What the heck!');
+                            this.editCallback(this.state.selectedFile);
                         }}
                     >
                         Edit this file

@@ -34,25 +34,26 @@ const styles = theme => ({
 class UploadContent extends React.Component{
     constructor(props) {
         super(props);
+        this.tagIdsTagsMap = this.buildTagIdTagsMap(props.allTags);
+        const labels = this.getAutoCompleteLabelsFromTagIds(props.content, this.tagIdsTagsMap);
         this.state = {
-            id: -1,
-            name: "",
-            description: "",
-            creators: [],
-            coverages: [],
-            subjects: [],
-            keywords: [],
-            workareas: [],
-            languages: [],
-            catalogers: [],
+            id: props.content.id,
+            name: props.content.name,
+            description: props.content.description,
+            creators: labels.creators,
+            coverages: labels.coverages,
+            subjects: labels.subjects,
+            keywords: labels.keywords,
+            workareas: labels.workareas,
+            languages: labels.languages,
+            catalogers: labels.catalogers,
             fieldErrors: {},
-            updatedTime: '',
-            selectedDate: new Date(),
-            source: "",
-            copyright: "",
-            rightsStatement: "",
+            selectedDate: props.content.updatedDate,
+            source: props.content.source,
+            copyright: props.content.copyright,
+            rightsStatement: props.content.rightsStatement,
             contentFile: null,
-            contentFileName: ""
+            contentFileName: props.content.originalFileName ? props.content.originalFileName : '',
         };
         this.tagNameTagMap = this.buildTagNameTagMap(props.allTags);
         this.handleDateChange=this.handleDateChange.bind(this);
@@ -76,12 +77,34 @@ class UploadContent extends React.Component{
         this.saveContent=this.saveContent.bind(this);
         this.saveCallback=props.onSave.bind(this);
     }
+    buildTagIdTagsMap(tags) {
+        // Builds a map of <Tag Id> - Tag map for each tag type.
+        const tagIdTagMap = {};
+        Object.keys(tags).forEach(eachTagType => {
+            tagIdTagMap[eachTagType] = buildMapFromArray(tags[eachTagType], 'id');
+        });
+        return tagIdTagMap;
+    }
     buildTagNameTagMap(tags) {
         const tagNameTagMap = {};
         Object.keys(tags).forEach(eachTagType => {
             tagNameTagMap[eachTagType] = buildMapFromArray(tags[eachTagType], 'name');
         });
         return tagNameTagMap;
+    }
+    getAutoCompleteLabelsFromTagIds(boardInfo, tagIdsTagsMap) {
+        console.log('getautocomplete', boardInfo, tagIdsTagsMap)
+        const retval = {};
+        Object.keys(tagIdsTagsMap).forEach(eachTagType => {
+            const selectedTagsForDir = boardInfo[eachTagType];
+            const selectedTypeAllTags = tagIdsTagsMap[eachTagType];
+            const labels = [];
+            selectedTagsForDir.forEach(eachTagId => {
+                labels.push(selectedTypeAllTags[eachTagId].name);
+            });
+            retval[eachTagType] = labels;
+        });
+        return retval;
     }
     componentDidMount() {
         // this.loadData()
@@ -247,11 +270,7 @@ class UploadContent extends React.Component{
             axios.patch(targetUrl, payload, {
                 responseType: 'json'
             }).then(function(response) {
-                currInstance.saveCallback(response.data);
-                currInstance.setState({
-                    message: 'Save successful',
-                    messageType: 'info'
-                });
+                currInstance.saveCallback(response.data, true);
             }).catch(function(error) {
                 console.error("Error in updating the directory", error);
                 console.error(error.response.data);
@@ -269,11 +288,7 @@ class UploadContent extends React.Component{
             axios.post(targetUrl, payload, {
                 responseType: 'json'
             }).then(function(response) {
-                currInstance.saveCallback(response.data, true);
-                currInstance.setState({
-                    message: 'Save successful',
-                    messageType: 'info'
-                });
+                currInstance.saveCallback(response.data, false);
             }).catch(function(error) {
                 console.error("Error in creating a new directory", error);
                 console.error(error.response.data);

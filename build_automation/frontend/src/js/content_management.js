@@ -34,12 +34,15 @@ class ContentManagement extends React.Component{
             fieldErrors: {},
             updatedTime: '',
             files: [],
-            currentView: 'manage'
+            currentView: 'manage',
+            content: null
         };
         this.setCurrentView = this.setCurrentView.bind(this);
         this.tagIdTagsMap = {};
         this.handleFileDelete = this.handleFileDelete.bind(this);
         this.saveContentCallback = this.saveContentCallback.bind(this);
+        this.uploadNewFile = this.uploadNewFile.bind(this);
+        this.handleContentEdit = this.handleContentEdit.bind(this);
     }
 
     componentDidMount() {
@@ -103,14 +106,69 @@ class ContentManagement extends React.Component{
             return {files};
         })
     }
-    saveContentCallback(content){
+    saveContentCallback(content, updated){
         this.setState((prevState, props)=>{
             const {files} = prevState;
-            files.push(content);
+            if (updated){
+                files.forEach(eachFile => {
+                if (eachFile.id===content.id){
+                    files.splice(files.indexOf(eachFile), 1, content);
+                }
+            });
+            }
+            else{
+                files.push(content);
+            }
+
             return {
                 currentView: 'manage',
                 files
             };
+        })
+    }
+    uploadNewFile(){
+        this.setState({
+            currentView: 'upload',
+            content: {
+                id: -1,
+                name: "",
+                description: "",
+                creators: [],
+                coverages: [],
+                subjects: [],
+                keywords: [],
+                workareas: [],
+                languages: [],
+                catalogers: [],
+                updatedDate: new Date(),
+                source: "",
+                copyright: "",
+                rightsStatement: "",
+                originalFileName: ""
+            }
+        })
+    }
+    handleContentEdit(content){
+        console.log(content)
+        this.setState({
+            currentView: 'upload',
+            content: {
+                id: content.id,
+                name: content.name,
+                description: content.description,
+                creators: content.creators||[],
+                coverages: content.coverage?[content.coverage]:[],
+                subjects: content.subjects||[],
+                keywords: content.keywords||[],
+                workareas: content.workareas||[],
+                languages: content.language?[content.language]:[],
+                catalogers: content.cataloger?[content.cataloger]:[],
+                updatedDate: content.updatedDate,
+                source: content.source,
+                copyright: content.copyright,
+                rightsStatement: content.rightsStatement,
+                originalFileName: content.originalFileName,
+            }
         })
     }
     render(){
@@ -123,14 +181,14 @@ class ContentManagement extends React.Component{
                             Manage Content
                         </Button>
                         <div style={{marginTop: '20px'}}> </div>
-                        <Button variant="raised" color="primary" onClick={e => {this.setCurrentView('upload')}}>
+                        <Button variant="raised" color="primary" onClick={e => {this.uploadNewFile()}}>
                             Add Content
                         </Button>
                     </Grid>
 
                     <Grid item xs={8}>
-                        {this.state.currentView=='manage'&&<FileListComponent onDelete={this.handleFileDelete} allFiles={this.state.files} tagIdsTagsMap={this.tagIdTagsMap} />}
-                        {this.state.currentView=='upload'&&<UploadContent onSave={this.saveContentCallback} tagIdsTagsMap={this.tagIdTagsMap} allTags={this.state.tags} />}
+                        {this.state.currentView=='manage'&&<FileListComponent onEdit={this.handleContentEdit} onDelete={this.handleFileDelete} allFiles={this.state.files} tagIdsTagsMap={this.tagIdTagsMap} />}
+                        {this.state.currentView=='upload'&&<UploadContent onSave={this.saveContentCallback} tagIdsTagsMap={this.tagIdTagsMap} allTags={this.state.tags} content={this.state.content}/>}
                     </Grid>
                 </Grid>
 
