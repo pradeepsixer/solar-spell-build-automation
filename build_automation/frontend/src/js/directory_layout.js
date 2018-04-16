@@ -438,6 +438,7 @@ class DirectoryLayoutComponent extends React.Component {
                 {
                     this.state.treeData[eachDirLayout.id].length > 0 &&
                     <SortableTree
+                    canDrag={false}
                     treeData={this.state.treeData[eachDirLayout.id]}
                     onChange={newTreeData=> {
                         var currentTreeData = this.state.treeData;
