@@ -81,6 +81,7 @@ def delete_banner_file_after_model_deletion(sender, **kwargs):
     ):
         os.remove(dir_layout.banner_file.path)
 
+
 @receiver(pre_save, sender=DirectoryLayout)
 def delete_dir_banner_file_on_change(sender, **kwargs):
     """

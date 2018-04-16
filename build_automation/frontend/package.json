@@ -7,9 +7,9 @@
     "clean": "rm -rf static/",
     "build": "npm run-script clean; webpack --mode=production",
     "build-dev": "npm run-script clean; webpack --mode=development",
-    "winclean": "rd /s /q dist ..\\content_management\\static",
-    "winbuild": "npm run-script winclean & webpack --mode=production && xcopy dist ..\\content_management\\static\\ /E",
-    "winbuild-dev": "npm run-script winclean & webpack --mode=development && xcopy dist ..\\content_management\\static\\ /E",
+    "winclean": "rd /s /q static",
+    "winbuild": "npm run-script winclean & webpack --mode=production",
+    "winbuild-dev": "npm run-script winclean & webpack --mode=development",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "School for the Future of Innovation in Society, Arizona State University.",
@@ -41,6 +41,7 @@
     "babel-preset-react": "^6.24.1",
     "copy-webpack-plugin": "^4.5.1",
     "css-loader": "^0.28.11",
+    "file-loader": "^1.1.11",
     "style-loader": "^0.20.3",
     "webpack": "^4.1.1",
     "webpack-cli": "^2.0.12"
