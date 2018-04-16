@@ -8,6 +8,7 @@ import Paper from 'material-ui/Paper';
 import Tabs, { Tab } from 'material-ui/Tabs';
 import Typography from 'material-ui/Typography';
 
+import solarSpellLogo from '../images/logo.png';
 import '../css/style.css';
 
 class MainScreen extends React.Component {
@@ -32,9 +33,7 @@ class MainScreen extends React.Component {
                 <Grid item xs={12}>
                     <Grid container justify="center" alignItems="flex-end" style={{height: '100%'}}>
                         <Grid item>
-                            <Typography gutterBottom variant="headline" style={{ color: '#ffffff' }}>
-                                SolarSPELL
-                            </Typography>
+                            <img src={solarSpellLogo} className="spellLogo" />
                         </Grid>
                     </Grid>
                 </Grid>
