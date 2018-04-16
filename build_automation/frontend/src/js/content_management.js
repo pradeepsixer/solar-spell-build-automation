@@ -39,6 +39,7 @@ class ContentManagement extends React.Component{
         this.setCurrentView = this.setCurrentView.bind(this);
         this.tagIdTagsMap = {};
         this.handleFileDelete = this.handleFileDelete.bind(this);
+        this.saveContentCallback = this.saveContentCallback.bind(this);
     }
 
     componentDidMount() {
@@ -102,6 +103,16 @@ class ContentManagement extends React.Component{
             return {files};
         })
     }
+    saveContentCallback(content){
+        this.setState((prevState, props)=>{
+            const {files} = prevState;
+            files.push(content);
+            return {
+                currentView: 'manage',
+                files
+            };
+        })
+    }
     render(){
         return (
             <div>
@@ -119,7 +130,7 @@ class ContentManagement extends React.Component{
 
                     <Grid item xs={8}>
                         {this.state.currentView=='manage'&&<FileListComponent onDelete={this.handleFileDelete} allFiles={this.state.files} tagIdsTagsMap={this.tagIdTagsMap} />}
-                        {this.state.currentView=='upload'&&<UploadContent tagIdsTagsMap={this.tagIdTagsMap} allTags={this.state.tags} />}
+                        {this.state.currentView=='upload'&&<UploadContent onSave={this.saveContentCallback} tagIdsTagsMap={this.tagIdTagsMap} allTags={this.state.tags} />}
                     </Grid>
                 </Grid>
 

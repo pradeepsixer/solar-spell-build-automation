@@ -34,7 +34,6 @@ class ContentSerializer(serializers.ModelSerializer):
         content.subjects.set(validated_data['subjects'])
         content.keywords.set(validated_data['keywords'])
         content.workareas.set(validated_data['workareas'])
-        content.save()
         return content
 
     def update(self, content, validated_data):

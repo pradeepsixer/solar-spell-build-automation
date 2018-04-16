@@ -6,11 +6,12 @@ import Typography from 'material-ui/Typography';
 import AutoCompleteWithChips from './autocomplete.js';
 import TextField from 'material-ui/TextField';
 import { DatePicker } from 'material-ui-pickers';
-import {APP_URLS} from "./url";
+import {APP_URLS, get_url} from "./url";
 import DateFnsUtils from 'material-ui-pickers/utils/date-fns-utils';
 import MuiPickersUtilsProvider from 'material-ui-pickers/utils/MuiPickersUtilsProvider';
 import {ChevronLeft, ChevronRight} from 'material-ui-icons';
 import axios from 'axios';
+import {buildMapFromArray} from "./utils";
 
 const styles = theme => ({
     root: {
@@ -34,22 +35,26 @@ class UploadContent extends React.Component{
     constructor(props) {
         super(props);
         this.state = {
+            id: -1,
             name: "",
             description: "",
-            selectedCreators: [],
-            selectedCoverage: [],
-            selectedSubjects: [],
-            selectedKeywords: [],
-            selectedWorkareas: [],
-            selectedLanguage: [],
-            selectedCataloger: [],
+            creators: [],
+            coverages: [],
+            subjects: [],
+            keywords: [],
+            workareas: [],
+            languages: [],
+            catalogers: [],
             fieldErrors: {},
             updatedTime: '',
             selectedDate: new Date(),
             source: "",
             copyright: "",
             rightsStatement: "",
+            contentFile: null,
+            contentFileName: ""
         };
+        this.tagNameTagMap = this.buildTagNameTagMap(props.allTags);
         this.handleDateChange=this.handleDateChange.bind(this);
         this.handleTagAddition=this.handleTagAddition.bind(this);
         this.handleCreatorAddition=this.handleCreatorAddition.bind(this);
@@ -67,6 +72,16 @@ class UploadContent extends React.Component{
         this.handleWorkareaDeletion=this.handleWorkareaDeletion.bind(this);
         this.handleLanguageDeletion=this.handleLanguageDeletion.bind(this);
         this.handleCatalogerDeletion=this.handleCatalogerDeletion.bind(this);
+        this.handleFileSelection=this.handleFileSelection.bind(this);
+        this.saveContent=this.saveContent.bind(this);
+        this.saveCallback=props.onSave.bind(this);
+    }
+    buildTagNameTagMap(tags) {
+        const tagNameTagMap = {};
+        Object.keys(tags).forEach(eachTagType => {
+            tagNameTagMap[eachTagType] = buildMapFromArray(tags[eachTagType], 'name');
+        });
+        return tagNameTagMap;
     }
     componentDidMount() {
         // this.loadData()
@@ -101,12 +116,11 @@ class UploadContent extends React.Component{
     handleTagAddition(tag, tagType){
         console.log('Oh No!!!!!');
         this.setState((prevState, props) => {
-            const tagKey = 'selected' + tagType;
-            const selectedTags = prevState[tagKey];
+            const selectedTags = prevState[tagType];
             const fieldErrors = prevState.fieldErrors;
             selectedTags.push(tag.name);
             fieldErrors[tagType] = null;
-            const value = {[tagKey]: selectedTags, fieldErrors};
+            const value = {[tagType]: selectedTags, fieldErrors};
             console.log('Here\'s the value of \'value!', value);
             return value;
         })
@@ -114,55 +128,182 @@ class UploadContent extends React.Component{
     handleTagDeletion(tag, tagType){
         console.log('Oh No!!!!!');
         this.setState((prevState, props) => {
-            const tagKey = 'selected' + tagType;
-            const selectedTags = prevState[tagKey];
+            const selectedTags = prevState[tagType];
             selectedTags.splice(tag.name, 1);
-            const value = {[tagKey]: selectedTags};
+            const value = {[tagType]: selectedTags};
             console.log('Here\'s the value of \'value!', value);
             return value;
         })
     }
     handleCreatorAddition(creator){
-        this.handleTagAddition(creator, 'Creators')
+        this.handleTagAddition(creator, 'creators')
     }
     handleCoverageAddition(coverage){
-        this.handleTagAddition(coverage, 'Coverage')
+        this.handleTagAddition(coverage, 'coverages')
     }
     handleSubjectAddition(subject){
-        this.handleTagAddition(subject, 'Subjects')
+        this.handleTagAddition(subject, 'subjects')
     }
     handleKeywordAddition(keyword){
-        this.handleTagAddition(keyword, 'Keywords')
+        this.handleTagAddition(keyword, 'keywords')
     }
     handleWorkareaAddition(workarea){
-        this.handleTagAddition(workarea, 'Workareas')
+        this.handleTagAddition(workarea, 'workareas')
     }
     handleLanguageAddition(language){
-        this.handleTagAddition(language, 'Language')
+        this.handleTagAddition(language, 'languages')
     }
     handleCatalogerAddition(cataloger){
-        this.handleTagAddition(cataloger, 'Cataloger')
+        this.handleTagAddition(cataloger, 'catalogers')
     }
     handleCreatorDeletion(creator){
-        this.handleTagDeletion(creator, 'Creators')
+        this.handleTagDeletion(creator, 'creators')
     }
     handleCoverageDeletion(coverage){
-        this.handleTagDeletion(coverage, 'Coverage')
+        this.handleTagDeletion(coverage, 'coverages')
     }
     handleSubjectDeletion(subject){
-        this.handleTagDeletion(subject, 'Subjects')
+        this.handleTagDeletion(subject, 'subjects')
     }
     handleKeywordDeletion(keyword){
-        this.handleTagDeletion(keyword, 'Keywords')
+        this.handleTagDeletion(keyword, 'keywords')
     }
     handleWorkareaDeletion(workarea){
-        this.handleTagDeletion(workarea, 'Workareas')
+        this.handleTagDeletion(workarea, 'workareas')
     }
     handleLanguageDeletion(language){
-        this.handleTagDeletion(language, 'Language')
+        this.handleTagDeletion(language, 'languages')
     }
     handleCatalogerDeletion(cataloger){
-        this.handleTagDeletion(cataloger, 'Cataloger')
+        this.handleTagDeletion(cataloger, 'catalogers')
+    }
+    is_valid_state(is_save) {
+        var hasErrors = false;
+        const fieldErrors = {};
+        if (!this.state.name || this.state.name.trim().length === 0) {
+            hasErrors = true;
+            fieldErrors['name'] = 'Name is required.';
+        }
+        if (!this.state.description || this.state.description.trim().length === 0) {
+            hasErrors = true;
+            fieldErrors['description'] = 'Description is required.';
+        }
+        if (hasErrors) {
+            this.setState({fieldErrors});
+        }
+        return !hasErrors;
+    }
+    getSelectedTags() {
+        const tagTypeSelectedTagsMap = {};
+        Object.keys(this.props.allTags).forEach(eachTagType => {
+            tagTypeSelectedTagsMap[eachTagType] = this.getSelectedTagsIdsFromName(eachTagType);
+        });
+        return tagTypeSelectedTagsMap;
+    }
+    getSelectedTagsIdsFromName(tagType) {
+        const matchingTagIds = [];
+        this.state[tagType].forEach(eachLabel => {
+            matchingTagIds.push(this.tagNameTagMap[tagType][eachLabel].id);
+        });
+        return matchingTagIds;
+    }
+    formatDate(input) {
+        const year = input.getFullYear();
+        let month = input.getMonth();
+        if (month < 10) {
+            month = '0' + month;
+        }
+        let date = input.getDate();
+        if (date < 10) {
+            date = '0' + date;
+        }
+        return year + '-' + month + '-' + date;
+    }
+    saveContent(evt) {
+        if (!this.is_valid_state(!(this.state.id > 0))) {
+            // If it is in an invalid state, do not proceed with the save operation.
+            return;
+        }
+        var targetUrl = APP_URLS.CONTENTS_LIST;
+        const selectedTags = this.getSelectedTags();
+        console.log(selectedTags);
+        const payload = new FormData();
+        payload.append('name', this.state.name);
+        payload.append('description', this.state.description);
+        selectedTags.creators.forEach(creator => {payload.append('creators', creator)});
+        payload.append('coverage', selectedTags.coverages[0]);
+        selectedTags.subjects.forEach(subject => {payload.append('subjects', subject)});
+        selectedTags.keywords.forEach(keyword => {payload.append('keywords', keyword)});
+        selectedTags.workareas.forEach(workarea => {payload.append('workareas', workarea)});
+        payload.append('language', selectedTags.languages[0]);
+        payload.append('cataloger', selectedTags.catalogers[0]);
+        payload.append('updated_time', this.formatDate(this.state.selectedDate));
+        Boolean(this.state.contentFile) && payload.append('content_file', this.state.contentFile);
+        const currInstance = this;
+        if (this.state.id > 0) {
+            // Update an existing directory.
+            payload.append('id', this.state.id);
+            targetUrl = get_url(APP_URLS.CONTENT_DETAIL, {id:this.state.id});
+            axios.patch(targetUrl, payload, {
+                responseType: 'json'
+            }).then(function(response) {
+                currInstance.saveCallback(response.data);
+                currInstance.setState({
+                    message: 'Save successful',
+                    messageType: 'info'
+                });
+            }).catch(function(error) {
+                console.error("Error in updating the directory", error);
+                console.error(error.response.data);
+                let errorMsg = 'Error in updating the folder';
+                if (!(JSON.stringify(error.response.data).indexOf('DUPLICATE_DIRECTORY') === -1)) {
+                    errorMsg = (<React.Fragment><b>ERROR:</b> There is another folder under the same name within the current folder. Please change the name, and try again.</React.Fragment>);
+                }
+                currInstance.setState({
+                    message: errorMsg,
+                    messageType: 'error'
+                });
+            });
+        } else {
+            // Create a new directory.
+            axios.post(targetUrl, payload, {
+                responseType: 'json'
+            }).then(function(response) {
+                currInstance.saveCallback(response.data, true);
+                currInstance.setState({
+                    message: 'Save successful',
+                    messageType: 'info'
+                });
+            }).catch(function(error) {
+                console.error("Error in creating a new directory", error);
+                console.error(error.response.data);
+                let errorMsg = 'Error in creating the folder';
+                if (!(JSON.stringify(error.response.data).indexOf('DUPLICATE_DIRECTORY') === -1)) {
+                    errorMsg = (<React.Fragment><b>ERROR:</b> There is another folder under the same name within the current folder. Please change the name, and try again.</React.Fragment>);
+                }
+                currInstance.setState({
+                    message: errorMsg,
+                    messageType: 'error'
+                });
+            });
+        }
+    }
+
+    handleFileSelection(evt) {
+        evt.persist();
+        const file = evt.target.files[0];
+        if (!Boolean(file)) { // If there is no file selected.
+            return;
+        }
+        this.setState((prevState, props) => {
+            const newState = {
+                contentFile: file,
+                contentFileName: file.name,
+                fieldErrors: prevState.fieldErrors,
+            };
+            newState.fieldErrors['file'] = null;
+            return newState;
+        });
     }
 
     render(){
@@ -174,7 +315,32 @@ class UploadContent extends React.Component{
                     </Typography>
                 </AppBar>
                 <div style={{marginTop: '20px'}}> </div>
-
+                <TextField
+                    id="contentFile"
+                    label="Content File"
+                    multiline
+                    disabled
+                    InputLabelProps={{
+                        shrink: true,
+                    }}
+                    error={this.state.fieldErrors.file ? true : false}
+                    value={this.state.contentFileName}
+                    margin="normal"
+                />
+                <input
+                    accept="*"
+                    className={'hidden'}
+                    id="raised-button-file"
+                    multiple
+                    type="file"
+                    ref={input => {this.fileInput = input;}}
+                    onChange={this.handleFileSelection}
+                />
+                <label htmlFor="raised-button-file">
+                    <Button variant="raised" component="span">
+                        Browse
+                    </Button>
+                </label>
                 <TextField
                     id="name"
                     label="Name"
@@ -213,7 +379,7 @@ class UploadContent extends React.Component{
                 </Typography>
                 <span>
                             <AutoCompleteWithChips suggestions={this.props.allTags['creators']}
-                                                   searchKey={'name'} selectedItem={this.state.selectedCreators}
+                                                   searchKey={'name'} selectedItem={this.state.creators}
                                                    onAddition={this.handleCreatorAddition} onDeletion={this.handleCreatorDeletion}/>
                         </span>
                 <div style={{marginTop: '20px'}}> </div>
@@ -222,7 +388,7 @@ class UploadContent extends React.Component{
                 </Typography>
                 <span>
                             <AutoCompleteWithChips suggestions={this.props.allTags['coverages']}
-                                                   searchKey={'name'} selectedItem={this.state.selectedCoverage}
+                                                   searchKey={'name'} selectedItem={this.state.coverages}
                                                    onAddition={this.handleCoverageAddition} onDeletion={this.handleCoverageDeletion}/>
                         </span>
                 <div style={{marginTop: '20px'}}> </div>
@@ -231,7 +397,7 @@ class UploadContent extends React.Component{
                 </Typography>
                 <span>
                             <AutoCompleteWithChips suggestions={this.props.allTags['subjects']}
-                                                   searchKey={'name'} selectedItem={this.state.selectedSubjects}
+                                                   searchKey={'name'} selectedItem={this.state.subjects}
                                                    onAddition={this.handleSubjectAddition} onDeletion={this.handleSubjectDeletion}/>
                         </span>
                 <div style={{marginTop: '20px'}}> </div>
@@ -240,7 +406,7 @@ class UploadContent extends React.Component{
                 </Typography>
                 <span>
                             <AutoCompleteWithChips suggestions={this.props.allTags['keywords']}
-                                                   searchKey={'name'} selectedItem={this.state.selectedKeywords}
+                                                   searchKey={'name'} selectedItem={this.state.keywords}
                                                    onAddition={this.handleKeywordAddition} onDeletion={this.handleKeywordDeletion}/>
                         </span>
                 <div style={{marginTop: '20px'}}> </div>
@@ -249,7 +415,7 @@ class UploadContent extends React.Component{
                 </Typography>
                 <span>
                             <AutoCompleteWithChips suggestions={this.props.allTags['workareas']}
-                                                   searchKey={'name'} selectedItem={this.state.selectedWorkareas}
+                                                   searchKey={'name'} selectedItem={this.state.workareas}
                                                    onAddition={this.handleWorkareaAddition} onDeletion={this.handleWorkareaDeletion}/>
                         </span>
                 <div style={{marginTop: '20px'}}> </div>
@@ -258,7 +424,7 @@ class UploadContent extends React.Component{
                 </Typography>
                 <span>
                             <AutoCompleteWithChips suggestions={this.props.allTags['languages']}
-                                                   searchKey={'name'} selectedItem={this.state.selectedLanguage}
+                                                   searchKey={'name'} selectedItem={this.state.languages}
                                                    onAddition={this.handleLanguageAddition} onDeletion={this.handleLanguageDeletion}/>
                         </span>
                 <div style={{marginTop: '20px'}}> </div>
@@ -267,7 +433,7 @@ class UploadContent extends React.Component{
                 </Typography>
                 <span>
                             <AutoCompleteWithChips suggestions={this.props.allTags['catalogers']} searchKey={'name'}
-                                                   selectedItem={this.state.selectedCataloger}
+                                                   selectedItem={this.state.catalogers}
                                                    onAddition={this.handleCatalogerAddition} onDeletion={this.handleCatalogerDeletion}/>
                         </span>
                 <TextField
@@ -300,22 +466,7 @@ class UploadContent extends React.Component{
                     fullWidth
                     margin="normal"
                 />
-                <div style={{marginTop: '20px'}}> </div>
-                <input
-                    accept="*"
-                    className={'hidden'}
-                    id="raised-button-file"
-                    multiple
-                    type="file"
-                    ref={input => {this.fileInput = input;}}
-                    onChange={e => console.log(this.fileInput.files)}
-                />
-                <label htmlFor="raised-button-file">
-                    <Button variant="raised" component="span">
-                        Browse
-                    </Button>
-                </label>
-                <Button variant="raised" component="span">
+                <Button variant="raised" component="span" onClick={this.saveContent}>
                     Save
                 </Button>
 
