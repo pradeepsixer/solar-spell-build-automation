@@ -182,6 +182,12 @@ class AutoCompleteWithChips extends React.Component {
                                             }),
                                         )
                                     }
+                                    {
+                                        this.props.onAddNew && this.state.inputValue.length > 0 &&
+                                            <MenuItem style={{ backgroundColor: '#3F51B5', color: 'white' }} onClick={evt=>this.props.onAddNew(this.state.inputValue)} selected={true} component="div">
+                                                Add New
+                                            </MenuItem>
+                                    }
                                 </Paper>
                             ) : null
                         }
@@ -197,6 +203,7 @@ AutoCompleteWithChips.propTypes = {
     suggestions: PropTypes.array,
     onAddition: PropTypes.func,
     onDeletion: PropTypes.func,
+    onAddNew: PropTypes.func,
     required: PropTypes.bool,
     errorMsg: PropTypes.string
 };
