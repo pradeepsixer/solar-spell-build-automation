@@ -516,7 +516,7 @@ class DirectoryLayoutComponent extends React.Component {
                     <Snackbar
                         anchorOrigin={{
                             vertical: 'bottom',
-                            horizontal: 'right',
+                            horizontal: 'left',
                         }}
                         open={Boolean(this.state.message)}
                         autoHideDuration={6000}
@@ -594,7 +594,8 @@ class DirectoryLayoutComponent extends React.Component {
                 accordionData: prevState.accordionData,
                 treeData: prevState.treeData,
                 selectedDirLayout: null,
-                breadCrumb: []
+                breadCrumb: [],
+                message: 'Successfully deleted the library version.'
             };
 
             delete newState.treeData[deletedItemId];
@@ -774,7 +775,8 @@ class DirectoryLayoutComponent extends React.Component {
                 infoBoardType: BOARD_TYPES.NONE,
                 infoBoardData: {},
                 treeData: cloneDeep(prevState.treeData),
-                breadCrumb: []
+                breadCrumb: [],
+                message: 'Successfully deleted the directory.'
             };
 
             this.removeDirectoryEntry(directoryId, newState.treeData[dirLayoutId]);

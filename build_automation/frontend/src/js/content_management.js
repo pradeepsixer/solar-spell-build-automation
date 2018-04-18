@@ -3,6 +3,7 @@ import Button from 'material-ui/Button';
 import Grid from 'material-ui/Grid';
 import UploadContent from './upload_content';
 import FileListComponent from './file_list_component';
+import {buildMapFromArray} from './utils';
 import {APP_URLS} from "./url";
 import axios from 'axios';
 
@@ -33,25 +34,31 @@ class ContentManagement extends React.Component{
             fieldErrors: {},
             updatedTime: '',
             files: [],
-            currentView: 'manage'
+            currentView: 'manage',
+            content: null
         };
-        this.setCurrentView=this.setCurrentView.bind(this);
-        this.tagIdTagsMap= {};
+        this.setCurrentView = this.setCurrentView.bind(this);
+        this.tagIdTagsMap = {};
+        this.handleFileDelete = this.handleFileDelete.bind(this);
+        this.saveContentCallback = this.saveContentCallback.bind(this);
+        this.uploadNewFile = this.uploadNewFile.bind(this);
+        this.handleContentEdit = this.handleContentEdit.bind(this);
     }
+
     componentDidMount() {
-        // this.loadData()
+        this.loadData()
     }
     buildTagIdTagsMap(tags) {
         // Builds a map of <Tag Id> - Tag
         const tagIdTagMap = {};
-        tags.forEach(eachTag => {
-            tagIdTagMap[eachTag.id] = eachTag;
+        Object.keys(tags).forEach(eachKey => {
+            tagIdTagMap[eachKey] = buildMapFromArray(tags[eachKey], 'id');
         });
         return tagIdTagMap;
     }
     loadData() {
         const currInstance = this;
-        axios.get(APP_URLS.TAG_LIST, {
+        axios.get(APP_URLS.ALLTAGS_LIST, {
             responseType: 'json'
         }).then(function (response) {
             currInstance.tagIdTagsMap=currInstance.buildTagIdTagsMap(response.data);
@@ -88,8 +95,83 @@ class ContentManagement extends React.Component{
     setCurrentView(viewName){
         this.setState({currentView: viewName})
     }
+    handleFileDelete(file){
+        this.setState((prevState, props)=>{
+            const {files} = prevState;
+            files.forEach(eachFile => {
+                if (eachFile.id===file.id){
+                    files.splice(files.indexOf(eachFile), 1)
+                }
+            });
+            return {files};
+        })
+    }
+    saveContentCallback(content, updated){
+        this.setState((prevState, props)=>{
+            const {files} = prevState;
+            if (updated){
+                files.forEach(eachFile => {
+                if (eachFile.id===content.id){
+                    files.splice(files.indexOf(eachFile), 1, content);
+                }
+            });
+            }
+            else{
+                files.push(content);
+            }
+
+            return {
+                currentView: 'manage',
+                files
+            };
+        })
+    }
+    uploadNewFile(){
+        this.setState({
+            currentView: 'upload',
+            content: {
+                id: -1,
+                name: "",
+                description: "",
+                creators: [],
+                coverages: [],
+                subjects: [],
+                keywords: [],
+                workareas: [],
+                languages: [],
+                catalogers: [],
+                updatedDate: new Date(),
+                source: "",
+                copyright: "",
+                rightsStatement: "",
+                originalFileName: ""
+            }
+        })
+    }
+    handleContentEdit(content){
+        console.log(content)
+        this.setState({
+            currentView: 'upload',
+            content: {
+                id: content.id,
+                name: content.name,
+                description: content.description,
+                creators: content.creators||[],
+                coverages: content.coverage?[content.coverage]:[],
+                subjects: content.subjects||[],
+                keywords: content.keywords||[],
+                workareas: content.workareas||[],
+                languages: content.language?[content.language]:[],
+                catalogers: content.cataloger?[content.cataloger]:[],
+                updatedDate: content.updatedDate,
+                source: content.source,
+                copyright: content.copyright,
+                rightsStatement: content.rightsStatement,
+                originalFileName: content.originalFileName,
+            }
+        })
+    }
     render(){
-        console.log(this.tagIdTagsMap);
         return (
             <div>
                 <Grid container spacing={8} style={{paddingLeft: '20px'}}>
@@ -99,14 +181,14 @@ class ContentManagement extends React.Component{
                             Manage Content
                         </Button>
                         <div style={{marginTop: '20px'}}> </div>
-                        <Button variant="raised" color="primary" onClick={e => {this.setCurrentView('upload')}}>
+                        <Button variant="raised" color="primary" onClick={e => {this.uploadNewFile()}}>
                             Add Content
                         </Button>
                     </Grid>
 
                     <Grid item xs={8}>
-                        {this.state.currentView=='manage2'&&<FileListComponent allFiles={this.state.files} />}
-                        {this.state.currentView=='upload'&&<UploadContent />}
+                        {this.state.currentView=='manage'&&<FileListComponent onEdit={this.handleContentEdit} onDelete={this.handleFileDelete} allFiles={this.state.files} tagIdsTagsMap={this.tagIdTagsMap} />}
+                        {this.state.currentView=='upload'&&<UploadContent onSave={this.saveContentCallback} tagIdsTagsMap={this.tagIdTagsMap} allTags={this.state.tags} content={this.state.content}/>}
                     </Grid>
                 </Grid>
 

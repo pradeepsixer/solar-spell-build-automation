@@ -21,12 +21,15 @@ import {
     PagingPanel,
 } from '@devexpress/dx-react-grid-material-ui';
 
-import { TableRow } from 'material-ui/Table';
+import { TableCell, TableRow } from 'material-ui/Table';
 
 import Chip from 'material-ui/Chip';
 import Menu, { MenuItem } from 'material-ui/Menu';
+import Input from 'material-ui/Input';
 
 import OpenInNew from 'material-ui-icons/OpenInNew';
+
+import AutoCompleteFilter from './autocomplete_filter.js';
 
 var __tagIdsTagsMap = {};
 
@@ -79,6 +82,31 @@ class FileSelectionComponent extends React.Component {
             }
         };
         __tagIdsTagsMap = props.tagIdsTagsMap;
+        this.columns = [
+            {name: 'name', title: 'Name', filterType: 'textfield'},
+            {name: 'description', title: 'Description', filterType: 'textfield'},
+            {name: 'updated_time', title: 'Updated on', filterType: 'textfield'},
+            {name: 'creators', title: 'Creators', filterType: 'autocomplete', tagKey: 'creators'},
+            {name: 'coverage', title: 'Coverage', filterType: 'autocomplete', tagKey: 'coverages'},
+            {name: 'subjects', title: 'Subjects', filterType: 'autocomplete', tagKey: 'subjects'},
+            {name: 'keywords', title: 'Keywords', filterType: 'autocomplete', tagKey: 'keywords'},
+            {name: 'workareas', title: 'Workareas', filterType: 'autocomplete', tagKey: 'workareas'},
+            {name: 'language', title: 'Language', filterType: 'autocomplete', tagKey: 'languages'},
+            {name: 'cataloger', title: 'Cataloger', filterType: 'autocomplete', tagKey: 'catalogers'},
+        ];
+        this.defaultColumnWidths=[
+            {columnName: 'name', width: 230},
+            {columnName: 'description', width: 250},
+            {columnName: 'updated_time', width: 240},
+            {columnName: 'creators', width: 420},
+            {columnName: 'coverage', width: 420},
+            {columnName: 'subjects', width: 420},
+            {columnName: 'keywords', width: 420},
+            {columnName: 'workareas', width: 420},
+            {columnName: 'language', width: 240},
+            {columnName: 'cataloger', width: 240},
+        ];
+        this.getFilterCellComponent = this.getFilterCellComponent.bind(this);
         this.handleFilesRightClick = this.handleFilesRightClick.bind(this);
         this.handleMenuClose = this.handleMenuClose.bind(this);
         this.tableRowComponent = this.tableRowComponent.bind(this);
@@ -139,26 +167,35 @@ class FileSelectionComponent extends React.Component {
         return(<TableRow onContextMenu={evt => this.handleFilesRightClick(evt, row, menuName)}>{children}</TableRow>);
     }
 
+    getFilterCellComponent(props) {
+        const {filter, onFilter, column, filteringEnabled} = props;
+        if (column.filterType === "autocomplete") {
+            const { tagKey } = column;
+            return (
+                <TableCell style={{paddingLeft: '10px', paddingRight: '5px'}}>
+                    <AutoCompleteFilter filter={filter} suggestions={this.props.tags[tagKey]} onFilter={onFilter} />
+                </TableCell>
+            );
+        }
+        return (
+            <TableCell style={{paddingLeft: '10px', paddingRight: '5px'}}>
+                <Input
+                    fullWidth
+                    value={filter ? filter.value : ''}
+                    placeholder='Filter...'
+                    onChange={evt => onFilter(evt.target.value ? { value: evt.target.value } : null)}
+                />
+            </TableCell>
+        );
+    }
+
     render() {
         return (
             <React.Fragment>
                 <Typography gutterBottom variant="headline" component="h2">
                     Select individual files
                 </Typography>
-                <Grid
-                    rows={this.props.allFiles}
-                    columns={[
-                        { name: 'name', title: 'Name' },
-                        { name: 'description', title: 'Description' },
-                        { name: 'creators', title: 'Creators' },
-                        { name: 'coverage', title: 'Coverage' },
-                        { name: 'subjects', title: 'Subjects' },
-                        { name: 'keywords', title: 'Keywords' },
-                        { name: 'workareas', title: 'Workareas' },
-                        { name: 'language', title: 'Language' },
-                        { name: 'cataloger', title: 'Cataloger' },
-                    ]}
-                >
+                <Grid rows={this.props.allFiles} columns={this.columns}>
                     <ChippedTagsTypeProvider for={['creators', 'coverage', 'subjects', 'keywords', 'workareas', 'language', 'cataloger']} />
                     <LinkTypeProvider for={['content_file']} />
                     <FilteringState defaultFilters={[]} columnExtensions={[{columnName: 'content_file', filteringEnabled: false}]} />
@@ -166,23 +203,12 @@ class FileSelectionComponent extends React.Component {
                     <PagingState defaultCurrentPage={0} defaultPageSize={10} />
                     <IntegratedPaging />
                     <Table rowComponent={obj => {return this.tableRowComponent(obj, 'allFilesMenu')}} />
-                    <TableColumnResizing
-                        defaultColumnWidths={[
-                            { columnName: 'name', width: 230 },
-                            { columnName: 'description', width: 250 },
-                            { columnName: 'creators', width: 420 },
-                            { columnName: 'coverage', width: 420 },
-                            { columnName: 'subjects', width: 420 },
-                            { columnName: 'keywords', width: 420 },
-                            { columnName: 'workareas', width: 420 },
-                            { columnName: 'language', width: 80 },
-                            { columnName: 'cataloger', width: 80 },
-                        ]} />
+                    <TableColumnResizing defaultColumnWidths={this.defaultColumnWidths} />
                     <TableHeaderRow />
                     <TableColumnVisibility/>
                     <Toolbar />
                     <ColumnChooser />
-                    <TableFilterRow />
+                    <TableFilterRow cellComponent={this.getFilterCellComponent}/>
                     <PagingPanel pageSizes={[5, 10, 20]} />
                 </Grid>
                 <Menu
@@ -213,20 +239,7 @@ class FileSelectionComponent extends React.Component {
                 <Typography gutterBottom variant="headline" component="h2">
                     Selected Files
                 </Typography>
-                <Grid
-                    rows={this.state.selectedFiles}
-                    columns={[
-                        { name: 'name', title: 'Name' },
-                        { name: 'description', title: 'Description' },
-                        { name: 'creators', title: 'Creators' },
-                        { name: 'coverage', title: 'Coverage' },
-                        { name: 'subjects', title: 'Subjects' },
-                        { name: 'keywords', title: 'Keywords' },
-                        { name: 'workareas', title: 'Workareas' },
-                        { name: 'language', title: 'Language' },
-                        { name: 'cataloger', title: 'Cataloger' },
-                    ]}
-                >
+                <Grid rows={this.state.selectedFiles} columns={this.columns}>
                     <ChippedTagsTypeProvider for={['creators', 'coverage', 'subjects', 'keywords', 'workareas', 'language', 'cataloger']} />
                     <LinkTypeProvider for={['content_file']} />
                     <FilteringState defaultFilters={[]} columnExtensions={[{columnName: 'content_file', filteringEnabled: false}]} />
@@ -234,23 +247,12 @@ class FileSelectionComponent extends React.Component {
                     <PagingState defaultCurrentPage={0} defaultPageSize={10} />
                     <IntegratedPaging />
                     <Table rowComponent={obj => {return this.tableRowComponent(obj, 'selectedFilesMenu')}} />
-                    <TableColumnResizing
-                        defaultColumnWidths={[
-                            { columnName: 'name', width: 230 },
-                            { columnName: 'description', width: 250 },
-                            { columnName: 'creators', width: 420 },
-                            { columnName: 'coverage', width: 120 },
-                            { columnName: 'subjects', width: 420 },
-                            { columnName: 'keywords', width: 420 },
-                            { columnName: 'workareas', width: 420 },
-                            { columnName: 'language', width: 120 },
-                            { columnName: 'cataloger', width: 200 },
-                        ]} />
+                    <TableColumnResizing defaultColumnWidths={this.defaultColumnWidths} />
                     <TableHeaderRow />
                     <TableColumnVisibility/>
                     <Toolbar />
                     <ColumnChooser />
-                    <TableFilterRow />
+                    <TableFilterRow cellComponent={this.getFilterCellComponent}/>
                     <PagingPanel pageSizes={[5, 10, 20]} />
                 </Grid>
                 <Menu

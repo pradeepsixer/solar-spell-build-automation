@@ -95,6 +95,11 @@ class AutoCompleteWithChips extends React.Component {
 
     handleChange(item) {
         let { selectedItem } = this.state;
+        const maxChips = this.props.maxChips;
+
+        if (maxChips > 0 && selectedItem.length >= maxChips) {
+            return;
+        }
 
         if (selectedItem.indexOf(item) === -1) {
             if (this.props.onAddition) {
@@ -178,7 +183,7 @@ class AutoCompleteWithChips extends React.Component {
                                                 itemProps: getItemProps({ item: suggestion[this.props.searchKey] }),
                                                 highlightedIndex,
                                                 selectedItem: selectedItem2,
-                                                searchKey: this.props.searchKey || 'label',
+                                                searchKey: this.props.searchKey,
                                             }),
                                         )
                                     }
@@ -205,12 +210,16 @@ AutoCompleteWithChips.propTypes = {
     onDeletion: PropTypes.func,
     onAddNew: PropTypes.func,
     required: PropTypes.bool,
-    errorMsg: PropTypes.string
+    errorMsg: PropTypes.string,
+    searchKey: PropTypes.string,
+    maxChips: PropTypes.number,
 };
 
 AutoCompleteWithChips.defaultProps = {
     required: false,
-    errorMsg: null
+    errorMsg: null,
+    searchKey: 'name',
+    maxChips: 0,
 };
 
 const styles = theme => ({
