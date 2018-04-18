@@ -34,7 +34,6 @@ class ContentSerializer(serializers.ModelSerializer):
         content.subjects.set(validated_data['subjects'])
         content.keywords.set(validated_data['keywords'])
         content.workareas.set(validated_data['workareas'])
-        content.save()
         return content
 
     def update(self, content, validated_data):
@@ -220,7 +219,7 @@ class DirectoryLayoutSerializer(serializers.ModelSerializer):
         validators=[
             UniqueValidator(
                 queryset=DirectoryLayout.objects.all(),
-                message=('Duplicate layout exists')
+                message=('DUPLICATE_LAYOUT_NAME')
             )
         ]
     )
@@ -312,16 +311,23 @@ class DirectorySerializer(serializers.ModelSerializer):
         instance.name = validated_data.get('name', instance.name)
         instance.dir_layout = validated_data.get('dir_layout', instance.dir_layout)
         instance.banner_file = validated_data.get('banner_file', instance.banner_file)
+        instance.creators_need_all = validated_data.get('creators_need_all', instance.creators_need_all)
+        instance.coverages_need_all = validated_data.get('coverages_need_all', instance.coverages_need_all)
+        instance.subjects_need_all = validated_data.get('subjects_need_all', instance.subjects_need_all)
+        instance.keywords_need_all = validated_data.get('keywords_need_all', instance.keywords_need_all)
+        instance.workareas_need_all = validated_data.get('workareas_need_all', instance.workareas_need_all)
+        instance.languages_need_all = validated_data.get('languages_need_all', instance.languages_need_all)
+        instance.catalogers_need_all = validated_data.get('catalogers_need_all', instance.catalogers_need_all)
         instance.parent = validated_data.get('parent', instance.parent)
         self.__create_update(instance)
-        instance.individual_files.set(validated_data.get('individual_files', instance.individual_files.all()))
-        instance.creators.set(validated_data.get('creators', instance.creators.all()))
-        instance.coverages.set(validated_data.get('coverages', instance.coverages.all()))
-        instance.subjects.set(validated_data.get('subjects', instance.subjects.all()))
-        instance.keywords.set(validated_data.get('keywords', instance.keywords.all()))
-        instance.workareas.set(validated_data.get('workareas', instance.workareas.all()))
-        instance.languages.set(validated_data.get('languages', instance.languages.all()))
-        instance.catalogers.set(validated_data.get('catalogers', instance.catalogers.all()))
+        instance.individual_files.set(validated_data.get('individual_files', []))
+        instance.creators.set(validated_data.get('creators', []))
+        instance.coverages.set(validated_data.get('coverages', []))
+        instance.subjects.set(validated_data.get('subjects', []))
+        instance.keywords.set(validated_data.get('keywords', []))
+        instance.workareas.set(validated_data.get('workareas', []))
+        instance.languages.set(validated_data.get('languages', []))
+        instance.catalogers.set(validated_data.get('catalogers', []))
         return instance
 
     def __create_update(self, directory):
@@ -335,7 +341,9 @@ class DirectorySerializer(serializers.ModelSerializer):
         model = Directory
         fields = (
             'id', 'url', 'name', 'dir_layout', 'individual_files', 'banner_file', 'original_file_name',
-            'creators', 'coverages', 'subjects', 'keywords', 'workareas', 'languages', 'catalogers', 'parent',
+            'creators', 'coverages', 'subjects', 'keywords', 'workareas', 'languages', 'catalogers',
+            'creators_need_all', 'coverages_need_all', 'subjects_need_all', 'keywords_need_all',
+            'workareas_need_all', 'languages_need_all', 'catalogers_need_all', 'parent',
         )
         read_only_fields = ('original_file_name',)
         validators = [

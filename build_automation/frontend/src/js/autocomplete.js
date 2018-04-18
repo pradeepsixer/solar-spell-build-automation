@@ -95,6 +95,11 @@ class AutoCompleteWithChips extends React.Component {
 
     handleChange(item) {
         let { selectedItem } = this.state;
+        const maxChips = this.props.maxChips;
+
+        if (maxChips > 0 && selectedItem.length >= maxChips) {
+            return;
+        }
 
         if (selectedItem.indexOf(item) === -1) {
             if (this.props.onAddition) {
@@ -178,9 +183,15 @@ class AutoCompleteWithChips extends React.Component {
                                                 itemProps: getItemProps({ item: suggestion[this.props.searchKey] }),
                                                 highlightedIndex,
                                                 selectedItem: selectedItem2,
-                                                searchKey: this.props.searchKey || 'label',
+                                                searchKey: this.props.searchKey,
                                             }),
                                         )
+                                    }
+                                    {
+                                        this.props.onAddNew && this.state.inputValue.length > 0 &&
+                                            <MenuItem style={{ backgroundColor: '#3F51B5', color: 'white' }} onClick={evt=>this.props.onAddNew(this.state.inputValue)} selected={true} component="div">
+                                                Add New
+                                            </MenuItem>
                                     }
                                 </Paper>
                             ) : null
@@ -197,13 +208,18 @@ AutoCompleteWithChips.propTypes = {
     suggestions: PropTypes.array,
     onAddition: PropTypes.func,
     onDeletion: PropTypes.func,
+    onAddNew: PropTypes.func,
     required: PropTypes.bool,
-    errorMsg: PropTypes.string
+    errorMsg: PropTypes.string,
+    searchKey: PropTypes.string,
+    maxChips: PropTypes.number,
 };
 
 AutoCompleteWithChips.defaultProps = {
     required: false,
-    errorMsg: null
+    errorMsg: null,
+    searchKey: 'name',
+    maxChips: 0,
 };
 
 const styles = theme => ({

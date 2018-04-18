@@ -7,6 +7,7 @@ import Divider from 'material-ui/Divider';
 import Grid from 'material-ui/Grid';
 import { MenuItem } from 'material-ui/Menu';
 import Select from 'material-ui/Select';
+import Snackbar from 'material-ui/Snackbar';
 import TextField from 'material-ui/TextField';
 import Typography from 'material-ui/Typography';
 
@@ -15,6 +16,7 @@ import OpenInNew from 'material-ui-icons/OpenInNew';
 import SortableTree from 'react-sortable-tree';
 
 import AutoCompleteWithChips from './autocomplete.js';
+import { HTTP_STATUS } from './constants.js';
 import FileSelectionComponent from './directory_file_selection.js'
 import { APP_URLS, get_url } from './url.js';
 import { buildMapFromArray } from './utils.js';
@@ -40,10 +42,19 @@ class DirectoryInfoBoard extends React.Component {
             workareas: labels['workareas'],
             languages: labels['languages'],
             catalogers: labels['catalogers'],
+            creatorsNeedAll: (props.boardData.creatorsNeedAll ? 'All' : 'Any'),
+            coveragesNeedAll: (props.boardData.coveragesNeedAll ? 'All' : 'Any'),
+            subjectsNeedAll: (props.boardData.subjectsNeedAll ? 'All' : 'Any'),
+            keywordsNeedAll: (props.boardData.keywordsNeedAll ? 'All' : 'Any'),
+            workareasNeedAll: (props.boardData.workareasNeedAll ? 'All' : 'Any'),
+            languagesNeedAll: (props.boardData.languagesNeedAll ? 'All' : 'Any'),
+            catalogersNeedAll: (props.boardData.catalogersNeedAll ? 'All' : 'Any'),
             selectedFiles: props.boardData.individualFiles,
             confirmDelete: false,
             labels: labels,
-            fieldErrors: {}
+            fieldErrors: {},
+            message: null,
+            messageType: 'info'
         };
 
         this.allFiles = props.allFiles;
@@ -57,6 +68,7 @@ class DirectoryInfoBoard extends React.Component {
         this.handleChipAddition = this.handleChipAddition.bind(this);
         this.handleChipDeletion = this.handleChipDeletion.bind(this);
         this.handleOperatorChange = this.handleOperatorChange.bind(this);
+        this.handleCloseSnackbar = this.handleCloseSnackbar.bind(this);
         this.fileSelectionCallback = this.fileSelectionCallback.bind(this);
         this.fileDeselectionCallback = this.fileDeselectionCallback.bind(this);
         this.confirmDeleteDirectory = this.confirmDeleteDirectory.bind(this);
@@ -127,6 +139,13 @@ class DirectoryInfoBoard extends React.Component {
             workareas: labels['workareas'],
             languages: labels['languages'],
             catalogers: labels['catalogers'],
+            creatorsNeedAll: (props.boardData.creatorsNeedAll ? 'All' : 'Any'),
+            coveragesNeedAll: (props.boardData.coveragesNeedAll ? 'All' : 'Any'),
+            subjectsNeedAll: (props.boardData.subjectsNeedAll ? 'All' : 'Any'),
+            keywordsNeedAll: (props.boardData.keywordsNeedAll ? 'All' : 'Any'),
+            workareasNeedAll: (props.boardData.workareasNeedAll ? 'All' : 'Any'),
+            languagesNeedAll: (props.boardData.languagesNeedAll ? 'All' : 'Any'),
+            catalogersNeedAll: (props.boardData.catalogersNeedAll ? 'All' : 'Any'),
             selectedFiles: props.boardData.individualFiles,
             confirmDelete: false,
             fieldErrors: {}
@@ -153,7 +172,7 @@ class DirectoryInfoBoard extends React.Component {
     }
 
     saveDirectory(evt) {
-        if (!this.is_valid_state()) {
+        if (!this.is_valid_state(!(this.state.id > 0))) {
             // If it is in an invalid state, do not proceed with the save operation.
             return;
         }
@@ -170,6 +189,13 @@ class DirectoryInfoBoard extends React.Component {
         selectedTags['workareas'].forEach(workarea => {payload.append('workareas', workarea)});
         selectedTags['languages'].forEach(language => {payload.append('languages', language)});
         selectedTags['catalogers'].forEach(cataloger => {payload.append('catalogers', cataloger)});
+        payload.append('creators_need_all', (this.state.creatorsNeedAll === 'All'));
+        payload.append('coverages_need_all', (this.state.coveragesNeedAll === 'All'));
+        payload.append('subjects_need_all', (this.state.subjectsNeedAll === 'All'));
+        payload.append('keywords_need_all', (this.state.keywordsNeedAll === 'All'));
+        payload.append('workareas_need_all', (this.state.workareasNeedAll === 'All'));
+        payload.append('languages_need_all', (this.state.languagesNeedAll === 'All'));
+        payload.append('catalogers_need_all', (this.state.catalogersNeedAll === 'All'));
         Boolean(this.state.parent) && payload.append('parent', this.state.parent);
         Boolean(this.state.bannerFile) && payload.append('banner_file', this.state.bannerFile);
         const currInstance = this;
@@ -181,9 +207,21 @@ class DirectoryInfoBoard extends React.Component {
                 responseType: 'json'
             }).then(function(response) {
                 currInstance.saveCallback(response.data);
+                currInstance.setState({
+                    message: 'Save successful',
+                    messageType: 'info'
+                });
             }).catch(function(error) {
                 console.error("Error in updating the directory", error);
                 console.error(error.response.data);
+                let errorMsg = 'Error in updating the folder';
+                if (!(JSON.stringify(error.response.data).indexOf('DUPLICATE_DIRECTORY') === -1)) {
+                    errorMsg = (<React.Fragment><b>ERROR:</b> There is another folder under the same name within the current folder. Please change the name, and try again.</React.Fragment>);
+                }
+                currInstance.setState({
+                    message: errorMsg,
+                    messageType: 'error'
+                });
             });
         } else {
             // Create a new directory.
@@ -191,14 +229,26 @@ class DirectoryInfoBoard extends React.Component {
                 responseType: 'json'
             }).then(function(response) {
                 currInstance.saveCallback(response.data, true);
+                currInstance.setState({
+                    message: 'Save successful',
+                    messageType: 'info'
+                });
             }).catch(function(error) {
                 console.error("Error in creating a new directory", error);
                 console.error(error.response.data);
+                let errorMsg = 'Error in creating the folder';
+                if (!(JSON.stringify(error.response.data).indexOf('DUPLICATE_DIRECTORY') === -1)) {
+                    errorMsg = (<React.Fragment><b>ERROR:</b> There is another folder under the same name within the current folder. Please change the name, and try again.</React.Fragment>);
+                }
+                currInstance.setState({
+                    message: errorMsg,
+                    messageType: 'error'
+                });
             });
         }
     }
 
-    is_valid_state() {
+    is_valid_state(is_save) {
         var hasErrors = false;
         const fieldErrors = {};
         if (!this.state.name || this.state.name.trim().length === 0) {
@@ -226,6 +276,10 @@ class DirectoryInfoBoard extends React.Component {
             currentInstance.deleteCallback(currentInstance.state.dirLayoutId, currentInstance.state.id);
         }).catch(function(error) {
             console.error("Error in deleting the directory", error);
+            currentInstance.setState({
+                message: 'Error in deleting the folder. Please reload the page, and try again.',
+                messageType: 'error'
+            });
         });
     }
 
@@ -241,10 +295,9 @@ class DirectoryInfoBoard extends React.Component {
         })
     }
 
-    handleOperatorChange(evt) {
-        console.log(evt.target.value);
+    handleOperatorChange(evt, targetElem) {
         this.setState({
-            selectedOperator: evt.target.value
+            [targetElem]: evt.target.value
         })
     }
 
@@ -290,22 +343,30 @@ class DirectoryInfoBoard extends React.Component {
     handleBannerSelection(evt) {
         evt.persist();
         const file = evt.target.files[0];
-        this.setState({
-            bannerFile: file,
-            bannerFileName: file.name
+        if (!Boolean(file)) { // If there is no file selected.
+            return;
+        }
+        this.setState((prevState, props) => {
+            const newState = {
+                bannerFile: file,
+                bannerFileName: file.name,
+                fieldErrors: prevState.fieldErrors,
+            };
+            newState.fieldErrors['banner'] = null;
+            return newState;
         });
     }
 
     render() {
         return (
             <Grid container spacing={24}>
-                <Grid item xs={9}>
+                <Grid item xs={12}>
                     <Button variant="raised" color="primary" onClick={this.saveDirectory}>
                         Save
                     </Button>
                     {
                         this.state.id > 0 &&
-                        <Button variant="raised" onClick={this.confirmDeleteDirectory}>
+                        <Button variant="raised" color="secondary" onClick={this.confirmDeleteDirectory}>
                         Delete
                         </Button>
                     }
@@ -357,119 +418,154 @@ class DirectoryInfoBoard extends React.Component {
                     <Grid container spacing={24} style={{marginTop: '15px'}}>
                         <Grid item xs={3}>
                             <Select
-                                value={'AND'}
+                                fullWidth
+                                value={this.state.creatorsNeedAll}
                                 displayEmpty
                                 name="creators-operator"
+                                onChange={evt => this.handleOperatorChange(evt, 'creatorsNeedAll')}
                             >
-                                <MenuItem value="AND">All of the Creators</MenuItem>
-                                <MenuItem value="OR">Any of the Creators</MenuItem>
+                                <MenuItem value="All">All of the Creators</MenuItem>
+                                <MenuItem value="Any">Any of the Creators</MenuItem>
                             </Select>
                         </Grid>
                         <Grid item xs={8}>
-                            <AutoCompleteWithChips suggestions={this.props.tags['creators']} searchKey={'name'}
-                                selectedItem={this.state.creators} onAddition={addedTag => {this.handleChipAddition(addedTag, 'creators')}} onDeletion={deletedTag => {this.handleChipDeletion(deletedTag, 'creators')}} required={true}
+                            <AutoCompleteWithChips suggestions={this.props.tags['creators']}
+                                selectedItem={this.state.creators}
+                                onAddition={addedTag => {this.handleChipAddition(addedTag, 'creators')}}
+                                onDeletion={deletedTag => {this.handleChipDeletion(deletedTag, 'creators')}}
+                                required={true}
                                 errorMsg={this.state.fieldErrors.selectedTags} />
                         </Grid>
                     </Grid>
                     <Grid container spacing={24}>
                         <Grid item xs={3}>
                             <Select
-                                value={'AND'}
+                                fullWidth
+                                value={this.state.coveragesNeedAll}
                                 displayEmpty
                                 name="coverage-operator"
+                                onChange={evt => this.handleOperatorChange(evt, 'coveragesNeedAll')}
                             >
-                                <MenuItem value="AND">All of the Coverages</MenuItem>
-                                <MenuItem value="OR">Any of the Coverages</MenuItem>
+                                <MenuItem value="All">All of the Coverages</MenuItem>
+                                <MenuItem value="Any">Any of the Coverages</MenuItem>
                             </Select>
                         </Grid>
                         <Grid item xs={8}>
-                            <AutoCompleteWithChips suggestions={this.props.tags['coverages']} searchKey={'name'}
-                                selectedItem={this.state.coverages} onAddition={addedTag => {this.handleChipAddition(addedTag, 'coverages')}} onDeletion={deletedTag => {this.handleChipDeletion(deletedTag, 'coverages')}} required={true}
+                            <AutoCompleteWithChips suggestions={this.props.tags['coverages']}
+                                selectedItem={this.state.coverages}
+                                onAddition={addedTag => {this.handleChipAddition(addedTag, 'coverages')}}
+                                onDeletion={deletedTag => {this.handleChipDeletion(deletedTag, 'coverages')}}
+                                required={true}
                                 errorMsg={this.state.fieldErrors.selectedTags} />
                         </Grid>
                     </Grid>
                     <Grid container spacing={24}>
                         <Grid item xs={3}>
                             <Select
-                                value={'AND'}
+                                fullWidth
+                                value={this.state.subjectsNeedAll}
                                 displayEmpty
                                 name="subjects-operator"
+                                onChange={evt => this.handleOperatorChange(evt, 'subjectsNeedAll')}
                             >
-                                <MenuItem value="AND">All of the Subjects</MenuItem>
-                                <MenuItem value="OR">Any of the Subjects</MenuItem>
+                                <MenuItem value="All">All of the Subjects</MenuItem>
+                                <MenuItem value="Any">Any of the Subjects</MenuItem>
                             </Select>
                         </Grid>
                         <Grid item xs={8}>
-                            <AutoCompleteWithChips suggestions={this.props.tags['subjects']} searchKey={'name'}
-                                selectedItem={this.state.subjects} onAddition={addedTag => {this.handleChipAddition(addedTag, 'subjects')}} onDeletion={deletedTag => {this.handleChipDeletion(deletedTag, 'subjects')}} required={true}
+                            <AutoCompleteWithChips suggestions={this.props.tags['subjects']}
+                                selectedItem={this.state.subjects}
+                                onAddition={addedTag => {this.handleChipAddition(addedTag, 'subjects')}}
+                                onDeletion={deletedTag => {this.handleChipDeletion(deletedTag, 'subjects')}}
+                                required={true}
                                 errorMsg={this.state.fieldErrors.selectedTags} />
                         </Grid>
                     </Grid>
                     <Grid container spacing={24}>
                         <Grid item xs={3}>
                             <Select
-                                value={'AND'}
+                                fullWidth
+                                value={this.state.keywordsNeedAll}
                                 displayEmpty
                                 name="keywords-operator"
+                                onChange={evt => this.handleOperatorChange(evt, 'keywordsNeedAll')}
                             >
-                                <MenuItem value="AND">All of the Keywords</MenuItem>
-                                <MenuItem value="OR">Any of the Keywords</MenuItem>
+                                <MenuItem value="All">All of the Keywords</MenuItem>
+                                <MenuItem value="Any">Any of the Keywords</MenuItem>
                             </Select>
                         </Grid>
                         <Grid item xs={8}>
-                            <AutoCompleteWithChips suggestions={this.props.tags['keywords']} searchKey={'name'}
-                                selectedItem={this.state.keywords} onAddition={addedTag => {this.handleChipAddition(addedTag, 'keywords')}} onDeletion={deletedTag => {this.handleChipDeletion(deletedTag, 'keywords')}} required={true}
+                            <AutoCompleteWithChips suggestions={this.props.tags['keywords']}
+                                selectedItem={this.state.keywords}
+                                onAddition={addedTag => {this.handleChipAddition(addedTag, 'keywords')}}
+                                onDeletion={deletedTag => {this.handleChipDeletion(deletedTag, 'keywords')}}
+                                required={true}
                                 errorMsg={this.state.fieldErrors.selectedTags} />
                         </Grid>
                     </Grid>
                     <Grid container spacing={24}>
                         <Grid item xs={3}>
                             <Select
-                                value={'AND'}
+                                fullWidth
+                                value={this.state.workareasNeedAll}
                                 displayEmpty
                                 name="workarea-operator"
+                                onChange={evt => this.handleOperatorChange(evt, 'workareasNeedAll')}
                             >
-                                <MenuItem value="AND">All of the Work Areas</MenuItem>
-                                <MenuItem value="OR">Any of the Work Areas</MenuItem>
+                                <MenuItem value="All">All of the Work Areas</MenuItem>
+                                <MenuItem value="Any">Any of the Work Areas</MenuItem>
                             </Select>
                         </Grid>
                         <Grid item xs={8}>
-                            <AutoCompleteWithChips suggestions={this.props.tags['workareas']} searchKey={'name'}
-                                selectedItem={this.state.workareas} onAddition={addedTag => {this.handleChipAddition(addedTag, 'workareas')}} onDeletion={deletedTag => {this.handleChipDeletion(deletedTag, 'workareas')}} required={true}
+                            <AutoCompleteWithChips suggestions={this.props.tags['workareas']}
+                                selectedItem={this.state.workareas}
+                                onAddition={addedTag => {this.handleChipAddition(addedTag, 'workareas')}}
+                                onDeletion={deletedTag => {this.handleChipDeletion(deletedTag, 'workareas')}}
+                                required={true}
                                 errorMsg={this.state.fieldErrors.selectedTags} />
                         </Grid>
                     </Grid>
                     <Grid container spacing={24}>
                         <Grid item xs={3}>
                             <Select
-                                value={'AND'}
+                                fullWidth
+                                value={this.state.languagesNeedAll}
                                 displayEmpty
                                 name="lang-operator"
+                                onChange={evt => this.handleOperatorChange(evt, 'languagesNeedAll')}
                             >
-                                <MenuItem value="AND">All of the Languages</MenuItem>
-                                <MenuItem value="OR">Any of the Languages</MenuItem>
+                                <MenuItem value="All">All of the Languages</MenuItem>
+                                <MenuItem value="Any">Any of the Languages</MenuItem>
                             </Select>
                         </Grid>
                         <Grid item xs={8}>
-                            <AutoCompleteWithChips suggestions={this.props.tags['languages']} searchKey={'name'}
-                                selectedItem={this.state.languages} onAddition={addedTag => {this.handleChipAddition(addedTag, 'languages')}} onDeletion={deletedTag => {this.handleChipDeletion(deletedTag, 'languages')}} required={true}
+                            <AutoCompleteWithChips suggestions={this.props.tags['languages']}
+                                selectedItem={this.state.languages}
+                                onAddition={addedTag => {this.handleChipAddition(addedTag, 'languages')}}
+                                onDeletion={deletedTag => {this.handleChipDeletion(deletedTag, 'languages')}}
+                                required={true}
                                 errorMsg={this.state.fieldErrors.selectedTags} />
                         </Grid>
                     </Grid>
                     <Grid container spacing={24}>
                         <Grid item xs={3}>
                             <Select
-                                value={'AND'}
+                                fullWidth
+                                value={this.state.catalogersNeedAll}
                                 displayEmpty
                                 name="cataloger-operator"
+                                onChange={evt => this.handleOperatorChange(evt, 'catalogersNeedAll')}
                             >
-                                <MenuItem value="AND">All of the Catalogers</MenuItem>
-                                <MenuItem value="OR">Any of the Catalogers</MenuItem>
+                                <MenuItem value="All">All of the Catalogers</MenuItem>
+                                <MenuItem value="Any">Any of the Catalogers</MenuItem>
                             </Select>
                         </Grid>
                         <Grid item xs={8}>
-                            <AutoCompleteWithChips suggestions={this.props.tags['catalogers']} searchKey={'name'}
-                                selectedItem={this.state.catalogers} onAddition={addedTag => {this.handleChipAddition(addedTag, 'catalogers')}} onDeletion={deletedTag => {this.handleChipDeletion(deletedTag, 'catalogers')}} required={true}
+                            <AutoCompleteWithChips suggestions={this.props.tags['catalogers']}
+                                selectedItem={this.state.catalogers}
+                                onAddition={addedTag => {this.handleChipAddition(addedTag, 'catalogers')}}
+                                onDeletion={deletedTag => {this.handleChipDeletion(deletedTag, 'catalogers')}}
+                                required={true}
                                 errorMsg={this.state.fieldErrors.selectedTags} />
                         </Grid>
                     </Grid>
@@ -488,12 +584,8 @@ class DirectoryInfoBoard extends React.Component {
                     <FileSelectionComponent allFiles={this.allFiles} tagIdsTagsMap={this.tagIdsTagsMap}
                         selectedFiles={this.state.selectedFiles} fileIdFileMap={this.fileIdFileMap}
                         onFileSelect={this.fileSelectionCallback} onFileDeselect={this.fileDeselectionCallback}
+                        tags={this.props.tags}
                     />
-                </Grid>
-                <Grid item xs={3}>
-                    {
-                        'Metadata goes here'
-                    }
                 </Grid>
                 <Dialog
                     open={this.state.confirmDelete}
@@ -516,8 +608,31 @@ class DirectoryInfoBoard extends React.Component {
                         </Button>
                     </DialogActions>
                 </Dialog>
+                <Snackbar
+                    anchorOrigin={{
+                        vertical: 'bottom',
+                        horizontal: 'left',
+                    }}
+                    open={Boolean(this.state.message)}
+                    onClose={this.handleCloseSnackbar}
+                    message={<span>{this.state.message}</span>}
+                    SnackbarContentProps={{
+                        "style": this.getErrorClass()
+                    }}
+                />
             </Grid>
         );
+    }
+
+    getErrorClass() {
+        return this.state.messageType === "error" ? {backgroundColor: '#B71C1C', fontWeight: 'normal'} : {};
+    }
+
+    handleCloseSnackbar() {
+        this.setState({
+            message: null,
+            messageType: 'info'
+        })
     }
 
     handleTagClick(nodeInfo, evt) {

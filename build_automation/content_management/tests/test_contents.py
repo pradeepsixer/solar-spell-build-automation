@@ -2,7 +2,7 @@ import json
 import os
 import shutil
 import tempfile
-from datetime import timedelta
+from datetime import date, timedelta
 from unittest.mock import MagicMock, patch
 
 from django.conf import settings
@@ -193,7 +193,7 @@ class ContentAPITest(APITestCase):
                 'name': 'Content File',
                 'description': 'File 1',
                 'content_file': content_file,
-                'updated_time': timezone.now(),
+                'updated_time': date.today(),
                 'creators': [],
                 'coverage': '',
                 'subjects': [],
@@ -217,7 +217,7 @@ class ContentAPITest(APITestCase):
                 'name': 'Content File',
                 'description': 'File 1',
                 'content_file': content_file,
-                'updated_time': timezone.now(),
+                'updated_time': date.today(),
                 'creators': [],
                 'coverage': '',
                 'subjects': [],
@@ -257,7 +257,7 @@ class ContentAPITest(APITestCase):
                 'name': 'Content File',
                 'description': 'File 1',
                 'content_file': content_file,
-                'updated_time': timezone.now(),
+                'updated_time': date.today(),
                 'creators': [],
                 'coverage': '',
                 'subjects': [],
@@ -314,7 +314,7 @@ class ContentAPITest(APITestCase):
                 'name': 'Content File',
                 'description': 'File 1',
                 'content_file': content_file,
-                'updated_time': timezone.now(),
+                'updated_time': date.today(),
                 'creators': [],
                 'coverage': '',
                 'subjects': [],
@@ -337,7 +337,7 @@ class ContentAPITest(APITestCase):
                 'name': 'Content File',
                 'description': 'File 1',
                 'content_file': content_file,
-                'updated_time': timezone.now(),
+                'updated_time': date.today(),
                 'creators': [],
                 'coverage': '',
                 'subjects': [],
@@ -372,7 +372,7 @@ class ContentAPITest(APITestCase):
                 'name': 'Content File',
                 'description': 'File 1',
                 'content_file': content_file,
-                'updated_time': timezone.now(),
+                'updated_time': date.today(),
                 'creators': [],
                 'coverage': '',
                 'subjects': [],
@@ -394,7 +394,7 @@ class ContentAPITest(APITestCase):
                 'name': 'Content File 2',
                 'description': 'File 2',
                 'content_file': content_file,
-                'updated_time': timezone.now(),
+                'updated_time': date.today(),
                 'creators': [],
                 'coverage': '',
                 'subjects': [],

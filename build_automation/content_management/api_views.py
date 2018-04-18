@@ -148,7 +148,7 @@ class DirectoryCloneApiViewSet(ViewSet, CreateModelMixin):
                 each_original_directory.banner_file is not None and
                 len(each_original_directory.banner_file.name) > 0 and
                 os.path.exists(each_original_directory.banner_file.path)
-            ) :
+            ):
                 dup_banner = ContentFile(each_original_directory.banner_file.read())
                 dup_banner.name = each_original_directory.original_file_name
                 cloned_directory.banner_file = dup_banner

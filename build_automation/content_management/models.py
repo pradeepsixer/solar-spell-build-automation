@@ -107,15 +107,15 @@ class Content(models.Model):
     # The Actual File
     content_file = models.FileField("File")
 
-    updated_time = models.DateTimeField(
+    updated_time = models.DateField(
         "Content updated on",
-        help_text='Date & Time when the content was updated recently'
+        help_text='Date when the content was last updated'
     )
 
     last_uploaded_time = models.DateTimeField(
         "Last updated on",
         editable=False,
-        help_text='Date & Time when the file was updated recently'
+        help_text='Date & Time when the file was uploaded'
     )
 
     # SHA-256 Checksum of the latest updated file.
@@ -192,6 +192,8 @@ class Directory(models.Model):
     banner_file = models.FileField(upload_to=set_original_name, null=True)
     original_file_name = models.CharField(max_length=200, null=True)
     individual_files = models.ManyToManyField(Content, related_name='individual_files')
+
+    # Tags
     creators = models.ManyToManyField(Creator)
     coverages = models.ManyToManyField(Coverage)
     subjects = models.ManyToManyField(Subject)
@@ -199,6 +201,16 @@ class Directory(models.Model):
     workareas = models.ManyToManyField(Workarea)
     languages = models.ManyToManyField(Language)
     catalogers = models.ManyToManyField(Cataloger)
+
+    # Whether All of the specificed tags should be present in the content, or atleast one is needed.
+    # Represent ALL or ANY of the UI state.
+    creators_need_all = models.BooleanField(default=True)
+    coverages_need_all = models.BooleanField(default=True)
+    subjects_need_all = models.BooleanField(default=True)
+    keywords_need_all = models.BooleanField(default=True)
+    workareas_need_all = models.BooleanField(default=True)
+    languages_need_all = models.BooleanField(default=True)
+    catalogers_need_all = models.BooleanField(default=True)
 
     banner_file_uploaded = False
 
