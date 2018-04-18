@@ -3,6 +3,7 @@ import Typography from 'material-ui/Typography';
 import Chip from 'material-ui/Chip';
 import Button from 'material-ui/Button';
 import Menu, { MenuItem } from 'material-ui/Menu';
+import Snackbar from 'material-ui/Snackbar';
 import Dialog, { DialogActions, DialogContent, DialogContentText, DialogTitle } from 'material-ui/Dialog';
 import axios from 'axios';
 import { APP_URLS, get_url } from './url.js';
@@ -67,6 +68,7 @@ class FileListComponent extends React.Component {
         this.closeConfirmDialog = this.closeConfirmDialog.bind(this);
         this.deleteFile = this.deleteFile.bind(this);
         this.handleFilesRightClick = this.handleFilesRightClick.bind(this);
+        this.handleCloseSnackbar = this.handleCloseSnackbar.bind(this);
     }
 
     componentWillReceiveProps(props) {
@@ -220,8 +222,30 @@ class FileListComponent extends React.Component {
                         </Button>
                     </DialogActions>
                 </Dialog>
+                <Snackbar
+                    anchorOrigin={{
+                        vertical: 'bottom',
+                        horizontal: 'left',
+                    }}
+                    open={Boolean(this.state.message)}
+                    onClose={this.handleCloseSnackbar}
+                    message={<span>{this.state.message}</span>}
+                    SnackbarContentProps={{
+                        "style": this.getErrorClass()
+                    }}
+                />
             </React.Fragment>
         );
+    }
+    getErrorClass() {
+        return this.state.messageType === "error" ? {backgroundColor: '#B71C1C', fontWeight: 'normal'} : {};
+    }
+
+    handleCloseSnackbar() {
+        this.setState({
+            message: null,
+            messageType: 'info'
+        })
     }
 }
 module.exports = FileListComponent;

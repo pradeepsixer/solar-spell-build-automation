@@ -7,6 +7,7 @@ import AutoCompleteWithChips from './autocomplete.js';
 import TextField from 'material-ui/TextField';
 import { DatePicker } from 'material-ui-pickers';
 import {APP_URLS, get_url} from "./url";
+import Snackbar from 'material-ui/Snackbar';
 import DateFnsUtils from 'material-ui-pickers/utils/date-fns-utils';
 import MuiPickersUtilsProvider from 'material-ui-pickers/utils/MuiPickersUtilsProvider';
 import {ChevronLeft, ChevronRight} from 'material-ui-icons';
@@ -58,6 +59,7 @@ class UploadContent extends React.Component{
         this.tags = props.allTags;
         console.log(props.content.updatedDate);
         this.tagNameTagMap = this.buildTagNameTagMap(props.allTags);
+        this.handleCloseSnackbar = this.handleCloseSnackbar.bind(this);
         this.handleDateChange=this.handleDateChange.bind(this);
         this.handleTagAddition=this.handleTagAddition.bind(this);
         this.handleCreatorAddition=this.handleCreatorAddition.bind(this);
@@ -155,7 +157,7 @@ class UploadContent extends React.Component{
         console.log('Oh No!!!!!');
         this.setState((prevState, props) => {
             const selectedTags = prevState[tagType];
-            selectedTags.splice(tag.name, 1);
+            selectedTags.splice(selectedTags.indexOf(tag.name), 1);
             const value = {[tagType]: selectedTags};
             console.log('Here\'s the value of \'value!', value);
             return value;
@@ -275,12 +277,9 @@ class UploadContent extends React.Component{
             }).then(function(response) {
                 currInstance.saveCallback(response.data, true);
             }).catch(function(error) {
-                console.error("Error in updating the directory", error);
+                console.error("Error in updating the content", error);
                 console.error(error.response.data);
-                let errorMsg = 'Error in updating the folder';
-                if (!(JSON.stringify(error.response.data).indexOf('DUPLICATE_DIRECTORY') === -1)) {
-                    errorMsg = (<React.Fragment><b>ERROR:</b> There is another folder under the same name within the current folder. Please change the name, and try again.</React.Fragment>);
-                }
+                let errorMsg = 'Error in updating the content';
                 currInstance.setState({
                     message: errorMsg,
                     messageType: 'error'
@@ -293,12 +292,9 @@ class UploadContent extends React.Component{
             }).then(function(response) {
                 currInstance.saveCallback(response.data, false);
             }).catch(function(error) {
-                console.error("Error in creating a new directory", error);
+                console.error("Error in uploading the content", error);
                 console.error(error.response.data);
-                let errorMsg = 'Error in creating the folder';
-                if (!(JSON.stringify(error.response.data).indexOf('DUPLICATE_DIRECTORY') === -1)) {
-                    errorMsg = (<React.Fragment><b>ERROR:</b> There is another folder under the same name within the current folder. Please change the name, and try again.</React.Fragment>);
-                }
+                let errorMsg = 'Error in uploading the content';
                 currInstance.setState({
                     message: errorMsg,
                     messageType: 'error'
@@ -335,6 +331,8 @@ class UploadContent extends React.Component{
             currentInstance.setState((prevState, props) => {
                 const newState = {
                     [tagType]: prevState[tagType],
+                    message: 'Metadata created',
+                    messageType: 'info',
                 };
                 newState[tagType].push(tagName);
                 console.log('This is the new state?', newState);
@@ -519,9 +517,30 @@ class UploadContent extends React.Component{
                 </Button>
 
                 <div style={{marginTop: '20px'}}> </div>
-
+            <Snackbar
+                    anchorOrigin={{
+                        vertical: 'bottom',
+                        horizontal: 'left',
+                    }}
+                    open={Boolean(this.state.message)}
+                    onClose={this.handleCloseSnackbar}
+                    message={<span>{this.state.message}</span>}
+                    SnackbarContentProps={{
+                        "style": this.getErrorClass()
+                    }}
+                />
             </Grid>
         )
+    }
+    getErrorClass() {
+        return this.state.messageType === "error" ? {backgroundColor: '#B71C1C', fontWeight: 'normal'} : {};
+    }
+
+    handleCloseSnackbar() {
+        this.setState({
+            message: null,
+            messageType: 'info'
+        })
     }
 }
 module.exports = UploadContent;
