@@ -194,10 +194,6 @@ class DirlayoutInfoBoard extends React.Component {
             responseType: 'json'
         }).then(function(response) {
             currentInstance.deleteCallback(currentInstance.state.id);
-            currentInstance.setState({
-                message: 'Successfully deleted the library version.',
-                messageType: 'info'
-            });
         }).catch(function(error) {
             console.error("Error in deleting the directory layout ", error);
             currentInstance.setState({

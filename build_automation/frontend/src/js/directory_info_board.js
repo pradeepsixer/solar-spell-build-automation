@@ -274,10 +274,6 @@ class DirectoryInfoBoard extends React.Component {
             responseType: 'json'
         }).then(function(response) {
             currentInstance.deleteCallback(currentInstance.state.dirLayoutId, currentInstance.state.id);
-            currentInstance.setState({
-                message: 'Successfully deleted the folder.',
-                messageType: 'info'
-            });
         }).catch(function(error) {
             console.error("Error in deleting the directory", error);
             currentInstance.setState({
