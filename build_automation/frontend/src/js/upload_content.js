@@ -255,12 +255,12 @@ class UploadContent extends React.Component{
         payload.append('name', this.state.name);
         payload.append('description', this.state.description);
         selectedTags.creators.forEach(creator => {payload.append('creators', creator)});
-        payload.append('coverage', selectedTags.coverages[0]);
+        selectedTags.coverages.length>0 && payload.append('coverage', selectedTags.coverages[0]);
         selectedTags.subjects.forEach(subject => {payload.append('subjects', subject)});
         selectedTags.keywords.forEach(keyword => {payload.append('keywords', keyword)});
         selectedTags.workareas.forEach(workarea => {payload.append('workareas', workarea)});
-        payload.append('language', selectedTags.languages[0]);
-        payload.append('cataloger', selectedTags.catalogers[0]);
+        selectedTags.languages.length>0 && payload.append('language', selectedTags.languages[0]);
+        selectedTags.catalogers.length>0 && payload.append('cataloger', selectedTags.catalogers[0]);
         payload.append('updated_time', this.formatDate(this.state.selectedDate));
         Boolean(this.state.contentFile) && payload.append('content_file', this.state.contentFile);
         const currInstance = this;

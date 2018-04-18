@@ -27,6 +27,9 @@ var __tagIdsTagsMap = {};
 
 function ChippedTagsFormatter(input) {
     const {row, column, value} = input;
+    if (!value){
+        return "";
+    }
     const allChips = [];
     if (typeof(value)=='number') {
         allChips.push(<Chip key={row.id + '_' + column['name'] + '_' + value} label={__tagIdsTagsMap[column['name']
