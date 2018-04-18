@@ -141,6 +141,9 @@ class Content(models.Model):
     language = models.ForeignKey(Language, on_delete=models.SET_NULL, null=True)
     cataloger = models.ForeignKey(Cataloger, on_delete=models.SET_NULL, null=True)
     original_file_name = models.CharField(max_length=300, null=True)
+    source = models.CharField(max_length=2000, null=True)
+    copyright = models.CharField(max_length=100, null=True)
+    rights_statement = models.TextField(null=True)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

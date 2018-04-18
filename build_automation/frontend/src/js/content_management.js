@@ -66,13 +66,11 @@ class ContentManagement extends React.Component{
             responseType: 'json'
         }).then(function (response) {
             currInstance.tagIdTagsMap=currInstance.buildTagIdTagsMap(response.data);
-            console.log(currInstance.tagIdTagsMap);
             currInstance.setState({
                 tags: response.data
             })
         }).catch(function (error) {
-            console.log(error);
-            // TODO : Show the error message.
+            console.error(error);
         });
         axios.get(APP_URLS.CONTENTS_LIST, {
             responseType: 'json'
@@ -81,8 +79,7 @@ class ContentManagement extends React.Component{
                 files: response.data, isLoaded: true
             })
         }).catch(function (error) {
-            console.log(error);
-            // TODO : Show the error message.
+            console.error(error);
         });
     }
     handleTextFieldUpdate(stateProperty, evt) {
@@ -116,7 +113,6 @@ class ContentManagement extends React.Component{
             responseType: 'json'
         }).then(function (response) {
             currInstance.tagIdTagsMap=currInstance.buildTagIdTagsMap(response.data);
-            console.log(currInstance.tagIdTagsMap);
             currInstance.setState((prevState, props)=>{
                 const {files} = prevState;
                 if (updated){
@@ -138,7 +134,7 @@ class ContentManagement extends React.Component{
                 }
             })
         }).catch(function (error) {
-            console.log(error);
+            console.error(error);
         });
     }
     uploadNewFile(){
@@ -164,7 +160,6 @@ class ContentManagement extends React.Component{
         })
     }
     handleContentEdit(content){
-        console.log(content)
         this.setState({
             currentView: 'upload',
             content: {
@@ -179,9 +174,9 @@ class ContentManagement extends React.Component{
                 languages: content.language?[content.language]:[],
                 catalogers: content.cataloger?[content.cataloger]:[],
                 updatedDate: this.parseDate(content.updated_time),
-                source: content.source,
-                copyright: content.copyright,
-                rightsStatement: content.rightsStatement,
+                source: content.source||'',
+                copyright: content.copyright||'',
+                rightsStatement: content.rights_statement||'',
                 originalFileName: content.original_file_name,
             }
         })

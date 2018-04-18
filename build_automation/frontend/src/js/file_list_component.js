@@ -74,7 +74,6 @@ class FileListComponent extends React.Component {
             confirmDelete: false,
             selectedFile: null
         };
-        console.log(props);
         __tagIdsTagsMap = props.tagIdsTagsMap;
         this.columns = [
             {name: 'name', title: 'Name', filterType: 'textfield'},
@@ -112,7 +111,6 @@ class FileListComponent extends React.Component {
     }
 
     handleFilesRightClick(evt, row, menuName) {
-        console.log(menuName, row, 'This is the value!');
         this.setState({
             [menuName]: {
                 selectedFile: row,
@@ -220,12 +218,10 @@ class FileListComponent extends React.Component {
                     anchorPosition={this.state.allFilesMenu.AnchorPos}
                     anchorReference={'anchorPosition'}
                     open={Boolean(this.state.allFilesMenu.AnchorPos)}
-                    onClose={evt => { console.log(evt); this.handleMenuClose(evt, 'allFilesMenu');}}
+                    onClose={evt => { this.handleMenuClose(evt, 'allFilesMenu');}}
                 >
                     <MenuItem
                         onClick={evt => {
-                            // this.handleMenuClose(evt, 'allFilesMenu');
-                            console.log('What the heck!');
                             this.editCallback(this.state.selectedFile);
                         }}
                     >

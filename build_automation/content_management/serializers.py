@@ -48,6 +48,9 @@ class ContentSerializer(serializers.ModelSerializer):
         content.language = (validated_data.get('language', content.language))
         content.cataloger = (validated_data.get('cataloger', content.cataloger))
         content.updated_time = (validated_data.get('updated_time', content.updated_time))
+        content.source = (validated_data.get('source', content.source))
+        content.copyright = (validated_data.get('copyright', content.copyright))
+        content.rights_statement = (validated_data.get('rights_statement', content.rights_statement))
 
         return self.__create_update(content)
 
@@ -61,7 +64,8 @@ class ContentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Content
         fields = ('url', 'id', 'name', 'description', 'content_file', 'updated_time', 'last_uploaded_time', 'creators',
-                  'coverage', 'subjects', 'keywords', 'workareas', 'language', 'cataloger', 'original_file_name')
+                  'coverage', 'subjects', 'keywords', 'workareas', 'language', 'cataloger', 'original_file_name',
+                  'source', 'copyright', 'rights_statement')
         read_only_fields = ('original_file_name',)
         extra_kwargs = {
             'url': {'lookup_field': 'pk'},

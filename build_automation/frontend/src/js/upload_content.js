@@ -57,7 +57,6 @@ class UploadContent extends React.Component{
             contentFileName: props.content.originalFileName ? props.content.originalFileName : '',
         };
         this.tags = props.allTags;
-        console.log(props.content.updatedDate);
         this.tagNameTagMap = this.buildTagNameTagMap(props.allTags);
         this.handleCloseSnackbar = this.handleCloseSnackbar.bind(this);
         this.handleDateChange=this.handleDateChange.bind(this);
@@ -98,7 +97,6 @@ class UploadContent extends React.Component{
         return tagNameTagMap;
     }
     getAutoCompleteLabelsFromTagIds(boardInfo, tagIdsTagsMap) {
-        console.log('getautocomplete', boardInfo, tagIdsTagsMap)
         const retval = {};
         Object.keys(tagIdsTagsMap).forEach(eachTagType => {
             const selectedTagsForDir = boardInfo[eachTagType];
@@ -123,7 +121,7 @@ class UploadContent extends React.Component{
                 tags: response.data
             })
         }).catch(function (error) {
-            console.log(error);
+            console.error(error);
             // TODO : Show the error message.
         });
     }
@@ -142,24 +140,20 @@ class UploadContent extends React.Component{
         this.setState({ selectedDate: date });
     };
     handleTagAddition(tag, tagType){
-        console.log('Oh No!!!!!');
         this.setState((prevState, props) => {
             const selectedTags = prevState[tagType];
             const fieldErrors = prevState.fieldErrors;
             selectedTags.push(tag.name);
             fieldErrors[tagType] = null;
             const value = {[tagType]: selectedTags, fieldErrors};
-            console.log('Here\'s the value of \'value!', value);
             return value;
         })
     }
     handleTagDeletion(tag, tagType){
-        console.log('Oh No!!!!!');
         this.setState((prevState, props) => {
             const selectedTags = prevState[tagType];
             selectedTags.splice(selectedTags.indexOf(tag.name), 1);
             const value = {[tagType]: selectedTags};
-            console.log('Here\'s the value of \'value!', value);
             return value;
         })
     }
@@ -254,7 +248,6 @@ class UploadContent extends React.Component{
         }
         var targetUrl = APP_URLS.CONTENTS_LIST;
         const selectedTags = this.getSelectedTags();
-        console.log(selectedTags);
         const payload = new FormData();
         payload.append('name', this.state.name);
         payload.append('description', this.state.description);
@@ -267,6 +260,9 @@ class UploadContent extends React.Component{
         selectedTags.catalogers.length>0 && payload.append('cataloger', selectedTags.catalogers[0]);
         payload.append('updated_time', this.formatDate(this.state.selectedDate));
         Boolean(this.state.contentFile) && payload.append('content_file', this.state.contentFile);
+        Boolean(this.state.source) && payload.append('source', this.state.source);
+        Boolean(this.state.copyright) && payload.append('copyright', this.state.copyright);
+        Boolean(this.state.rightsStatement) && payload.append('rights_statement', this.state.rightsStatement);
         const currInstance = this;
         if (this.state.id > 0) {
             // Update an existing directory.
@@ -324,7 +320,6 @@ class UploadContent extends React.Component{
         const payload = {name: tagName, description: tagName};
         const currentInstance = this;
         axios.post(url, payload, {responseType: 'json'}).then(function(response) {
-            console.log('save successful!', response.data);
             currentInstance.tags[tagType].push(response.data);
             currentInstance.tagIdsTagsMap[tagType][response.data.id] = response.data;
             currentInstance.tagNameTagMap[tagType][response.data.name] = response.data;
@@ -335,7 +330,6 @@ class UploadContent extends React.Component{
                     messageType: 'info',
                 };
                 newState[tagType].push(tagName);
-                console.log('This is the new state?', newState);
                 return newState;
             })
         }).catch(function(error) {
@@ -517,7 +511,7 @@ class UploadContent extends React.Component{
                 </Button>
 
                 <div style={{marginTop: '20px'}}> </div>
-            <Snackbar
+                <Snackbar
                     anchorOrigin={{
                         vertical: 'bottom',
                         horizontal: 'left',
