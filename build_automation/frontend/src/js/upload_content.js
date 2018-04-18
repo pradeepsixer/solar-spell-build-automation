@@ -55,6 +55,7 @@ class UploadContent extends React.Component{
             contentFile: null,
             contentFileName: props.content.originalFileName ? props.content.originalFileName : '',
         };
+        console.log(props.content.updatedDate);
         this.tagNameTagMap = this.buildTagNameTagMap(props.allTags);
         this.handleDateChange=this.handleDateChange.bind(this);
         this.handleTagAddition=this.handleTagAddition.bind(this);
@@ -232,7 +233,7 @@ class UploadContent extends React.Component{
     }
     formatDate(input) {
         const year = input.getFullYear();
-        let month = input.getMonth();
+        let month = input.getMonth()+1;
         if (month < 10) {
             month = '0' + month;
         }

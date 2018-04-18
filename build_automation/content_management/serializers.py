@@ -47,6 +47,7 @@ class ContentSerializer(serializers.ModelSerializer):
         content.workareas.set(validated_data.get('workareas', []))
         content.language = (validated_data.get('language', content.language))
         content.cataloger = (validated_data.get('cataloger', content.cataloger))
+        content.updated_time = (validated_data.get('updated_time', content.updated_time))
 
         return self.__create_update(content)
 

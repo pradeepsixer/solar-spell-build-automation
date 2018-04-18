@@ -163,13 +163,17 @@ class ContentManagement extends React.Component{
                 workareas: content.workareas||[],
                 languages: content.language?[content.language]:[],
                 catalogers: content.cataloger?[content.cataloger]:[],
-                updatedDate: content.updatedDate,
+                updatedDate: this.parseDate(content.updated_time),
                 source: content.source,
                 copyright: content.copyright,
                 rightsStatement: content.rightsStatement,
                 originalFileName: content.originalFileName,
             }
         })
+    }
+    parseDate(inputStr) {
+    let splitval = inputStr.split("-");
+    return new Date(splitval[0], splitval[1] - 1, splitval[2]);
     }
     render(){
         return (
