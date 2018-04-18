@@ -433,8 +433,11 @@ class DirectoryInfoBoard extends React.Component {
                             </Select>
                         </Grid>
                         <Grid item xs={8}>
-                            <AutoCompleteWithChips suggestions={this.props.tags['creators']} searchKey={'name'}
-                                selectedItem={this.state.creators} onAddition={addedTag => {this.handleChipAddition(addedTag, 'creators')}} onDeletion={deletedTag => {this.handleChipDeletion(deletedTag, 'creators')}} required={true}
+                            <AutoCompleteWithChips suggestions={this.props.tags['creators']}
+                                selectedItem={this.state.creators}
+                                onAddition={addedTag => {this.handleChipAddition(addedTag, 'creators')}}
+                                onDeletion={deletedTag => {this.handleChipDeletion(deletedTag, 'creators')}}
+                                required={true}
                                 errorMsg={this.state.fieldErrors.selectedTags} />
                         </Grid>
                     </Grid>
@@ -452,8 +455,11 @@ class DirectoryInfoBoard extends React.Component {
                             </Select>
                         </Grid>
                         <Grid item xs={8}>
-                            <AutoCompleteWithChips suggestions={this.props.tags['coverages']} searchKey={'name'}
-                                selectedItem={this.state.coverages} onAddition={addedTag => {this.handleChipAddition(addedTag, 'coverages')}} onDeletion={deletedTag => {this.handleChipDeletion(deletedTag, 'coverages')}} required={true}
+                            <AutoCompleteWithChips suggestions={this.props.tags['coverages']}
+                                selectedItem={this.state.coverages}
+                                onAddition={addedTag => {this.handleChipAddition(addedTag, 'coverages')}}
+                                onDeletion={deletedTag => {this.handleChipDeletion(deletedTag, 'coverages')}}
+                                required={true}
                                 errorMsg={this.state.fieldErrors.selectedTags} />
                         </Grid>
                     </Grid>
@@ -471,8 +477,11 @@ class DirectoryInfoBoard extends React.Component {
                             </Select>
                         </Grid>
                         <Grid item xs={8}>
-                            <AutoCompleteWithChips suggestions={this.props.tags['subjects']} searchKey={'name'}
-                                selectedItem={this.state.subjects} onAddition={addedTag => {this.handleChipAddition(addedTag, 'subjects')}} onDeletion={deletedTag => {this.handleChipDeletion(deletedTag, 'subjects')}} required={true}
+                            <AutoCompleteWithChips suggestions={this.props.tags['subjects']}
+                                selectedItem={this.state.subjects}
+                                onAddition={addedTag => {this.handleChipAddition(addedTag, 'subjects')}}
+                                onDeletion={deletedTag => {this.handleChipDeletion(deletedTag, 'subjects')}}
+                                required={true}
                                 errorMsg={this.state.fieldErrors.selectedTags} />
                         </Grid>
                     </Grid>
@@ -490,8 +499,11 @@ class DirectoryInfoBoard extends React.Component {
                             </Select>
                         </Grid>
                         <Grid item xs={8}>
-                            <AutoCompleteWithChips suggestions={this.props.tags['keywords']} searchKey={'name'}
-                                selectedItem={this.state.keywords} onAddition={addedTag => {this.handleChipAddition(addedTag, 'keywords')}} onDeletion={deletedTag => {this.handleChipDeletion(deletedTag, 'keywords')}} required={true}
+                            <AutoCompleteWithChips suggestions={this.props.tags['keywords']}
+                                selectedItem={this.state.keywords}
+                                onAddition={addedTag => {this.handleChipAddition(addedTag, 'keywords')}}
+                                onDeletion={deletedTag => {this.handleChipDeletion(deletedTag, 'keywords')}}
+                                required={true}
                                 errorMsg={this.state.fieldErrors.selectedTags} />
                         </Grid>
                     </Grid>
@@ -509,8 +521,11 @@ class DirectoryInfoBoard extends React.Component {
                             </Select>
                         </Grid>
                         <Grid item xs={8}>
-                            <AutoCompleteWithChips suggestions={this.props.tags['workareas']} searchKey={'name'}
-                                selectedItem={this.state.workareas} onAddition={addedTag => {this.handleChipAddition(addedTag, 'workareas')}} onDeletion={deletedTag => {this.handleChipDeletion(deletedTag, 'workareas')}} required={true}
+                            <AutoCompleteWithChips suggestions={this.props.tags['workareas']}
+                                selectedItem={this.state.workareas}
+                                onAddition={addedTag => {this.handleChipAddition(addedTag, 'workareas')}}
+                                onDeletion={deletedTag => {this.handleChipDeletion(deletedTag, 'workareas')}}
+                                required={true}
                                 errorMsg={this.state.fieldErrors.selectedTags} />
                         </Grid>
                     </Grid>
@@ -528,8 +543,11 @@ class DirectoryInfoBoard extends React.Component {
                             </Select>
                         </Grid>
                         <Grid item xs={8}>
-                            <AutoCompleteWithChips suggestions={this.props.tags['languages']} searchKey={'name'}
-                                selectedItem={this.state.languages} onAddition={addedTag => {this.handleChipAddition(addedTag, 'languages')}} onDeletion={deletedTag => {this.handleChipDeletion(deletedTag, 'languages')}} required={true}
+                            <AutoCompleteWithChips suggestions={this.props.tags['languages']}
+                                selectedItem={this.state.languages}
+                                onAddition={addedTag => {this.handleChipAddition(addedTag, 'languages')}}
+                                onDeletion={deletedTag => {this.handleChipDeletion(deletedTag, 'languages')}}
+                                required={true}
                                 errorMsg={this.state.fieldErrors.selectedTags} />
                         </Grid>
                     </Grid>
@@ -547,8 +565,11 @@ class DirectoryInfoBoard extends React.Component {
                             </Select>
                         </Grid>
                         <Grid item xs={8}>
-                            <AutoCompleteWithChips suggestions={this.props.tags['catalogers']} searchKey={'name'}
-                                selectedItem={this.state.catalogers} onAddition={addedTag => {this.handleChipAddition(addedTag, 'catalogers')}} onDeletion={deletedTag => {this.handleChipDeletion(deletedTag, 'catalogers')}} required={true}
+                            <AutoCompleteWithChips suggestions={this.props.tags['catalogers']}
+                                selectedItem={this.state.catalogers}
+                                onAddition={addedTag => {this.handleChipAddition(addedTag, 'catalogers')}}
+                                onDeletion={deletedTag => {this.handleChipDeletion(deletedTag, 'catalogers')}}
+                                required={true}
                                 errorMsg={this.state.fieldErrors.selectedTags} />
                         </Grid>
                     </Grid>
@@ -567,6 +588,7 @@ class DirectoryInfoBoard extends React.Component {
                     <FileSelectionComponent allFiles={this.allFiles} tagIdsTagsMap={this.tagIdsTagsMap}
                         selectedFiles={this.state.selectedFiles} fileIdFileMap={this.fileIdFileMap}
                         onFileSelect={this.fileSelectionCallback} onFileDeselect={this.fileDeselectionCallback}
+                        tags={this.props.tags}
                     />
                 </Grid>
                 <Dialog
