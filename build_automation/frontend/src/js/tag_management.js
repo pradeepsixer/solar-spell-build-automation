@@ -2,6 +2,11 @@ import axios from 'axios';
 import React from 'react';
 import TagCreation from './addTag'
 
+import Dialog, { DialogActions, DialogContent, DialogContentText, DialogTitle } from 'material-ui/Dialog';
+import Snackbar from 'material-ui/Snackbar';
+import OpenInNew from 'material-ui-icons/OpenInNew';
+
+
 import Button from 'material-ui/Button';
 import TextField from 'material-ui/TextField';
 import Grid from 'material-ui/Grid';
@@ -41,11 +46,15 @@ class TagManagementComponent extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
+            selectedTag: null,
             currentPanel: null,
             selectedTagsMenu: {
                 selectedTag: null,
                 AnchorPos: null
             },
+            confirmDelete: false,
+            message: null,
+            messageType: 'info',
             currentView: 'manage',
             currentTitle: 'Coverages',
             expanded: null,
@@ -85,9 +94,25 @@ class TagManagementComponent extends React.Component {
         this.deleteTag = this.deleteTag.bind(this);
         this.handleAccordionClick = this.handleAccordionClick.bind(this);
         this.saveTagCallback = this.saveTagCallback.bind(this);
+        this.handleTagEdit = this.handleTagEdit.bind(this);
+        this.addNewTag = this.addNewTag.bind(this);
+        // this.confirmDeleteTag = this.confirmDeleteTag.bind(this);
+        // this.getErrorClass = this.getErrorClass.bind(this);
+        // this.closeConfirmDialog = this.closeConfirmDialog.bind(this);
     }
 
+    // getErrorClass() {
+    //     return this.state.messageType === "error" ? { backgroundColor: '#B71C1C', fontWeight: 'normal' } : {};
+    // }
+    // confirmDeleteTag() {
+    //     this.setState({
+    //         confirmDelete: true
+    //     })
+    // }
 
+    // closeConfirmDialog() {
+    //     this.setState({ confirmDelete: false })
+    // }
 
     handleChange(panel) {
         const thisInstance = this
@@ -119,6 +144,18 @@ class TagManagementComponent extends React.Component {
         })
     }
 
+    addNewTag(selectedPanel) {
+        this.setState({
+            currentView: 'addTag',
+            currentTitle: selectedPanel,
+            selectedTag: {
+                id: -1,
+                name: '',
+                description: ''
+            },
+
+        })
+    }
     componentDidMount() {
         this.loadData()
     }
@@ -228,6 +265,19 @@ class TagManagementComponent extends React.Component {
 
     }
 
+    handleTagEdit() {
+        const selectedTag = this.state.selectedTagsMenu.selectedTag;
+        const currentInstance = this;
+        this.setState({
+            currentView: 'addTag',
+            selectedTag: {
+                id: selectedTag.id,
+                name: selectedTag.name,
+                description: selectedTag.description
+            }
+        })
+    }
+
     render() {
         const { classes } = this.props;
         const { expanded } = this.state;
@@ -257,7 +307,7 @@ class TagManagementComponent extends React.Component {
                                 <ExpansionPanelDetails>
                                     <Grid container>
                                         <Grid item>
-                                            <Button variant="raised" color="primary" onClick={e => { this.setCurrentView('addTag', 'Coverages') }}>
+                                            <Button variant="raised" color="primary" onClick={e => { this.addNewTag('Coverages') }}>
                                                 Add New
             </Button>
                                         </Grid>
@@ -288,7 +338,7 @@ class TagManagementComponent extends React.Component {
                                 <ExpansionPanelDetails>
                                     <Grid container>
                                         <Grid item>
-                                            <Button variant="raised" color="primary" onClick={e => { this.setCurrentView('addTag', 'Subjects') }}>
+                                            <Button variant="raised" color="primary" onClick={e => { this.addNewTag('Subjects') }}>
                                                 Add New
             </Button>
                                         </Grid>
@@ -318,7 +368,7 @@ class TagManagementComponent extends React.Component {
                                 <ExpansionPanelDetails>
                                     <Grid container>
                                         <Grid item>
-                                            <Button variant="raised" color="primary" onClick={e => { this.setCurrentView('addTag', 'Work Areas') }}>
+                                            <Button variant="raised" color="primary" onClick={e => { this.addNewTag('Work Areas') }}>
                                                 Add New
             </Button>
                                         </Grid>
@@ -348,7 +398,7 @@ class TagManagementComponent extends React.Component {
                                 <ExpansionPanelDetails>
                                     <Grid container>
                                         <Grid item>
-                                            <Button variant="raised" color="primary" onClick={e => { this.setCurrentView('addTag', 'Languages') }}>
+                                            <Button variant="raised" color="primary" onClick={e => { this.addNewTag('Languages') }}>
                                                 Add New
             </Button>
                                         </Grid>
@@ -377,7 +427,7 @@ class TagManagementComponent extends React.Component {
                                 </ExpansionPanelSummary>
                                 <ExpansionPanelDetails>
                                     <Grid container>
-                                        <Grid item><Button variant="raised" color="primary" onClick={e => { this.setCurrentView('addTag', 'Catalogers') }}>
+                                        <Grid item><Button variant="raised" color="primary" onClick={e => { this.addNewTag('Catalogers') }}>
                                             Add New
             </Button>
                                         </Grid>
@@ -408,9 +458,10 @@ class TagManagementComponent extends React.Component {
                                 onClose={evt => { this.handleMenuClose(evt, 'selectedTagsMenu') }}
                             >
                                 <MenuItem
-                                    onClick={evt => {
-                                        this.handleMenuClose(evt, 'selectedTagsMenu');
+                                    onClick={currentView => {
+                                        this.handleTagEdit();
                                     }}
+
                                 >
                                     Edit
                     </MenuItem>
@@ -424,12 +475,47 @@ class TagManagementComponent extends React.Component {
                     </MenuItem>
                             </Menu>
                         </Grid>
+                        {/* <Dialog
+                            open={Boolean(this.state.confirmDeleteTag)}
+                            onClose={this.closeConfirmDialog}
+                            aria-labelledby="alert-dialog-title"
+                            aria-describedby="alert-dialog-description"
+                        >
+                            <DialogTitle id="alert-dialog-title">{"Confirm Delete?"}</DialogTitle>
+                            <DialogContent>
+                                <DialogContentText id="alert-dialog-description">
+                                    Are you sure you want to delete this meta data ?{this.state.name}?
+                        </DialogContentText>
+                            </DialogContent>
+                            <DialogActions>
+                                <Button onClick={this.closeConfirmDialog} color="primary">
+                                    No
+                        </Button>
+                                <Button onClick={evt => { this.closeConfirmDialog(); this.deleteTag(); }} color="primary" autoFocus>
+                                    Yes
+                        </Button>
+                            </DialogActions>
+                        </Dialog>
+                        <Snackbar
+                            anchorOrigin={{
+                                vertical: 'bottom',
+                                horizontal: 'left',
+                            }}
+                            open={Boolean(this.state.message)}
+                            onClose={this.handleCloseSnackbar}
+                            message={<span>{this.state.message}</span>}
+                            SnackbarContentProps={{
+                                "style": this.getErrorClass()
+                            }}
+                        /> */}
 
                     </Grid>
+
+
                 )}
                 {
-                    this.state.currentView == 'addTag' && 
-                        <TagCreation title={this.state.currentTitle} onSave={this.saveTagCallback}
+                    this.state.currentView == 'addTag' &&
+                    <TagCreation tag={this.state.selectedTag} title={this.state.currentTitle} onSave={this.saveTagCallback} onEdit={this.selectedTagId}
                         onCancel={() => this.setCurrentView('manage')} listUrl={this.state.listUrl}
                         detailUrl={this.state.detailUrl} />
                 }

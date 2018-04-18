@@ -12,9 +12,11 @@ import { TAG_SAVE_TYPE } from './constants.js';
 class TagCreation extends React.Component {
     constructor(props) {
         super(props);
+        console.log(props);
         this.state = {
-            name: '',
-            description: ''
+            id: props.tag.id,
+            name: props.tag.name,
+            description: props.tag.description
         };
         this.handleTextFieldUpdate = this.handleTextFieldUpdate.bind(this);
         this.saveTag = this.saveTag.bind(this);
@@ -27,7 +29,10 @@ class TagCreation extends React.Component {
         })
     }
 
+
+
     componentWillReceiveProps(props) {
+
         this.setState({
             name: '',
             description: ''
@@ -39,15 +44,41 @@ class TagCreation extends React.Component {
         var targetUrl = this.props.listUrl;
         const payload = { name: this.state.name, description: this.state.description };
         const currentInstance = this;
-        {
+        if (this.state.id > 0) {
+            // Update an exising Tag.
+            targetUrl = get_url(this.props.detailUrl, { id: this.state.id });
+            axios.patch(targetUrl, payload, {
+                responseType: 'json'
+            }).then(function (response) {
+                currentInstance.saveCallback(response.data, TAG_SAVE_TYPE.UPDATE);
+            }).catch(function (error) {
+                console.error("Error in updating the tag.", error);
+                console.error(error.response.data);
+            })
+        }
+        else {
             // Create a new Tag.
             axios.post(targetUrl, payload, {
                 responseType: 'json'
             }).then(function (response) {
                 currentInstance.saveCallback(response.data, TAG_SAVE_TYPE.CREATE);
+                currentInstance.setState({
+                    message: 'Save successful',
+                    messageType: 'info'});
             }).catch(function (error) {
                 console.error("Error in creating a new Tag", error);
+                console.error(error.response.data);
+                let errorMsg = 'Error in creating the library version.';
+                if (!(JSON.stringify(error.response.data).indexOf('DUPLICATE_LAYOUT_NAME') === -1)) {
+                    errorMsg = (<React.Fragment><b>ERROR:</b> There is an existing library version with the same name. Please change the name, and try again.</React.Fragment>);
+                }
+                currentInstance.setState({
+                    message: errorMsg,
+                    messageType: 'error'
+                });
             })
+            
+
         }
     }
 
@@ -84,7 +115,7 @@ class TagCreation extends React.Component {
                     <TextField
                         id="desc"
                         label="Description"
-                        value={this.state.desc}
+                        value={this.state.description}
                         onChange={evt => this.handleTextFieldUpdate('description', evt)}
                         fullWidth
                         margin="normal"
