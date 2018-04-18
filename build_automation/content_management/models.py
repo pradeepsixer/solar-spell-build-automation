@@ -97,6 +97,11 @@ class Cataloger(AbstractTag):
 
 
 class Content(models.Model):
+
+    def set_original_name(self, file_name):
+        self.original_file_name = file_name
+        return os.path.join("contents", file_name)
+
     """
     A content is the representation of a file.
     """
@@ -105,7 +110,7 @@ class Content(models.Model):
     description = models.TextField()
 
     # The Actual File
-    content_file = models.FileField("File")
+    content_file = models.FileField("File", upload_to=set_original_name)
 
     updated_time = models.DateField(
         "Content updated on",
@@ -135,6 +140,7 @@ class Content(models.Model):
     workareas = models.ManyToManyField(Workarea)
     language = models.ForeignKey(Language, on_delete=models.SET_NULL, null=True)
     cataloger = models.ForeignKey(Cataloger, on_delete=models.SET_NULL, null=True)
+    original_file_name = models.CharField(max_length=300, null=True)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

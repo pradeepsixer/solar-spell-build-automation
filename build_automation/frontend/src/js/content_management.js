@@ -36,7 +36,9 @@ class ContentManagement extends React.Component{
             updatedTime: '',
             files: [],
             currentView: 'manage',
-            content: null
+            content: null,
+            tags: {},
+            isLoaded: false,
         };
         this.setCurrentView = this.setCurrentView.bind(this);
         this.tagIdTagsMap = {};
@@ -76,7 +78,7 @@ class ContentManagement extends React.Component{
             responseType: 'json'
         }).then(function (response) {
             currInstance.setState({
-                files: response.data
+                files: response.data, isLoaded: true
             })
         }).catch(function (error) {
             console.log(error);
@@ -180,13 +182,13 @@ class ContentManagement extends React.Component{
                 source: content.source,
                 copyright: content.copyright,
                 rightsStatement: content.rightsStatement,
-                originalFileName: content.originalFileName,
+                originalFileName: content.original_file_name,
             }
         })
     }
     parseDate(inputStr) {
-    let splitval = inputStr.split("-");
-    return new Date(splitval[0], splitval[1] - 1, splitval[2]);
+        let splitval = inputStr.split("-");
+        return new Date(splitval[0], splitval[1] - 1, splitval[2]);
     }
     render(){
         return (
@@ -204,11 +206,16 @@ class ContentManagement extends React.Component{
                     </Grid>
 
                     <Grid item xs={8}>
-                        {this.state.currentView=='manage'&&<FileListComponent onEdit={this.handleContentEdit} onDelete={this.handleFileDelete} allFiles={this.state.files} tagIdsTagsMap={this.tagIdTagsMap} />}
-                        {this.state.currentView=='upload'&&<UploadContent onSave={this.saveContentCallback} tagIdsTagsMap={this.tagIdTagsMap} allTags={this.state.tags} content={this.state.content}/>}
+                        {this.state.isLoaded && this.state.currentView=='manage'&&<FileListComponent tags={this.state.tags} onEdit={this.handleContentEdit}
+                                                                                                     onDelete={this.handleFileDelete} allFiles={this.state.files}
+                                                                                                     tagIdsTagsMap={this.tagIdTagsMap} />}
+                        {this.state.isLoaded && this.state.currentView=='upload'&&<UploadContent onSave={this.saveContentCallback}
+                                                                                                 tagIdsTagsMap={this.tagIdTagsMap} allTags={this.state.tags}
+                                                                                                 content={this.state.content}/>}
+                        {!this.state.isLoaded && 'loading'}
                     </Grid>
                 </Grid>
-            <Snackbar
+                <Snackbar
                     anchorOrigin={{
                         vertical: 'bottom',
                         horizontal: 'left',

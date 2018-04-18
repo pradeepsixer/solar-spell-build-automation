@@ -61,7 +61,8 @@ class ContentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Content
         fields = ('url', 'id', 'name', 'description', 'content_file', 'updated_time', 'last_uploaded_time', 'creators',
-                  'coverage', 'subjects', 'keywords', 'workareas', 'language', 'cataloger')
+                  'coverage', 'subjects', 'keywords', 'workareas', 'language', 'cataloger', 'original_file_name')
+        read_only_fields = ('original_file_name',)
         extra_kwargs = {
             'url': {'lookup_field': 'pk'},
         }
