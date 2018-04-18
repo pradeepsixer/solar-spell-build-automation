@@ -153,12 +153,12 @@ class FileListComponent extends React.Component {
                     <TableColumnResizing
                         defaultColumnWidths={[
                             { columnName: 'name', width: 230 },
-                            { columnName: 'description', width: 250 },
-                            { columnName: 'creators', width: 420 },
-                            { columnName: 'coverage', width: 420 },
-                            { columnName: 'subjects', width: 420 },
-                            { columnName: 'keywords', width: 420 },
-                            { columnName: 'workareas', width: 420 },
+                            { columnName: 'description', width: 420 },
+                            { columnName: 'creators', width: 160 },
+                            { columnName: 'coverage', width: 160 },
+                            { columnName: 'subjects', width: 160 },
+                            { columnName: 'keywords', width: 160 },
+                            { columnName: 'workareas', width: 160 },
                             { columnName: 'language', width: 80 },
                             { columnName: 'cataloger', width: 80 },
                         ]} />

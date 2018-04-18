@@ -55,6 +55,7 @@ class UploadContent extends React.Component{
             contentFile: null,
             contentFileName: props.content.originalFileName ? props.content.originalFileName : '',
         };
+        this.tags = props.allTags;
         console.log(props.content.updatedDate);
         this.tagNameTagMap = this.buildTagNameTagMap(props.allTags);
         this.handleDateChange=this.handleDateChange.bind(this);
@@ -76,6 +77,7 @@ class UploadContent extends React.Component{
         this.handleCatalogerDeletion=this.handleCatalogerDeletion.bind(this);
         this.handleFileSelection=this.handleFileSelection.bind(this);
         this.saveContent=this.saveContent.bind(this);
+        this.saveTag=this.saveTag.bind(this);
         this.saveCallback=props.onSave.bind(this);
     }
     buildTagIdTagsMap(tags) {
@@ -322,6 +324,36 @@ class UploadContent extends React.Component{
         });
     }
 
+    saveTag(tagName, url, tagType){
+        const payload = {name: tagName, description: tagName};
+        const currentInstance = this;
+        axios.post(url, payload, {responseType: 'json'}).then(function(response) {
+            console.log('save successful!', response.data);
+            currentInstance.tags[tagType].push(response.data);
+            currentInstance.tagIdsTagsMap[tagType][response.data.id] = response.data;
+            currentInstance.tagNameTagMap[tagType][response.data.name] = response.data;
+            currentInstance.setState((prevState, props) => {
+                const newState = {
+                    [tagType]: prevState[tagType],
+                };
+                newState[tagType].push(tagName);
+                console.log('This is the new state?', newState);
+                return newState;
+            })
+        }).catch(function(error) {
+            console.error("Error in creating a new directory", error);
+            console.error(error.response.data);
+            let errorMsg = 'Error in creating the folder';
+            if (!(JSON.stringify(error.response.data).indexOf('DUPLICATE_DIRECTORY') === -1)) {
+                errorMsg = (<React.Fragment><b>ERROR:</b> There is another folder under the same name within the current folder. Please change the name, and try again.</React.Fragment>);
+            }
+            currInstance.setState({
+                message: errorMsg,
+                messageType: 'error'
+            });
+        });
+    }
+
     render(){
         return (
             <Grid item xs={8}>
@@ -394,7 +426,7 @@ class UploadContent extends React.Component{
                     Creator(s)
                 </Typography>
                 <span>
-                            <AutoCompleteWithChips suggestions={this.props.allTags['creators']}
+                            <AutoCompleteWithChips onAddNew={tag => this.saveTag(tag, APP_URLS.CREATORS_LIST, 'creators')} suggestions={this.props.allTags['creators']}
                                                    searchKey={'name'} selectedItem={this.state.creators}
                                                    onAddition={this.handleCreatorAddition} onDeletion={this.handleCreatorDeletion}/>
                         </span>
@@ -421,7 +453,7 @@ class UploadContent extends React.Component{
                     Keywords
                 </Typography>
                 <span>
-                            <AutoCompleteWithChips suggestions={this.props.allTags['keywords']}
+                            <AutoCompleteWithChips onAddNew={tag => this.saveTag(tag, APP_URLS.KEYWORDS_LIST, 'keywords')} suggestions={this.props.allTags['keywords']}
                                                    searchKey={'name'} selectedItem={this.state.keywords}
                                                    onAddition={this.handleKeywordAddition} onDeletion={this.handleKeywordDeletion}/>
                         </span>
