@@ -13,7 +13,7 @@ import { TAG_SAVE_TYPE } from './constants.js';
 class TagCreation extends React.Component {
     constructor(props) {
         super(props);
-        console.log(props);
+        
         this.state = {
             id: props.tag.id,
             name: props.tag.name,
@@ -22,6 +22,7 @@ class TagCreation extends React.Component {
         this.handleTextFieldUpdate = this.handleTextFieldUpdate.bind(this);
         this.saveTag = this.saveTag.bind(this);
         this.saveCallback = props.onSave.bind(this);
+        this.handleCloseSnackbar = this.handleCloseSnackbar.bind(this);
     }
 
     handleTextFieldUpdate(stateProperty, evt) {
@@ -66,22 +67,11 @@ class TagCreation extends React.Component {
                 responseType: 'json'
             }).then(function (response) {
                 currentInstance.saveCallback(response.data, TAG_SAVE_TYPE.CREATE);
-                currentInstance.setState({
-                    message: 'Save successful',
-                    messageType: 'info'});
             }).catch(function (error) {
                 console.error("Error in creating a new Tag", error);
-                console.error(error.response.data);
-                let errorMsg = 'Error in creating the Tag.';
-                if (!(JSON.stringify(error.response.data).indexOf('DUPLICATE_TAG_NAME') === -1)) {
-                    errorMsg = (<React.Fragment><b>ERROR:</b> There is an existing library version with the same name. Please change the name, and try again.</React.Fragment>);
-                }
-                currentInstance.setState({
-                    message: errorMsg,
-                    messageType: 'error'
-                });
+                
             })
-            
+
 
         }
     }
@@ -126,23 +116,29 @@ class TagCreation extends React.Component {
                     />
                 </Grid>
                 <Snackbar
-                            anchorOrigin={{
-                                vertical: 'bottom',
-                                horizontal: 'left',
-                            }}
-                            open={Boolean(this.state.message)}
-                            onClose={this.handleCloseSnackbar}
-                            message={<span>{this.state.message}</span>}
-                            SnackbarContentProps={{
-                                "style": this.getErrorClass()
-                            }}
-                        />
+                    anchorOrigin={{
+                        vertical: 'bottom',
+                        horizontal: 'left',
+                    }}
+                    open={Boolean(this.state.message)}
+                    onClose={this.handleCloseSnackbar}
+                    message={<span>{this.state.message}</span>}
+                    SnackbarContentProps={{
+                        "style": this.getErrorClass()
+                    }}
+                />
 
             </Grid>
         );
 
 
 
+    }
+    handleCloseSnackbar() {
+        this.setState({
+            message: null,
+            messageType: 'info'
+        })
     }
 }
 

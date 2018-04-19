@@ -23,14 +23,13 @@ import {
     PagingState,
 } from '@devexpress/dx-react-grid';
 import {
-    ColumnChooser,
+    
     Grid as DataGrid,
     Table,
     TableHeaderRow,
     TableFilterRow,
     TableColumnResizing,
-    TableColumnVisibility,
-    Toolbar,
+    
     PagingPanel,
 } from '@devexpress/dx-react-grid-material-ui';
 
@@ -108,6 +107,7 @@ class TagManagementComponent extends React.Component {
         this.addNewTag = this.addNewTag.bind(this);
         this.confirmDeleteTag = this.confirmDeleteTag.bind(this);
         this.closeConfirmDialog = this.closeConfirmDialog.bind(this);
+        this.handleCloseSnackbar = this.handleCloseSnackbar.bind(this);
     }
 
     getErrorClass() {
@@ -205,7 +205,7 @@ class TagManagementComponent extends React.Component {
             }
         });
         evt.preventDefault();
-        console.log(row)
+        
     }
 
 
@@ -339,9 +339,8 @@ class TagManagementComponent extends React.Component {
                                             <IntegratedPaging />
                                             <Table rowComponent={obj => { return this.tableRowComponent(obj, 'selectedTagsMenu') }} />
                                             <TableHeaderRow />
-                                            <TableColumnVisibility />
-                                            <Toolbar />
-                                            <ColumnChooser />
+                                            
+                                            
                                             <TableFilterRow />
                                             <PagingPanel pageSizes={[5, 10, 20]} />
 
@@ -368,9 +367,8 @@ class TagManagementComponent extends React.Component {
                                             <IntegratedPaging />
                                             <Table rowComponent={obj => { return this.tableRowComponent(obj, 'selectedTagsMenu') }} />
                                             <TableHeaderRow />
-                                            <TableColumnVisibility />
-                                            <Toolbar />
-                                            <ColumnChooser />
+                                            
+                                            
                                             <TableFilterRow />
                                             <PagingPanel pageSizes={[5, 10, 20]} />
 
@@ -399,9 +397,8 @@ class TagManagementComponent extends React.Component {
                                             <IntegratedPaging />
                                             <Table rowComponent={obj => { return this.tableRowComponent(obj, 'selectedTagsMenu') }} />
                                             <TableHeaderRow />
-                                            <TableColumnVisibility />
-                                            <Toolbar />
-                                            <ColumnChooser />
+                                            
+                                            
                                             <TableFilterRow />
                                             <PagingPanel pageSizes={[5, 10, 20]} />
                                         </DataGrid>
@@ -429,9 +426,8 @@ class TagManagementComponent extends React.Component {
                                             <IntegratedPaging />
                                             <Table rowComponent={obj => { return this.tableRowComponent(obj, 'selectedTagsMenu') }} />
                                             <TableHeaderRow />
-                                            <TableColumnVisibility />
-                                            <Toolbar />
-                                            <ColumnChooser />
+                                            
+                                            
                                             <TableFilterRow />
                                             <PagingPanel pageSizes={[5, 10, 20]} />
                                         </DataGrid>
@@ -459,9 +455,8 @@ class TagManagementComponent extends React.Component {
                                             <IntegratedPaging />
                                             <Table rowComponent={obj => { return this.tableRowComponent(obj, 'selectedTagsMenu') }} />
                                             <TableHeaderRow />
-                                            <TableColumnVisibility />
-                                            <Toolbar />
-                                            <ColumnChooser />
+
+                                            
                                             <TableFilterRow />
                                             <PagingPanel pageSizes={[5, 10, 20]} />
                                         </DataGrid>
@@ -488,9 +483,8 @@ class TagManagementComponent extends React.Component {
                                             <IntegratedPaging />
                                             <Table rowComponent={obj => { return this.tableRowComponent(obj, 'selectedTagsMenu') }} />
                                             <TableHeaderRow />
-                                            <TableColumnVisibility />
-                                            <Toolbar />
-                                            <ColumnChooser />
+                                            
+                                           
                                             <TableFilterRow />
                                             <PagingPanel pageSizes={[5, 10, 20]} />
                                         </DataGrid>
@@ -562,7 +556,7 @@ class TagManagementComponent extends React.Component {
                 )}
                 {
                     this.state.currentView == 'addTag' &&
-                    <TagCreation tag={this.state.selectedTag} title={this.state.currentTitle} onSave={this.saveTagCallback} onEdit={this.selectedTagId}
+                    <TagCreation tag={this.state.selectedTag} title={this.state.currentTitle} onSave={this.saveTagCallback} 
                         onCancel={() => this.setCurrentView('manage')} listUrl={this.state.listUrl}
                         detailUrl={this.state.detailUrl} />
                 }
@@ -572,6 +566,12 @@ class TagManagementComponent extends React.Component {
 
 
 
+    }
+    handleCloseSnackbar() {
+        this.setState({
+            message: null,
+            messageType: 'info'
+        })
     }
 }
 
