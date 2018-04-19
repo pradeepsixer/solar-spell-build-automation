@@ -4,6 +4,7 @@ const APP_URLS = {
     CREATORS_LIST:'/api/creators/',
     CREATORS_DETAIL:'/api/creators/${id}/',
     CONTENTS_LIST: '/api/contents/',
+    CONTENT_DETAIL: '/api/contents/${id}/',
     DIRLAYOUT_LIST: '/api/dirlayouts/',
     DIRLAYOUT_DETAIL: '/api/dirlayouts/${id}/',
     DIRLAYOUT_CLONE: '/api/dirlayouts/${id}/clone/',

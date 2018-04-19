@@ -8,7 +8,7 @@ import TextField from 'material-ui/TextField';
 
 import OpenInNew from 'material-ui-icons/OpenInNew';
 
-import { DIRLAYOUT_SAVE_TYPE } from './constants.js';
+import { DIRLAYOUT_SAVE_TYPE, HTTP_STATUS } from './constants.js';
 import { APP_URLS, get_url } from './url.js';
 
 class DirlayoutInfoBoard extends React.Component {
@@ -64,6 +64,9 @@ class DirlayoutInfoBoard extends React.Component {
     handleBannerSelection(evt) {
         evt.persist();
         const file = evt.target.files[0];
+        if (!Boolean(file)) { // If there is no file selected.
+            return;
+        }
         this.setState((prevState, props) => {
             const newState = {
                 bannerFile: file,
@@ -102,8 +105,12 @@ class DirlayoutInfoBoard extends React.Component {
             }).catch(function(error) {
                 console.error("Error in updating the library version info.", error);
                 console.error(error.response.data);
+                let errorMsg = 'Error in updating the library version.';
+                if (!(JSON.stringify(error.response.data).indexOf('DUPLICATE_LAYOUT_NAME') === -1)) {
+                    errorMsg = (<React.Fragment><b>ERROR:</b> There is an existing library version with the same name. Please change the name, and try again.</React.Fragment>);
+                }
                 currentInstance.setState({
-                    message: 'Error in updating the library version.',
+                    message: errorMsg,
                     messageType: 'error'
                 });
             })
@@ -120,8 +127,12 @@ class DirlayoutInfoBoard extends React.Component {
             }).catch(function(error) {
                 console.error("Error in creating a new directory layout ", error);
                 console.error(error.response.data);
+                let errorMsg = 'Error in creating the library version.';
+                if (!(JSON.stringify(error.response.data).indexOf('DUPLICATE_LAYOUT_NAME') === -1)) {
+                    errorMsg = (<React.Fragment><b>ERROR:</b> There is an existing library version with the same name. Please change the name, and try again.</React.Fragment>);
+                }
                 currentInstance.setState({
-                    message: 'Error in creating the library version.',
+                    message: errorMsg,
                     messageType: 'error'
                 });
             })
@@ -159,8 +170,12 @@ class DirlayoutInfoBoard extends React.Component {
         }).catch(function(error) {
             console.error("Error in cloning the directory layout", error);
             console.error(error.response.data);
+            let errorMsg = 'Error in cloning the library version.';
+            if (response.status === HTTP_STATUS.CONFLICT) {
+                errorMsg = (<React.Fragment><b>ERROR:</b> A clone already exists for the library version. Please rename it before trying to clone.</React.Fragment>);
+            }
             currentInstance.setState({
-                message: 'Error in cloning the library version.',
+                message: errorMsg,
                 messageType: 'error'
             });
         })
@@ -179,14 +194,10 @@ class DirlayoutInfoBoard extends React.Component {
             responseType: 'json'
         }).then(function(response) {
             currentInstance.deleteCallback(currentInstance.state.id);
-            currentInstance.setState({
-                message: 'Successfully deleted the library version.',
-                messageType: 'info'
-            });
         }).catch(function(error) {
             console.error("Error in deleting the directory layout ", error);
             currentInstance.setState({
-                message: 'Error in deleting the library version.',
+                message: 'ERROR: Cannot delete the library version. Please reload the page, and try again.',
                 messageType: 'error'
             });
         });
@@ -286,10 +297,9 @@ class DirlayoutInfoBoard extends React.Component {
                 <Snackbar
                     anchorOrigin={{
                         vertical: 'bottom',
-                        horizontal: 'right',
+                        horizontal: 'left',
                     }}
                     open={Boolean(this.state.message)}
-                    autoHideDuration={6000}
                     onClose={this.handleCloseSnackbar}
                     message={<span>{this.state.message}</span>}
                     SnackbarContentProps={{
