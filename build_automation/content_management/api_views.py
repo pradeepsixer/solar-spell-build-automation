@@ -15,7 +15,7 @@ from content_management.serializers import (
     CatalogerSerializer, ContentSerializer, CoverageSerializer, CreatorSerializer, DirectoryLayoutSerializer,
     DirectorySerializer, KeywordSerializer, LanguageSerializer, SubjectSerializer, WorkareaSerializer
 )
-from content_management.utils import DiskSpace, FilterCriteriaUtil
+from content_management.utils import DiskSpace
 
 
 class ContentApiViewset(ModelViewSet):

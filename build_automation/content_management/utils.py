@@ -1,6 +1,5 @@
 import hashlib
 import os
-import re
 
 
 class HashUtil:
@@ -21,6 +20,7 @@ class HashUtil:
             bytes_data = input_file.read(4096)
         input_file.seek(0)
         return sha256_ctxt.hexdigest()
+
 
 class DiskSpace:
     disk_stats = os.statvfs('/')
