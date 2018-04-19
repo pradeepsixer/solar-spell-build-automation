@@ -1,4 +1,8 @@
 const APP_URLS = {
+    KEYWORDS_LIST:'/api/keywords/',
+    KEYWORDS_DETAIL:'/api/keywords/${id}/',
+    CREATORS_LIST:'/api/creators/',
+    CREATORS_DETAIL:'/api/creators/${id}/',
     CONTENTS_LIST: '/api/contents/',
     CONTENT_DETAIL: '/api/contents/${id}/',
     DIRLAYOUT_LIST: '/api/dirlayouts/',
