@@ -4,6 +4,7 @@ import React from 'react';
 import Button from 'material-ui/Button';
 import TextField from 'material-ui/TextField';
 import Grid from 'material-ui/Grid';
+import Snackbar from 'material-ui/Snackbar';
 
 import { APP_URLS, get_url } from './url.js';
 
@@ -29,6 +30,9 @@ class TagCreation extends React.Component {
         })
     }
 
+    getErrorClass() {
+        return this.state.messageType === "error" ? { backgroundColor: '#B71C1C', fontWeight: 'normal' } : {};
+    }
 
 
     componentWillReceiveProps(props) {
@@ -68,8 +72,8 @@ class TagCreation extends React.Component {
             }).catch(function (error) {
                 console.error("Error in creating a new Tag", error);
                 console.error(error.response.data);
-                let errorMsg = 'Error in creating the library version.';
-                if (!(JSON.stringify(error.response.data).indexOf('DUPLICATE_LAYOUT_NAME') === -1)) {
+                let errorMsg = 'Error in creating the Tag.';
+                if (!(JSON.stringify(error.response.data).indexOf('DUPLICATE_TAG_NAME') === -1)) {
                     errorMsg = (<React.Fragment><b>ERROR:</b> There is an existing library version with the same name. Please change the name, and try again.</React.Fragment>);
                 }
                 currentInstance.setState({
@@ -121,6 +125,19 @@ class TagCreation extends React.Component {
                         margin="normal"
                     />
                 </Grid>
+                <Snackbar
+                            anchorOrigin={{
+                                vertical: 'bottom',
+                                horizontal: 'left',
+                            }}
+                            open={Boolean(this.state.message)}
+                            onClose={this.handleCloseSnackbar}
+                            message={<span>{this.state.message}</span>}
+                            SnackbarContentProps={{
+                                "style": this.getErrorClass()
+                            }}
+                        />
+
             </Grid>
         );
 

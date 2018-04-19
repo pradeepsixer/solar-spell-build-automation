@@ -60,6 +60,16 @@ class TagManagementComponent extends React.Component {
             expanded: null,
             listUrl: null,
             detailUrl: null,
+            creatorColumns: [
+                { name: 'name', title: 'Name' },
+                { name: 'description', title: 'Description' }
+            ],
+            creatorRows: [],
+            keywordColumns: [
+                { name: 'name', title: 'Name' },
+                { name: 'description', title: 'Description' }
+            ],
+            keywordRows: [],
             coverageColumns: [
                 { name: 'name', title: 'Name' },
                 { name: 'description', title: 'Description' }
@@ -96,23 +106,22 @@ class TagManagementComponent extends React.Component {
         this.saveTagCallback = this.saveTagCallback.bind(this);
         this.handleTagEdit = this.handleTagEdit.bind(this);
         this.addNewTag = this.addNewTag.bind(this);
-        // this.confirmDeleteTag = this.confirmDeleteTag.bind(this);
-        // this.getErrorClass = this.getErrorClass.bind(this);
-        // this.closeConfirmDialog = this.closeConfirmDialog.bind(this);
+        this.confirmDeleteTag = this.confirmDeleteTag.bind(this);
+        this.closeConfirmDialog = this.closeConfirmDialog.bind(this);
     }
 
-    // getErrorClass() {
-    //     return this.state.messageType === "error" ? { backgroundColor: '#B71C1C', fontWeight: 'normal' } : {};
-    // }
-    // confirmDeleteTag() {
-    //     this.setState({
-    //         confirmDelete: true
-    //     })
-    // }
+    getErrorClass() {
+        return this.state.messageType === "error" ? { backgroundColor: '#B71C1C', fontWeight: 'normal' } : {};
+    }
+    confirmDeleteTag() {
+        this.setState({
+            confirmDelete: true
+        })
+    }
 
-    // closeConfirmDialog() {
-    //     this.setState({ confirmDelete: false })
-    // }
+    closeConfirmDialog() {
+        this.setState({ confirmDelete: false })
+    }
 
     handleChange(panel) {
         const thisInstance = this
@@ -167,6 +176,8 @@ class TagManagementComponent extends React.Component {
         }).then(function (resp) {
             const response = resp.data;
             currInstance.setState({
+                creatorRows: response['creators'],
+                keywordRows: response['keywords'],
                 subjectRows: response['subjects'],
                 coverageRows: response['coverages'],
                 workareaRows: response['workareas'],
@@ -186,12 +197,15 @@ class TagManagementComponent extends React.Component {
 
     handleTagsRightClick(evt, row, menuName) {
         this.setState({
+            selectedTag: row,
             [menuName]: {
+
                 selectedTag: row,
                 AnchorPos: { top: evt.clientY, left: evt.clientX }
             }
         });
         evt.preventDefault();
+        console.log(row)
     }
 
 
@@ -199,7 +213,9 @@ class TagManagementComponent extends React.Component {
         var tagDataKey = this.state.currentPanel + "Rows";
         this.setState((prevState, props) => {
             const newState = {
-                [tagDataKey]: prevState[tagDataKey]
+                [tagDataKey]: prevState[tagDataKey],
+                message: 'Delete successful',
+                messageType: 'info'
             }
             for (var i = 0; i < newState[tagDataKey].length; i++) {
                 if (newState[tagDataKey][i].id == deletedItemId) {
@@ -213,7 +229,7 @@ class TagManagementComponent extends React.Component {
     }
 
     deleteTag() {
-        const selectedTagId = this.state.selectedTagsMenu.selectedTag.id;
+        const selectedTagId = this.state.selectedTag.id;
         const targetUrl = get_url(this.state.detailUrl, { id: selectedTagId });
         const currentInstance = this;
         axios.delete(targetUrl, {
@@ -240,6 +256,8 @@ class TagManagementComponent extends React.Component {
         this.setState((prevState, props) => {
             const newState = {
                 [tagDataKey]: prevState[tagDataKey],
+                message: 'Save successful',
+                messageType: 'info',
                 currentView: 'manage'
             };
 
@@ -281,6 +299,8 @@ class TagManagementComponent extends React.Component {
     render() {
         const { classes } = this.props;
         const { expanded } = this.state;
+        const { creatorRows, creatorColumns } = this.state;
+        const { keywordRows, keywordColumns } = this.state;
         const { coverageRows, coverageColumns } = this.state;
         const { subjectRows, subjectColumns } = this.state;
         const { workareaRows, workareaColumns } = this.state;
@@ -300,20 +320,47 @@ class TagManagementComponent extends React.Component {
 
                     <Grid container spacing={0}>
                         <Grid item xs={12}>
-                            <ExpansionPanel expanded={expanded === 'coverage'} onChange={this.handleChange('coverage')} onClick={e => { this.handleAccordionClick('coverage') }}>
-                                <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />} onClick={e => { this.setUrls(APP_URLS.COVERAGES_LIST, APP_URLS.COVERAGES_DETAIL) }}>
-                                    <Typography>Coverages</Typography>
+                            <ExpansionPanel expanded={expanded === 'creator'} onChange={this.handleChange('creator')} onClick={e => { this.handleAccordionClick('creator') }}>
+                                <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />} onClick={e => { this.setUrls(APP_URLS.CREATORS_LIST, APP_URLS.CREATORS_DETAIL) }}>
+                                    <Typography>Creators</Typography>
                                 </ExpansionPanelSummary>
                                 <ExpansionPanelDetails>
                                     <Grid container>
                                         <Grid item>
-                                            <Button variant="raised" color="primary" onClick={e => { this.addNewTag('Coverages') }}>
-                                                Add New
-            </Button>
+
                                         </Grid>
                                         <DataGrid
-                                            rows={coverageRows}
-                                            columns={coverageColumns}
+                                            rows={creatorRows}
+                                            columns={creatorColumns}
+                                        >
+                                            <FilteringState defaultFilters={[]} columnExtensions={[{ columnName: 'name', filteringEnabled: true }]} />
+                                            <IntegratedFiltering />
+                                            <PagingState defaultCurrentPage={0} defaultPageSize={10} />
+                                            <IntegratedPaging />
+                                            <Table rowComponent={obj => { return this.tableRowComponent(obj, 'selectedTagsMenu') }} />
+                                            <TableHeaderRow />
+                                            <TableColumnVisibility />
+                                            <Toolbar />
+                                            <ColumnChooser />
+                                            <TableFilterRow />
+                                            <PagingPanel pageSizes={[5, 10, 20]} />
+
+                                        </DataGrid>
+                                    </Grid>
+                                </ExpansionPanelDetails>
+                            </ExpansionPanel>
+                            <ExpansionPanel expanded={expanded === 'keyword'} onChange={this.handleChange('keyword')} onClick={e => { this.handleAccordionClick('keyword') }}>
+                                <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />} onClick={e => { this.setUrls(APP_URLS.KEYWORDS_LIST, APP_URLS.KEYWORDS_DETAIL) }}>
+                                    <Typography>Keywords</Typography>
+                                </ExpansionPanelSummary>
+                                <ExpansionPanelDetails>
+                                    <Grid container>
+                                        <Grid item>
+
+                                        </Grid>
+                                        <DataGrid
+                                            rows={keywordRows}
+                                            columns={keywordColumns}
                                         >
                                             <FilteringState defaultFilters={[]} columnExtensions={[{ columnName: 'name', filteringEnabled: true }]} />
                                             <IntegratedFiltering />
@@ -467,7 +514,7 @@ class TagManagementComponent extends React.Component {
                     </MenuItem>
                                 <MenuItem
                                     onClick={evt => {
-                                        this.deleteTag();
+                                        this.confirmDeleteTag();
                                         this.handleMenuClose(evt, 'selectedTagsMenu');
                                     }}
                                 >
@@ -475,8 +522,8 @@ class TagManagementComponent extends React.Component {
                     </MenuItem>
                             </Menu>
                         </Grid>
-                        {/* <Dialog
-                            open={Boolean(this.state.confirmDeleteTag)}
+                        <Dialog
+                            open={this.state.confirmDelete}
                             onClose={this.closeConfirmDialog}
                             aria-labelledby="alert-dialog-title"
                             aria-describedby="alert-dialog-description"
@@ -484,7 +531,7 @@ class TagManagementComponent extends React.Component {
                             <DialogTitle id="alert-dialog-title">{"Confirm Delete?"}</DialogTitle>
                             <DialogContent>
                                 <DialogContentText id="alert-dialog-description">
-                                    Are you sure you want to delete this meta data ?{this.state.name}?
+                                    Are you sure you want to delete this metadata {this.state.name}?
                         </DialogContentText>
                             </DialogContent>
                             <DialogActions>
@@ -507,7 +554,7 @@ class TagManagementComponent extends React.Component {
                             SnackbarContentProps={{
                                 "style": this.getErrorClass()
                             }}
-                        /> */}
+                        />
 
                     </Grid>
 
