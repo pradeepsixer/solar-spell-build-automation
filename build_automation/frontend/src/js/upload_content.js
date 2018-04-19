@@ -383,9 +383,8 @@ class UploadContent extends React.Component{
                 </label>
                 <TextField
                     id="name"
-                    label="Name"
+                    label="Name *"
                     value={this.state.name}
-                    required={true}
                     error={this.state.fieldErrors.name ? true : false}
                     onChange={evt => this.handleTextFieldUpdate('name', evt)}
                     fullWidth
@@ -393,10 +392,9 @@ class UploadContent extends React.Component{
                 />
                 <TextField
                     id="description"
-                    label="Description"
+                    label="Description *"
                     multiline
                     fullWidth
-                    required={true}
                     error={this.state.fieldErrors.description ? true : false}
                     value={this.state.description}
                     onChange={evt => this.handleTextFieldUpdate('description', evt)}
@@ -478,9 +476,8 @@ class UploadContent extends React.Component{
                         </span>
                 <TextField
                     id="source"
-                    label="Source"
+                    label="Source *"
                     value={this.state.source}
-                    required={true}
                     error={this.state.fieldErrors.source ? true : false}
                     onChange={evt => this.handleTextFieldUpdate('source', evt)}
                     fullWidth
@@ -488,9 +485,8 @@ class UploadContent extends React.Component{
                 />
                 <TextField
                     id="copyright"
-                    label="Copyright"
+                    label="Copyright *"
                     value={this.state.copyright}
-                    required={true}
                     error={this.state.fieldErrors.copyright ? true : false}
                     onChange={evt => this.handleTextFieldUpdate('copyright', evt)}
                     fullWidth
@@ -498,9 +494,8 @@ class UploadContent extends React.Component{
                 />
                 <TextField
                     id="rightsStatement"
-                    label="Rights Statement"
+                    label="Rights Statement *"
                     value={this.state.rightsStatement}
-                    required={true}
                     error={this.state.fieldErrors.rightsStatement ? true : false}
                     onChange={evt => this.handleTextFieldUpdate('rightsStatement', evt)}
                     fullWidth
