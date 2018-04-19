@@ -4,21 +4,45 @@
   "description": "Front-end for SolarSPELL build automation using ReactJS",
   "main": "index.js",
   "scripts": {
+    "clean": "rm -rf static/",
+    "build": "npm run-script clean; webpack --mode=production",
+    "build-dev": "npm run-script clean; webpack --mode=development",
+    "winclean": "rd /s /q static",
+    "winbuild": "npm run-script winclean & webpack --mode=production",
+    "winbuild-dev": "npm run-script winclean & webpack --mode=development",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "School for the Future of Innovation in Society, Arizona State University.",
   "license": "MIT",
   "dependencies": {
+    "@devexpress/dx-react-core": "^1.1.1",
+    "@devexpress/dx-react-grid": "^1.1.1",
+    "@devexpress/dx-react-grid-material-ui": "^1.1.1",
+    "axios": "^0.18.0",
+    "date-fns": "^2.0.0-alpha.7",
+    "downshift": "^1.31.2",
+    "keycode": "^2.2.0",
+    "lodash": "^4.17.5",
+    "material-ui": "^1.0.0-beta.38",
+    "material-ui-icons": "^1.0.0-beta.36",
+    "material-ui-pickers": "^1.0.0-rc.4",
+    "npm": "^5.8.0",
+    "prop-types": "^15.6.1",
     "react": "^16.2.0",
-    "react-dom": "^16.2.0"
+    "react-dom": "^16.2.0",
+    "react-sortable-tree": "^2.1.0"
   },
   "devDependencies": {
     "babel-cli": "^6.26.0",
     "babel-core": "^6.26.0",
     "babel-loader": "^7.1.4",
+    "babel-plugin-transform-object-rest-spread": "^6.26.0",
     "babel-preset-env": "^1.6.1",
     "babel-preset-react": "^6.24.1",
     "copy-webpack-plugin": "^4.5.1",
+    "css-loader": "^0.28.11",
+    "file-loader": "^1.1.11",
+    "style-loader": "^0.20.3",
     "webpack": "^4.1.1",
     "webpack-cli": "^2.0.12"
   }

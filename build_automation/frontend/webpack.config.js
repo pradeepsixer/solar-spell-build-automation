@@ -3,7 +3,6 @@ const CopyWebpackPlugin = require('copy-webpack-plugin');
 
 module.exports = {
     entry: './src/js/index.js',
-    mode: 'production',
     node: {
         fs: 'empty'
     },
@@ -14,7 +13,14 @@ module.exports = {
             use: {
                 loader: 'babel-loader',
             }
-        }]
+        },{
+            test: /\.css$/,
+            use: [ 'style-loader', 'css-loader' ]
+        },{
+            test: /\.(png|svg|jpg|gif)$/,
+            use: ['file-loader']
+        }
+      ]
     },
     plugins: [
         new CopyWebpackPlugin([{
@@ -32,7 +38,6 @@ module.exports = {
     ],
     output: {
         filename: 'js/bundle.js',
-        path: path.resolve(__dirname, 'dist')
+        path: path.resolve(__dirname, 'static')
     },
 };
-

@@ -2,7 +2,7 @@ import json
 import os
 import shutil
 import tempfile
-from datetime import timedelta
+from datetime import date, timedelta
 from unittest.mock import MagicMock, patch
 
 from django.conf import settings
@@ -193,8 +193,14 @@ class ContentAPITest(APITestCase):
                 'name': 'Content File',
                 'description': 'File 1',
                 'content_file': content_file,
-                'updated_time': timezone.now(),
-                'tag_ids': []
+                'updated_time': date.today(),
+                'creators': [],
+                'coverage': '',
+                'subjects': [],
+                'keywords': [],
+                'workareas': [],
+                'language': '',
+                'cataloger': ''
             }
             response = self.client.post(url, data, format='multipart')
             self.assertEqual(response.status_code, status.HTTP_201_CREATED)
@@ -211,8 +217,14 @@ class ContentAPITest(APITestCase):
                 'name': 'Content File',
                 'description': 'File 1',
                 'content_file': content_file,
-                'updated_time': timezone.now(),
-                'tag_ids': []
+                'updated_time': date.today(),
+                'creators': [],
+                'coverage': '',
+                'subjects': [],
+                'keywords': [],
+                'workareas': [],
+                'language': '',
+                'cataloger': ''
             }
             response = self.client.post(url, data, format='multipart')
             self.assertEqual(response.status_code, status.HTTP_201_CREATED)
@@ -245,8 +257,14 @@ class ContentAPITest(APITestCase):
                 'name': 'Content File',
                 'description': 'File 1',
                 'content_file': content_file,
-                'updated_time': timezone.now(),
-                'tag_ids': []
+                'updated_time': date.today(),
+                'creators': [],
+                'coverage': '',
+                'subjects': [],
+                'keywords': [],
+                'workareas': [],
+                'language': '',
+                'cataloger': ''
             }
 
             with patch('django.utils.timezone.now', mock_timezone_now):
@@ -264,7 +282,14 @@ class ContentAPITest(APITestCase):
             updated_data = {
                 'name': 'Updated Content Name',
                 'description': 'New description',
-                'content_file': content_file
+                'content_file': content_file,
+                'creators': [],
+                'coverage': '',
+                'subjects': [],
+                'keywords': [],
+                'workareas': [],
+                'language': '',
+                'cataloger': ''
             }
 
             mock_timezone_now.return_value = current_upload_time
@@ -289,8 +314,14 @@ class ContentAPITest(APITestCase):
                 'name': 'Content File',
                 'description': 'File 1',
                 'content_file': content_file,
-                'updated_time': timezone.now(),
-                'tag_ids': []
+                'updated_time': date.today(),
+                'creators': [],
+                'coverage': '',
+                'subjects': [],
+                'keywords': [],
+                'workareas': [],
+                'language': '',
+                'cataloger': ''
             }
             response = self.client.post(url, data, format='multipart')
             self.assertEqual(response.status_code, status.HTTP_201_CREATED)
@@ -306,8 +337,14 @@ class ContentAPITest(APITestCase):
                 'name': 'Content File',
                 'description': 'File 1',
                 'content_file': content_file,
-                'updated_time': timezone.now(),
-                'tag_ids': []
+                'updated_time': date.today(),
+                'creators': [],
+                'coverage': '',
+                'subjects': [],
+                'keywords': [],
+                'workareas': [],
+                'language': '',
+                'cataloger': ''
             }
             response = self.client.post(url, data, format='multipart')
             self.assertEqual(response.status_code, status.HTTP_409_CONFLICT)
@@ -335,7 +372,14 @@ class ContentAPITest(APITestCase):
                 'name': 'Content File',
                 'description': 'File 1',
                 'content_file': content_file,
-                'updated_time': timezone.now()
+                'updated_time': date.today(),
+                'creators': [],
+                'coverage': '',
+                'subjects': [],
+                'keywords': [],
+                'workareas': [],
+                'language': '',
+                'cataloger': ''
             }
             response = self.client.post(url, data, format='multipart')
             self.assertEqual(response.status_code, status.HTTP_201_CREATED)
@@ -350,7 +394,14 @@ class ContentAPITest(APITestCase):
                 'name': 'Content File 2',
                 'description': 'File 2',
                 'content_file': content_file,
-                'updated_time': timezone.now()
+                'updated_time': date.today(),
+                'creators': [],
+                'coverage': '',
+                'subjects': [],
+                'keywords': [],
+                'workareas': [],
+                'language': '',
+                'cataloger': ''
             }
             response = self.client.post(url, data, format='multipart')
             self.assertEqual(response.status_code, status.HTTP_201_CREATED)

@@ -20,23 +20,3 @@ class DuplicateContentFileException(BaseException):
             ), message
         )
         self.content = duplicate_content
-
-
-class MalformedExpressionException(BaseException):
-    """
-    Raised when the expression is malformed for creating the FilterCriteria
-    """
-
-    def __init__(self, expression, message=None):
-        super().__init__("The given expression %s is malformed." % expression, message)
-        self.expression = expression
-
-
-class InvalidOperatorException(BaseException):
-    """
-    Raised when there is an invalid operator in the expression provided.
-    """
-
-    def __init__(self, operator, message=None):
-        super().__init__("An invalid operator %s is encountered." % operator, message)
-        self.operator = operator

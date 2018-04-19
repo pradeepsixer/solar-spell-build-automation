@@ -1,7 +1,14 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 
+import CssBaseline from 'material-ui/CssBaseline';
+
+import MainScreen from './main_screen.js';
+
 ReactDOM.render(
-    <h1>SolarSPELL Hello World</h1>,
+    (<React.Fragment><CssBaseline />
+    <MainScreen />
+    </React.Fragment>)
+    ,
     document.getElementById('container')
 );

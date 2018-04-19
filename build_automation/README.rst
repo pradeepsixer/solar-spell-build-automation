@@ -9,11 +9,7 @@ Django
 
      pip install -r requirements/dev.txt
 
-Front-end (React)
-::
-    cd frontend
-    npm install
-    (Optionally, add the node_modules/bin/ to PATH Environment Variable)
+Front-end (React) - Refer the README within :code:`frontend`.
 
 2. Setup Database
 ##################
@@ -39,4 +35,4 @@ To run both tests and flake8 in a single command,
 ::
      tox
 
-Before making any commits, please make sure the code follows PEP-8 rules. Also, before making a pull-request, please make sure that it does not break the existing code. (This is only possible with a really good code coverage by the test suite).
+`Before making any commits, please make sure the code follows PEP-8 rules. Also, before making a pull-request, please make sure that it does not break the existing code. (This is only possible with a really good code coverage by the test suite).
