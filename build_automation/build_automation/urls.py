@@ -28,7 +28,6 @@ router.register(r'contents', ContentApiViewset)
 # router.register(r'tags', TagViewSet, base_name='tag')
 router.register(r'directories', DirectoryViewSet)
 router.register(r'dirlayouts', DirectoryLayoutViewSet)
-router.register(r'dirlayouts/(?P<id>\d+)/clone', DirectoryCloneApiViewSet, base_name='dirlayout')
 router.register(r'creators', CreatorViewSet)
 router.register(r'coverages', CoverageViewSet)
 router.register(r'subjects', SubjectViewSet)
@@ -42,4 +41,8 @@ urlpatterns = [
     path('api/', include(router.urls)),
     path('content_management/', include('content_management.urls')),
     path('accounts/', include('django.contrib.auth.urls')),
+    path(
+        'api/dirlayouts/<int:id>/clone/',
+        DirectoryCloneApiViewSet.as_view({'post': 'create'}), name="dirlayout-clone"
+    )
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

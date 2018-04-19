@@ -130,7 +130,7 @@ class DirectoryCloneApiViewSet(ViewSet, CreateModelMixin):
         self.__clone_directory_tree(None, cloned_layout, dir_queryset, None)
 
         serializer = DirectoryLayoutSerializer(cloned_layout, context={'request': request})
-        return Response(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def get_queryset(self, **kwargs):
         queryset = DirectoryLayout.objects.get(id=self.kwargs['id'])
