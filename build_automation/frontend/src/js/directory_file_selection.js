@@ -66,6 +66,16 @@ function LinkTypeProvider(props) {
     return (<DataTypeProvider formatterComponent={OpenInNewWindowFormatter} {...props} />);
 };
 
+function filterThroughArray(value, filter) {
+    if (filter && Array.isArray(filter.value)) {
+        let allTagsPresent = true;
+        filter.value.forEach(eachFilterTag => {
+            allTagsPresent = allTagsPresent && (value.indexOf(eachFilterTag) != -1);
+        });
+        return allTagsPresent;
+    }
+}
+
 class FileSelectionComponent extends React.Component {
     constructor(props) {
         super(props);
@@ -94,7 +104,7 @@ class FileSelectionComponent extends React.Component {
             {name: 'language', title: 'Language', filterType: 'autocomplete', tagKey: 'languages'},
             {name: 'cataloger', title: 'Cataloger', filterType: 'autocomplete', tagKey: 'catalogers'},
         ];
-        this.defaultColumnWidths=[
+        this.defaultColumnWidths = [
             {columnName: 'name', width: 230},
             {columnName: 'description', width: 250},
             {columnName: 'updated_time', width: 240},
@@ -105,6 +115,15 @@ class FileSelectionComponent extends React.Component {
             {columnName: 'workareas', width: 420},
             {columnName: 'language', width: 240},
             {columnName: 'cataloger', width: 240},
+        ];
+        this.filterExtensions = [
+            {columnName: 'creators', predicate: filterThroughArray},
+            {columnName: 'coverage', predicate: filterThroughArray},
+            {columnName: 'subjects', predicate: filterThroughArray},
+            {columnName: 'keywords', predicate: filterThroughArray},
+            {columnName: 'workareas', predicate: filterThroughArray},
+            {columnName: 'language', predicate: filterThroughArray},
+            {columnName: 'cataloger', predicate: filterThroughArray},
         ];
         this.getFilterCellComponent = this.getFilterCellComponent.bind(this);
         this.handleFilesRightClick = this.handleFilesRightClick.bind(this);
@@ -199,7 +218,7 @@ class FileSelectionComponent extends React.Component {
                     <ChippedTagsTypeProvider for={['creators', 'coverage', 'subjects', 'keywords', 'workareas', 'language', 'cataloger']} />
                     <LinkTypeProvider for={['content_file']} />
                     <FilteringState defaultFilters={[]} columnExtensions={[{columnName: 'content_file', filteringEnabled: false}]} />
-                    <IntegratedFiltering />
+                    <IntegratedFiltering columnExtensions={this.filterExtensions} />
                     <PagingState defaultCurrentPage={0} defaultPageSize={10} />
                     <IntegratedPaging />
                     <Table rowComponent={obj => {return this.tableRowComponent(obj, 'allFilesMenu')}} />
@@ -243,7 +262,7 @@ class FileSelectionComponent extends React.Component {
                     <ChippedTagsTypeProvider for={['creators', 'coverage', 'subjects', 'keywords', 'workareas', 'language', 'cataloger']} />
                     <LinkTypeProvider for={['content_file']} />
                     <FilteringState defaultFilters={[]} columnExtensions={[{columnName: 'content_file', filteringEnabled: false}]} />
-                    <IntegratedFiltering />
+                    <IntegratedFiltering  columnExtensions={this.filterExtensions} />
                     <PagingState defaultCurrentPage={0} defaultPageSize={10} />
                     <IntegratedPaging />
                     <Table rowComponent={obj => {return this.tableRowComponent(obj, 'selectedFilesMenu')}} />
