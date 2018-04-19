@@ -16,7 +16,8 @@ const APP_URLS = {
     LANGUAGES_LIST:'/api/languages/',
     LANGUAGES_DETAIL:'/api/languages/${id}/',
     CATALOGERS_LIST:'/api/catalogers/',
-    CATALOGERS_DETAIL:'/api/catalogers/${id}/'
+    CATALOGERS_DETAIL:'/api/catalogers/${id}/',
+    DISKSPACE: '/api/diskspace/'
 }
 
 function get_url(templateStringLiteral, context) {
