@@ -9,7 +9,7 @@ import Snackbar from 'material-ui/Snackbar';
 import { APP_URLS, get_url } from './url.js';
 
 import Typography from 'material-ui/Typography';
-import { TAG_SAVE_TYPE } from './constants.js';
+import { TAG_SAVE_TYPE, HTTP_STATUS } from './constants.js';
 class TagCreation extends React.Component {
     constructor(props) {
         super(props);
@@ -59,6 +59,14 @@ class TagCreation extends React.Component {
             }).catch(function (error) {
                 console.error("Error in updating the tag.", error);
                 console.error(error.response.data);
+                let errorMsg = 'Error in creating the tag.';
+            if (error.response.status === HTTP_STATUS.BAD_REQUEST) {
+                errorMsg = (<React.Fragment><b>ERROR:</b> This metadata already exists. Please rename it before trying to update.</React.Fragment>);
+            }
+                currentInstance.setState({
+                    message: errorMsg,
+                    messageType: 'error'
+                });
             })
         }
         else {
@@ -69,6 +77,15 @@ class TagCreation extends React.Component {
                 currentInstance.saveCallback(response.data, TAG_SAVE_TYPE.CREATE);
             }).catch(function (error) {
                 console.error("Error in creating a new Tag", error);
+                console.error(error.response.data);
+                let errorMsg = 'Error in creating the tag.';
+            if (error.response.status === HTTP_STATUS.BAD_REQUEST) {
+                errorMsg = (<React.Fragment><b>ERROR:</b> This metadata already exists. Please rename it before trying to add.</React.Fragment>);
+            }
+                currentInstance.setState({
+                    message: errorMsg,
+                    messageType: 'error'
+                });
                 
             })
 

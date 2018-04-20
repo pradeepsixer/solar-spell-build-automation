@@ -348,18 +348,20 @@ class TagManagementComponent extends React.Component {
                                     </Grid>
                                 </ExpansionPanelDetails>
                             </ExpansionPanel>
-                            <ExpansionPanel expanded={expanded === 'keyword'} onChange={this.handleChange('keyword')} onClick={e => { this.handleAccordionClick('keyword') }}>
-                                <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />} onClick={e => { this.setUrls(APP_URLS.KEYWORDS_LIST, APP_URLS.KEYWORDS_DETAIL) }}>
-                                    <Typography>Keywords</Typography>
+                            <ExpansionPanel expanded={expanded === 'coverage'} onChange={this.handleChange('coverage')} onClick={e => { this.handleAccordionClick('coverage') }}>
+                                <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />} onClick={e => { this.setUrls(APP_URLS.COVERAGES_LIST, APP_URLS.COVERAGES_DETAIL) }}>
+                                    <Typography>Coverages</Typography>
                                 </ExpansionPanelSummary>
                                 <ExpansionPanelDetails>
                                     <Grid container>
                                         <Grid item>
-
+                                            <Button variant="raised" color="primary" onClick={e => { this.addNewTag('Coverages') }}>
+                                                Add New
+            </Button>
                                         </Grid>
                                         <DataGrid
-                                            rows={keywordRows}
-                                            columns={keywordColumns}
+                                            rows={coverageRows}
+                                            columns={coverageColumns}
                                         >
                                             <FilteringState defaultFilters={[]} columnExtensions={[{ columnName: 'name', filteringEnabled: true }]} />
                                             <IntegratedFiltering />
@@ -371,7 +373,6 @@ class TagManagementComponent extends React.Component {
                                             
                                             <TableFilterRow />
                                             <PagingPanel pageSizes={[5, 10, 20]} />
-
                                         </DataGrid>
                                     </Grid>
                                 </ExpansionPanelDetails>
@@ -401,6 +402,34 @@ class TagManagementComponent extends React.Component {
                                             
                                             <TableFilterRow />
                                             <PagingPanel pageSizes={[5, 10, 20]} />
+                                        </DataGrid>
+                                    </Grid>
+                                </ExpansionPanelDetails>
+                            </ExpansionPanel>
+                            <ExpansionPanel expanded={expanded === 'keyword'} onChange={this.handleChange('keyword')} onClick={e => { this.handleAccordionClick('keyword') }}>
+                                <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />} onClick={e => { this.setUrls(APP_URLS.KEYWORDS_LIST, APP_URLS.KEYWORDS_DETAIL) }}>
+                                    <Typography>Keywords</Typography>
+                                </ExpansionPanelSummary>
+                                <ExpansionPanelDetails>
+                                    <Grid container>
+                                        <Grid item>
+
+                                        </Grid>
+                                        <DataGrid
+                                            rows={keywordRows}
+                                            columns={keywordColumns}
+                                        >
+                                            <FilteringState defaultFilters={[]} columnExtensions={[{ columnName: 'name', filteringEnabled: true }]} />
+                                            <IntegratedFiltering />
+                                            <PagingState defaultCurrentPage={0} defaultPageSize={10} />
+                                            <IntegratedPaging />
+                                            <Table rowComponent={obj => { return this.tableRowComponent(obj, 'selectedTagsMenu') }} />
+                                            <TableHeaderRow />
+                                            
+                                            
+                                            <TableFilterRow />
+                                            <PagingPanel pageSizes={[5, 10, 20]} />
+
                                         </DataGrid>
                                     </Grid>
                                 </ExpansionPanelDetails>
