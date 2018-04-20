@@ -22,9 +22,6 @@ module.exports = {
         }
       ]
     },
-    watchOptions: {
-        poll: true
-    },
     plugins: [
         new CopyWebpackPlugin([{
                 from: '**/*', context: 'html'
