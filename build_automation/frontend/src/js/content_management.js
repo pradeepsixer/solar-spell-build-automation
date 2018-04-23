@@ -2,6 +2,7 @@ import React from 'react';
 import Button from 'material-ui/Button';
 import Grid from 'material-ui/Grid';
 import UploadContent from './upload_content';
+import Snackbar from 'material-ui/Snackbar';
 import FileListComponent from './file_list_component';
 import {buildMapFromArray} from './utils';
 import {APP_URLS} from "./url";
@@ -35,7 +36,9 @@ class ContentManagement extends React.Component{
             updatedTime: '',
             files: [],
             currentView: 'manage',
-            content: null
+            content: null,
+            tags: {},
+            isLoaded: false,
         };
         this.setCurrentView = this.setCurrentView.bind(this);
         this.tagIdTagsMap = {};
@@ -43,6 +46,7 @@ class ContentManagement extends React.Component{
         this.saveContentCallback = this.saveContentCallback.bind(this);
         this.uploadNewFile = this.uploadNewFile.bind(this);
         this.handleContentEdit = this.handleContentEdit.bind(this);
+        this.handleCloseSnackbar = this.handleCloseSnackbar.bind(this);
     }
 
     componentDidMount() {
@@ -58,27 +62,21 @@ class ContentManagement extends React.Component{
     }
     loadData() {
         const currInstance = this;
-        axios.get(APP_URLS.ALLTAGS_LIST, {
-            responseType: 'json'
-        }).then(function (response) {
+        const allRequests = [];
+        allRequests.push(axios.get(APP_URLS.ALLTAGS_LIST, {responseType: 'json'}).then(function(response) {
             currInstance.tagIdTagsMap=currInstance.buildTagIdTagsMap(response.data);
-            console.log(currInstance.tagIdTagsMap);
+            return response;
+        }));
+        allRequests.push(axios.get(APP_URLS.CONTENTS_LIST, {
+            responseType: 'json'}));
+        Promise.all(allRequests).then(function(values) {
             currInstance.setState({
-                tags: response.data
+                tags: values[0].data,
+                files: values[1].data, isLoaded: true
             })
-        }).catch(function (error) {
-            console.log(error);
-            // TODO : Show the error message.
-        });
-        axios.get(APP_URLS.CONTENTS_LIST, {
-            responseType: 'json'
-        }).then(function (response) {
-            currInstance.setState({
-                files: response.data
-            })
-        }).catch(function (error) {
-            console.log(error);
-            // TODO : Show the error message.
+        }).catch(function(error) {
+            console.error(error);
+            console.error(error.response.data);
         });
     }
     handleTextFieldUpdate(stateProperty, evt) {
@@ -103,28 +101,38 @@ class ContentManagement extends React.Component{
                     files.splice(files.indexOf(eachFile), 1)
                 }
             });
-            return {files};
+            return {files, message: 'Delete Successful', messageType: 'info',};
         })
     }
     saveContentCallback(content, updated){
-        this.setState((prevState, props)=>{
-            const {files} = prevState;
-            if (updated){
-                files.forEach(eachFile => {
-                if (eachFile.id===content.id){
-                    files.splice(files.indexOf(eachFile), 1, content);
+        const currInstance = this;
+        axios.get(APP_URLS.ALLTAGS_LIST, {
+            responseType: 'json'
+        }).then(function (response) {
+            currInstance.tagIdTagsMap=currInstance.buildTagIdTagsMap(response.data);
+            currInstance.setState((prevState, props)=>{
+                const {files} = prevState;
+                if (updated){
+                    files.forEach(eachFile => {
+                        if (eachFile.id===content.id){
+                            files.splice(files.indexOf(eachFile), 1, content);
+                        }
+                    });
                 }
-            });
-            }
-            else{
-                files.push(content);
-            }
-
-            return {
-                currentView: 'manage',
-                files
-            };
-        })
+                else{
+                    files.push(content);
+                }
+                return {
+                    message: 'Save Successful',
+                    messageType: 'info',
+                    currentView: 'manage',
+                    files,
+                    tags: response.data
+                }
+            })
+        }).catch(function (error) {
+            console.error(error);
+        });
     }
     uploadNewFile(){
         this.setState({
@@ -149,7 +157,6 @@ class ContentManagement extends React.Component{
         })
     }
     handleContentEdit(content){
-        console.log(content)
         this.setState({
             currentView: 'upload',
             content: {
@@ -163,13 +170,17 @@ class ContentManagement extends React.Component{
                 workareas: content.workareas||[],
                 languages: content.language?[content.language]:[],
                 catalogers: content.cataloger?[content.cataloger]:[],
-                updatedDate: content.updatedDate,
-                source: content.source,
-                copyright: content.copyright,
-                rightsStatement: content.rightsStatement,
-                originalFileName: content.originalFileName,
+                updatedDate: this.parseDate(content.updated_time),
+                source: content.source||'',
+                copyright: content.copyright||'',
+                rightsStatement: content.rights_statement||'',
+                originalFileName: content.original_file_name,
             }
         })
+    }
+    parseDate(inputStr) {
+        let splitval = inputStr.split("-");
+        return new Date(splitval[0], splitval[1] - 1, splitval[2]);
     }
     render(){
         return (
@@ -187,13 +198,40 @@ class ContentManagement extends React.Component{
                     </Grid>
 
                     <Grid item xs={8}>
-                        {this.state.currentView=='manage'&&<FileListComponent onEdit={this.handleContentEdit} onDelete={this.handleFileDelete} allFiles={this.state.files} tagIdsTagsMap={this.tagIdTagsMap} />}
-                        {this.state.currentView=='upload'&&<UploadContent onSave={this.saveContentCallback} tagIdsTagsMap={this.tagIdTagsMap} allTags={this.state.tags} content={this.state.content}/>}
+                        {this.state.isLoaded && this.state.currentView=='manage'&&<FileListComponent tags={this.state.tags} onEdit={this.handleContentEdit}
+                                                                                                     onDelete={this.handleFileDelete} allFiles={this.state.files}
+                                                                                                     tagIdsTagsMap={this.tagIdTagsMap} />}
+                        {this.state.isLoaded && this.state.currentView=='upload'&&<UploadContent onSave={this.saveContentCallback}
+                                                                                                 tagIdsTagsMap={this.tagIdTagsMap} allTags={this.state.tags}
+                                                                                                 content={this.state.content}/>}
+                        {!this.state.isLoaded && 'loading'}
                     </Grid>
                 </Grid>
-
+                <Snackbar
+                    anchorOrigin={{
+                        vertical: 'bottom',
+                        horizontal: 'left',
+                    }}
+                    open={Boolean(this.state.message)}
+                    onClose={this.handleCloseSnackbar}
+                    message={<span>{this.state.message}</span>}
+                    SnackbarContentProps={{
+                        "style": this.getErrorClass()
+                    }}
+                />
             </div>
         )
+    }
+
+    getErrorClass() {
+        return this.state.messageType === "error" ? {backgroundColor: '#B71C1C', fontWeight: 'normal'} : {};
+    }
+
+    handleCloseSnackbar() {
+        this.setState({
+            message: null,
+            messageType: 'info'
+        })
     }
 }
 module.exports = ContentManagement;

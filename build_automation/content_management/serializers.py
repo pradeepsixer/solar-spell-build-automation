@@ -40,13 +40,17 @@ class ContentSerializer(serializers.ModelSerializer):
         content.name = validated_data.get('name', content.name)
         content.description = validated_data.get('description', content.description)
         content.content_file = validated_data.get('content_file', content.content_file)
-        content.creators.set(validated_data.get('creators', content.creators.all()))
+        content.creators.set(validated_data.get('creators', []))
         content.coverage = (validated_data.get('coverage', content.coverage))
-        content.subjects.set(validated_data.get('subjects', content.subjects.all()))
-        content.keywords.set(validated_data.get('keywords', content.keywords.all()))
-        content.workareas.set(validated_data.get('workareas', content.workareas.all()))
+        content.subjects.set(validated_data.get('subjects', []))
+        content.keywords.set(validated_data.get('keywords', []))
+        content.workareas.set(validated_data.get('workareas', []))
         content.language = (validated_data.get('language', content.language))
         content.cataloger = (validated_data.get('cataloger', content.cataloger))
+        content.updated_time = (validated_data.get('updated_time', content.updated_time))
+        content.source = (validated_data.get('source', content.source))
+        content.copyright = (validated_data.get('copyright', content.copyright))
+        content.rights_statement = (validated_data.get('rights_statement', content.rights_statement))
 
         return self.__create_update(content)
 
@@ -60,7 +64,9 @@ class ContentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Content
         fields = ('url', 'id', 'name', 'description', 'content_file', 'updated_time', 'last_uploaded_time', 'creators',
-                  'coverage', 'subjects', 'keywords', 'workareas', 'language', 'cataloger')
+                  'coverage', 'subjects', 'keywords', 'workareas', 'language', 'cataloger', 'original_file_name',
+                  'source', 'copyright', 'rights_statement')
+        read_only_fields = ('original_file_name',)
         extra_kwargs = {
             'url': {'lookup_field': 'pk'},
         }
