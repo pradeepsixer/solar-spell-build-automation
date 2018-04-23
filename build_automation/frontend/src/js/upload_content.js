@@ -425,7 +425,7 @@ class UploadContent extends React.Component{
                     Coverage
                 </Typography>
                 <span>
-                            <AutoCompleteWithChips suggestions={this.props.allTags['coverages']}
+                            <AutoCompleteWithChips maxChips={1} suggestions={this.props.allTags['coverages']}
                                                    searchKey={'name'} selectedItem={this.state.coverages}
                                                    onAddition={this.handleCoverageAddition} onDeletion={this.handleCoverageDeletion}/>
                         </span>
@@ -461,7 +461,7 @@ class UploadContent extends React.Component{
                     Language
                 </Typography>
                 <span>
-                            <AutoCompleteWithChips suggestions={this.props.allTags['languages']}
+                            <AutoCompleteWithChips maxChips={1} suggestions={this.props.allTags['languages']}
                                                    searchKey={'name'} selectedItem={this.state.languages}
                                                    onAddition={this.handleLanguageAddition} onDeletion={this.handleLanguageDeletion}/>
                         </span>
@@ -470,7 +470,7 @@ class UploadContent extends React.Component{
                     Cataloger
                 </Typography>
                 <span>
-                            <AutoCompleteWithChips suggestions={this.props.allTags['catalogers']} searchKey={'name'}
+                            <AutoCompleteWithChips maxChips={1} suggestions={this.props.allTags['catalogers']} searchKey={'name'}
                                                    selectedItem={this.state.catalogers}
                                                    onAddition={this.handleCatalogerAddition} onDeletion={this.handleCatalogerDeletion}/>
                         </span>
