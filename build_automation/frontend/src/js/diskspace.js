@@ -5,9 +5,12 @@ import LinearProgress from 'material-ui/Progress/LinearProgress';
 import Grid from 'material-ui/Grid';
 import { withStyles } from "material-ui/styles";
 import Select from 'material-ui/Select';
-import { FormControl } from 'material-ui/Form';
+import { FormControl, FormControlLabel } from 'material-ui/Form';
 import { InputLabel } from 'material-ui/Input';
 import { MenuItem } from 'material-ui/Menu';
+import Paper from 'material-ui/Paper';
+import Radio, { RadioGroup } from 'material-ui/Radio';
+import Chart from 'chart.js';
 
 
 const styles = {
@@ -15,12 +18,21 @@ const styles = {
     flexGrow: 1
     },
     barColorPrimary: {
-        backgroundColor: "#499E2F"
+        backgroundColor: "#46BFBD"
     },
     bar: {
-        background: "#FF3B29"
+        background: "#F7464A"
+    },
+    paper: {
+      padding: 8,
+      textAlign: 'center',
+      fontSize: 20,
+      fontFamily: 'Verdana',
+      fontWeight: 'bold',
     }
 };
+
+var DoughnutChart = require("react-chartjs").Doughnut;
 
 class DiskSpace extends React.Component {
     constructor(props) {
@@ -30,20 +42,26 @@ class DiskSpace extends React.Component {
             completed: 0,
             multiplier: 1048576,
             name: "",
+            value: '0',
         };
         this.unit = " MB"
         this.handleChange = this.handleChange.bind(this);
+        this.changeView = this.changeView.bind(this);
     }
 
     handleChange(event) {
         this.setState({ multiplier: event.target.value, [event.target.name]: event.target.value });
-        console.log(event.target.value)
         if(event.target.value == 1048576) {
             this.unit = " MB"
         }
         if(event.target.value == 1073741824) {
         this.unit = " GB";
         }
+    }
+
+    changeView(event) {
+        this.setState({value: event.target.value});
+
     }
 
     componentDidMount() {
@@ -66,13 +84,48 @@ class DiskSpace extends React.Component {
 
     render() {
         const { classes } = this.props;
+        var options = {
+            percentageInnerCutout: 50,
+            responsive: true,
+            animationEasing : 'easeOutBack',
+        }
+
         return (
             <div className={classes.root}>
                 <div style={{padding:20}}>
                     <Grid container spacing={40}>
-                    <Grid item xs={12}>
-                    <h1>DiskSpace</h1>
+                    <Grid item xs={2.5}>
+                        <Paper className={classes.paper}>Disk Usage Statistics</Paper>
+                        <Paper className={classes.paper}>
+                        <Select
+                        value={this.state.multiplier}
+                        onChange={this.handleChange}
+                        >
+                            <MenuItem value={1048576}>In MB</MenuItem>
+                            <MenuItem value={1073741824}>In GB</MenuItem>
+                        </Select>
+                        </Paper>
                     </Grid>
+                    <Grid item xs={7}>
+                    </Grid>
+                    <Grid item xs={2.5}>
+                        <div>
+                        <FormControl>
+                        <RadioGroup
+                            value= {this.state.value}
+                            onChange= {this.changeView}
+                            style={{ display: 'inline-block' }}
+                        >
+                        <FormControlLabel value="0" control={<Radio/>} label="Linear View"/>
+                        <FormControlLabel value="1" control={<Radio/>} label="Doughnut View"/>
+                        </RadioGroup>
+                        </FormControl>
+                        </div>
+                    </Grid>
+                    {this.state.value=="0" ?
+                    (
+                    <Grid container spacing={40}>
+                    <Grid item xs={12}/>
                     <Grid item xs={1.5}>
                         <h4>Used: {(this.used/this.state.multiplier).toFixed(2)}{this.unit}</h4>
                     </Grid>
@@ -84,22 +137,38 @@ class DiskSpace extends React.Component {
                             className={classes.barColorPrimary}
                             classes={{barColorPrimary:classes.barColorPrimary}}
                             classes={{bar: classes.bar}}  />
-                        <form className={classes.root} autoComplete="off">
-                        <FormControl>
-                        <InputLabel htmlFor=""></InputLabel>
-                        <Select
-                        value={this.state.multiplier}
-                        onChange={this.handleChange}
-                        >
-                            <MenuItem value={1048576}>MB</MenuItem>
-                            <MenuItem value={1073741824}>GB</MenuItem>
-                        </Select>
-                        </FormControl>
-                        </form>
                     </Grid>
                     <Grid item xs={1.5}>
                         <h4>Available: {(this.avail/this.state.multiplier).toFixed(2)}{this.unit}</h4>
                     </Grid>
+                    </Grid>
+                    )
+                    :
+                    (
+                    <Grid container spacing={20}>
+                    <Grid item xs/>
+                    <Grid item xs={6}>
+                    <h5 align="center">Hover over the Doughnut to view the values</h5>
+                        <DoughnutChart data={[
+                          {
+                            value: this.used/this.state.multiplier,
+                            color: '#F7464A',
+                            highlight: '#FF5A5E',
+                            label: 'Used (in' + this.unit + ')'
+                          },
+                          {
+                            value: this.avail/this.state.multiplier,
+                            color: '#46BFBD',
+                            highlight: '#5AD3D1',
+                            label: 'Available (in' + this.unit + ')'
+                          }
+                      ]} options={options} position= 'relative'/>
+
+                    </Grid>
+                    <Grid item xs/>
+                    </Grid>
+                    )
+                    }
                     </Grid>
                 </div>
             </div>
