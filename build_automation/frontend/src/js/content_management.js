@@ -62,24 +62,21 @@ class ContentManagement extends React.Component{
     }
     loadData() {
         const currInstance = this;
-        axios.get(APP_URLS.ALLTAGS_LIST, {
-            responseType: 'json'
-        }).then(function (response) {
+        const allRequests = [];
+        allRequests.push(axios.get(APP_URLS.ALLTAGS_LIST, {responseType: 'json'}).then(function(response) {
             currInstance.tagIdTagsMap=currInstance.buildTagIdTagsMap(response.data);
+            return response;
+        }));
+        allRequests.push(axios.get(APP_URLS.CONTENTS_LIST, {
+            responseType: 'json'}));
+        Promise.all(allRequests).then(function(values) {
             currInstance.setState({
-                tags: response.data
+                tags: values[0].data,
+                files: values[1].data, isLoaded: true
             })
-        }).catch(function (error) {
+        }).catch(function(error) {
             console.error(error);
-        });
-        axios.get(APP_URLS.CONTENTS_LIST, {
-            responseType: 'json'
-        }).then(function (response) {
-            currInstance.setState({
-                files: response.data, isLoaded: true
-            })
-        }).catch(function (error) {
-            console.error(error);
+            console.error(error.response.data);
         });
     }
     handleTextFieldUpdate(stateProperty, evt) {
