@@ -53,7 +53,10 @@ function ChippedTagsTypeProvider(props) {
 }
 
 function filterThroughArray(value, filter) {
-    if (filter && Array.isArray(filter.value)) {
+    if ( value && filter && Array.isArray(filter.value)) {
+        if(!Array.isArray(value)) {
+            value = [value];
+        }
         let allTagsPresent = true;
         filter.value.forEach(eachFilterTag => {
             allTagsPresent = allTagsPresent && (value.indexOf(eachFilterTag) != -1);
