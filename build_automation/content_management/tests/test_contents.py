@@ -474,11 +474,11 @@ class CustomStorageTest(TestCase):
         content2 = Content(**second_value)
         content2.content_file_uploaded = True
         content2.save()
-        self.assertEqual(content1.content_file.name, "uploaded_file_name")
+        self.assertEqual(content1.content_file.name, "contents/uploaded_file_name")
         # The following regex is based on CustomFileStorage's get_original_file_name()
         self.assertRegex(
             content2.content_file.name,
-            "^uploaded_file_name_%s_[a-zA-Z0-9]{7}$" % settings.FILE_DUPLICATION_MARKER
+            "^contents/uploaded_file_name_%s_[a-zA-Z0-9]{7}$" % settings.FILE_DUPLICATION_MARKER
         )
 
     def test_get_original_file_name_match_regex(self):
