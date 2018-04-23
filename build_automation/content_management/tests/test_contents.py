@@ -445,42 +445,6 @@ class CustomStorageTest(TestCase):
         if os.path.exists(temp_media_dir):
             shutil.rmtree(temp_media_dir)
 
-    def test_duplicate_file_names(self):
-        """
-        Tests what happens when another file (different file contents), with the same name as an
-        existing file is uploaded to the server.
-        """
-        first_value = {
-            "name": "Content 1",
-            "description": "Content's Description",
-            "content_file": SimpleUploadedFile(
-                "uploaded_file_name", "This will be the contents of the uploaded file 1.".encode()
-            ),
-            "updated_time": timezone.now()
-        }
-        content1 = Content(**first_value)
-        content1.content_file_uploaded = True
-        content1.save()
-        content1.content_file.close()
-
-        second_value = {
-            "name": "Content 2",
-            "description": "Content's Description",
-            "content_file": SimpleUploadedFile(
-                "uploaded_file_name", "This will be the contents of the uploaded file 2.".encode()
-            ),
-            "updated_time": timezone.now()
-        }
-        content2 = Content(**second_value)
-        content2.content_file_uploaded = True
-        content2.save()
-        self.assertEqual(content1.content_file.name, "contents/uploaded_file_name")
-        # The following regex is based on CustomFileStorage's get_original_file_name()
-        self.assertRegex(
-            content2.content_file.name,
-            "^contents/uploaded_file_name_%s_[a-zA-Z0-9]{7}$" % settings.FILE_DUPLICATION_MARKER
-        )
-
     def test_get_original_file_name_match_regex(self):
         """
         Test the get_original_file_name() method when it matches the expected regex.
@@ -490,9 +454,9 @@ class CustomStorageTest(TestCase):
         cfs = CustomFileStorage()
         self.assertEqual(cfs.get_original_file_name(test_file_name), expected_file_name)
 
-    def test_get_original_file_name_not_match_regex(self):
+    def test_get_original_file_name_without_duplication_marker(self):
         """
-        Test the get_original_file_name() method when it does not match the expected regex.
+        Test the get_original_file_name() method when it the file name does not have the duplication marker in it.
         """
         test_file_name = "uploaded_file_name"
         expected_file_name = "uploaded_file_name"
