@@ -2,7 +2,7 @@ from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
 
 from content_management.models import (
-    Cataloger, Content, Coverage, Creator, Directory, DirectoryLayout, Keyword, Language, Subject, Workarea
+    Build, Cataloger, Content, Coverage, Creator, Directory, DirectoryLayout, Keyword, Language, Subject, Workarea
 )
 
 
@@ -258,6 +258,7 @@ class DirectoryLayoutSerializer(serializers.ModelSerializer):
 
 
 class DirectoryNameUniqueValidator(object):
+    # TODO : Move this class to a separate file.
     def __call__(self, directory):
         dir_name = directory.get('name')
         parent = directory.get('parent')
@@ -358,3 +359,18 @@ class DirectorySerializer(serializers.ModelSerializer):
         extra_kwargs = {
             'url': {'lookup_field': 'pk'},
         }
+
+
+class BuildSerializer(serializers.ModelSerializer):
+    build_url = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Build
+        fields = '__all__'
+        read_only_fields = ('build_url',)
+
+    def get_build_url(self, obj):
+        if obj.build_url is not None:
+            request = self.context['request']
+            return request.build_absolute_uri(obj.build_url)
+        return None

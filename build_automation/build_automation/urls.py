@@ -19,8 +19,9 @@ from django.urls import include, path
 from rest_framework import routers
 
 from content_management.api_views import (
-    AllTagsApiViewSet, CatalogerViewSet, ContentApiViewset, CoverageViewSet, CreatorViewSet, DirectoryCloneApiViewSet,
-    DirectoryLayoutViewSet, DirectoryViewSet, KeywordViewSet, LanguageViewSet, SubjectViewSet, WorkareaViewSet
+    AllTagsApiViewSet, BuildLibraryVersionViewSet, CatalogerViewSet, ContentApiViewset, CoverageViewSet,
+    CreatorViewSet, DirectoryCloneApiViewSet, DirectoryLayoutViewSet, DirectoryViewSet, KeywordViewSet,
+    LanguageViewSet, SubjectViewSet, WorkareaViewSet
 )
 
 router = routers.SimpleRouter()
@@ -44,5 +45,10 @@ urlpatterns = [
     path(
         'api/dirlayouts/<int:id>/clone/',
         DirectoryCloneApiViewSet.as_view({'post': 'create'}), name="dirlayout-clone"
-    )
+    ),
+    path(
+        'api/dirlayouts/<int:id>/build/',
+        BuildLibraryVersionViewSet.as_view({'post': 'create'}), name="dirlayout-build"
+    ),
+    path('api/builds/', BuildLibraryVersionViewSet.as_view({'get': 'list'}), name="build-list"),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
