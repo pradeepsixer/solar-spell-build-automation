@@ -254,7 +254,7 @@ class Build(models.Model):
     )
 
     task_state = models.IntegerField(choices=TASK_STATES)
-    build_url = models.CharField(max_length=400, null=True)
+    build_file = models.CharField(max_length=400, null=True)
     dir_layout = models.ForeignKey(DirectoryLayout, on_delete=models.SET_NULL, null=True)
     completion_state = models.IntegerField(choices=BUILD_COMPLETION_STATES, null=True)
     start_time = models.DateTimeField()
