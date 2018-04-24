@@ -1,3 +1,6 @@
+import os
+
+from django.conf import settings
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
 
@@ -362,15 +365,16 @@ class DirectorySerializer(serializers.ModelSerializer):
 
 
 class BuildSerializer(serializers.ModelSerializer):
-    build_url = serializers.SerializerMethodField()
+    build_file = serializers.SerializerMethodField()
 
     class Meta:
         model = Build
         fields = '__all__'
-        read_only_fields = ('build_url',)
+        read_only_fields = ('build_file',)
 
-    def get_build_url(self, obj):
-        if obj.build_url is not None:
+    def get_build_file(self, obj):
+        if obj.build_file is not None:
             request = self.context['request']
-            return request.build_absolute_uri(obj.build_url)
+            file_url = os.path.join(settings.BUILDS_URL, obj.build_file)
+            return request.build_absolute_uri(file_url)
         return None

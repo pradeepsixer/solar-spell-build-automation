@@ -128,6 +128,9 @@ STATIC_ROOT = env.str('STATIC_ROOT')
 MEDIA_ROOT = env.str('MEDIA_ROOT')
 MEDIA_URL = '/media/'
 
+BUILDS_ROOT = 'build_automation/builds'
+BUILDS_URL = '/builds/'
+
 DEFAULT_FILE_STORAGE = 'content_management.storage.CustomFileStorage'
 FILE_DUPLICATION_MARKER = 'spell-cms-dup'
 
