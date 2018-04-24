@@ -228,3 +228,37 @@ class Directory(models.Model):
 
     class Meta:
         ordering = ['pk']
+
+
+class Build(models.Model):
+    """
+    Representation of the build of library version. Only one record will be present, since we need to have only the
+    latest build.
+    """
+    class TaskState:
+        RUNNING = 1
+        FINISHED = 2
+
+    class BuildCompletionState:
+        SUCCESS = 1
+        FAILURE = 2
+
+    TASK_STATES = (
+        (TaskState.RUNNING, 'Running'),
+        (TaskState.FINISHED, 'Finished'),
+    )
+
+    BUILD_COMPLETION_STATES = (
+        (BuildCompletionState.SUCCESS, 'Success'),
+        (BuildCompletionState.FAILURE, 'Failure'),
+    )
+
+    task_state = models.IntegerField(choices=TASK_STATES)
+    build_url = models.CharField(max_length=400, null=True)
+    dir_layout = models.ForeignKey(DirectoryLayout, on_delete=models.SET_NULL, null=True)
+    completion_state = models.IntegerField(choices=BUILD_COMPLETION_STATES, null=True)
+    start_time = models.DateTimeField()
+    end_time = models.DateTimeField(null=True)
+
+    class Meta:
+        ordering = ['pk']
