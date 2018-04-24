@@ -49,13 +49,12 @@ class LibraryVersionBuildUtil:
     def build_library_version(self, dir_layout_id):
         directory_layout = DirectoryLayout.objects.get(id=dir_layout_id)
         tarfile_name = "{} {}.tar.gz".format(directory_layout.name, datetime.datetime.now())
-        self.__update_existing_build(directory_layout, None, Build.TaskState.RUNNING, None)
+        tarfile_path = self.__get_tarfile_path(tarfile_name)
+        self.__update_existing_build(directory_layout, None, Build.TaskState.RUNNING, None, True)
 
         top_dirs = Directory.objects.filter(dir_layout=directory_layout, parent=None)  # Get the top directories
         try:
-            with tarfile.open(
-                os.path.join(settings.BASE_DIR, "build_automation", "builds", tarfile_name), "w:gz"
-            ) as build_tar:
+            with tarfile.open(tarfile_path, "w:gz") as build_tar:
 
                 # Copy the directory layout's banner image.
                 banner_path = os.path.join("img", os.path.basename(directory_layout.banner_file.name))
@@ -66,17 +65,40 @@ class LibraryVersionBuildUtil:
                     banner_path = os.path.join("img", os.path.basename(each_top_dir.banner_file.name))
                     build_tar.add(each_top_dir.banner_file.path, arcname=banner_path)
                     self.__build_files_list(each_top_dir, build_tar, self.CONTENT_PREFIX, self.ROOT_DIR_NAV_PREFIX)
+
+                self.__update_existing_build(
+                    directory_layout, tarfile_name, Build.TaskState.FINISHED, Build.BuildCompletionState.SUCCESS
+                )
         except Exception as e:
             print(e)  # TODO: Replace this with logger
+            if os.path.exists(tarfile_path):
+                os.remove(tarfile_path)
+            self.__update_existing_build(
+                directory_layout, tarfile_name, Build.TaskState.FINISHED, Build.BuildCompletionState.FAILURE
+            )
 
-    def __update_existing_build(self, dir_layout, build_url, task_state, completion_state):
+    def __get_tarfile_path(self, tarfile_name):
+        return os.path.join(os.path.abspath(settings.BUILDS_ROOT), tarfile_name)
+
+    def __update_existing_build(self, dir_layout, file_name, task_state, completion_state, remove_file=False):
         latest_build = self.get_latest_build()
         if latest_build is None:
             latest_build = Build()
+
+        if task_state == Build.TaskState.RUNNING:
             latest_build.start_time = timezone.now()
+
+        latest_build.start_time = timezone.now()
         latest_build.task_state = task_state
         latest_build.completion_state = completion_state
-        latest_build.build_url = build_url
+
+        # Remove the existing build file.
+        if remove_file and latest_build.build_file is not None:
+            tarfile_path = self.__get_tarfile_path(latest_build.build_file)
+            if os.path.exists(tarfile_path):
+                os.remove(tarfile_path)
+
+        latest_build.build_file = file_name
         latest_build.dir_layout = dir_layout
 
         if task_state == Build.TaskState.FINISHED:
