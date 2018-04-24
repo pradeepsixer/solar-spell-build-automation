@@ -217,6 +217,8 @@ class BuildLibraryVersionViewSet(ViewSet, CreateModelMixin, RetrieveModelMixin):
     def list(self, request, *args, **kwargs):
         build_util = LibraryVersionBuildUtil()
         latest_build = build_util.get_latest_build()
+        if latest_build is None:
+            return Response([])
         serializer = BuildSerializer(latest_build, context={'request': request})
         return Response([
             serializer.data
