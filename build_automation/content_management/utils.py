@@ -50,7 +50,7 @@ class LibraryVersionBuildUtil:
 
     def build_library_version(self, dir_layout_id):
         directory_layout = DirectoryLayout.objects.get(id=dir_layout_id)
-        tarfile_name = "{} {}.tar.gz".format(directory_layout.name, datetime.datetime.now())
+        tarfile_name = self.__get_date_suffixed_file_name(directory_layout.name)
         tarfile_path = self.__get_tarfile_path(tarfile_name)
         self.__update_existing_build(directory_layout, None, Build.TaskState.RUNNING, None, True)
 
@@ -106,6 +106,11 @@ class LibraryVersionBuildUtil:
         #     self.__update_existing_build(
         #         directory_layout, tarfile_name, Build.TaskState.FINISHED, Build.BuildCompletionState.FAILURE
         #     )
+
+    def __get_date_suffixed_file_name(self, layout_name):
+        current_time = datetime.datetime.now()
+        date_suffix = current_time.strftime('%Y_%m_%d %H_%M_%S')
+        return "{} {}.tar.gz".format(layout_name, date_suffix)
 
     def __get_tarfile_path(self, tarfile_name):
         return os.path.join(os.path.abspath(settings.BUILDS_ROOT), tarfile_name)
