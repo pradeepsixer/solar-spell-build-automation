@@ -1,5 +1,6 @@
 import axios from 'axios';
 import React from 'react';
+
 import { AutoComplete } from 'material-ui';
 import Radio, { RadioGroup } from 'material-ui/Radio';
 import Grid from 'material-ui/Grid';
@@ -16,12 +17,12 @@ class MakeBuildComponent extends React.Component{
         this.state = {
           dirLayouts: [],
           info: {},
-          currentLayout : {},
-          value : ''
+          currentLayout : '',
+          isLoaded : false
     };
 
     this.handleClick = this.handleClick.bind(this)
-    this.handleData = this.handleData.bind(this)
+  //  this.handleData = this.handleData.bind(this)
     }
 
     componentDidMount() {
@@ -39,17 +40,9 @@ class MakeBuildComponent extends React.Component{
         console.log("clicked")
         console.log(layout)
         this.setState({
-            value: event.target.value,
+            currentLayout: event.target.value,
             info:layout});
        // console.log(this.state.info);
-    }
-
-    handleData(currentLayout){
-    console.log(currentLayout)
-        this.setState({
-            currentLayout: currentLayout
-        });
-        this.props.handlerFromParent(currentLayout)
     }
 
     loadData() {
@@ -58,11 +51,11 @@ class MakeBuildComponent extends React.Component{
             responseType: 'json'
         }).then(function(response) {
             const dirLayouts = response.data;
-            currInstance.setState({dirLayouts:dirLayouts});
+            currInstance.setState({
+                dirLayouts:dirLayouts,
+                isLoaded:true
+            });
             console.log(currInstance.state.dirLayouts);
-
-            //const dirLayouts = response.data;
-            //console.log(dirLayouts)
         }).catch(function(error) {
             console.log(error);
         });
@@ -70,34 +63,39 @@ class MakeBuildComponent extends React.Component{
 
     render(){
         var elements=null
-        elements=(
-            <Grid container spacing={8}>
-                <Grid item xs={3} style={{paddingLeft: '20px'}}>
-                    <List component="nav">
-                            <ListSubheader disableSticky component="div">Directory Layouts</ListSubheader>
-                                <div className="container1">
-                                    {  this.state.dirLayouts.map((layout,i) =>
-                                        <div key={i}>
-                                             <RadioGroup ref="dirlayout" name="dirlayout" value={this.state.value} onChange={event => this.handleClick(layout, event)}>
-                                                    <FormControlLabel value={layout.name} control={<Radio />} label={layout.name} />
-                                             </RadioGroup>
-                                        </div>)
-                                    }
+        if(this.state.isLoaded){
+            elements=(
+                <Grid container spacing={8}>
+                    <Grid item xs={3} style={{paddingLeft: '20px'}}>
+                        <List component="nav">
+                                <ListSubheader disableSticky component="div">Library Versions</ListSubheader>
+                                    <div className="container1">
+                                        {
+                                          <RadioGroup name="dirlayout" value={this.state.currentLayout}>
+                                            {
+                                                this.state.dirLayouts.map((layout,i) =>
+                                                    <FormControlLabel key={i} value={layout.name} control={<Radio />} label={layout.name} onClick={evt => this.handleClick(layout, evt)} />
+                                                )
+                                            }
 
-
-
-
-                                </div>
-                    </List>
+                                          </RadioGroup>
+                                        }
+                                    </div>
+                        </List>
+                    </Grid>
+                    <Grid item xs={8}>
+                        {
+                                <MakeBuildDirlayoutInfo info={this.state.info} />
+                        }
+                    </Grid>
                 </Grid>
-                <Grid item xs={8}>
-                    <div style={{marginTop: '20px'}}> </div>
-                    {
-                            <MakeBuildDirlayoutInfo handlerFromParent={this.handleData} info={this.state.info} />
-                    }
-                </Grid>
-            </Grid>
-        )
+            )
+        }
+        else{
+            elements = (
+                <div>Loading...</div>
+            )
+        }
        /* return(
             *//*<div className="container2">
                 <p> Directory Layouts </p>

@@ -6,18 +6,17 @@ class DownloadBuild extends React.Component{
     constructor(props){
         super(props);
         this.state = {
-            id: props.build.id,
             name: props.build.name,
-            description: props.build.description,
-            currTime: props.build.currTime,
+            currTime: props.build.end_time,
+            download: props.build.build_file
         };
-        this.handleDownloadBuild = this.handleDownloadBuild.bind(this);
+      //  this.handleDownloadBuild = this.handleDownloadBuild.bind(this);
     }
 
-    handleDownloadBuild(evt){
+    /*handleDownloadBuild(evt){
         //call api
         console.log("Download");
-    }
+    }*/
 
     render(){
 
@@ -48,7 +47,7 @@ class DownloadBuild extends React.Component{
                   value={this.state.currTime}
                   margin="normal"
                 />
-                <Button variant="raised" color="primary" onClick={this.handleDownloadBuild}>
+                <Button variant="raised" color="primary" onClick={evt => window.open(this.state.download, "_blank")}>
                     Download Build
                 </Button>
             </div>
