@@ -366,6 +366,10 @@ class DirectorySerializer(serializers.ModelSerializer):
 
 class BuildSerializer(serializers.ModelSerializer):
     build_file = serializers.SerializerMethodField()
+    end_time = serializers.SerializerMethodField()
+    start_time = serializers.SerializerMethodField()
+
+    TIME_FORMAT_STR = '%d %b %Y %I:%M:%S %p'
 
     class Meta:
         model = Build
@@ -377,4 +381,14 @@ class BuildSerializer(serializers.ModelSerializer):
             request = self.context['request']
             file_url = os.path.join(settings.BUILDS_URL, obj.build_file)
             return request.build_absolute_uri(file_url)
+        return None
+
+    def get_end_time(self, obj):
+        if obj.end_time is not None:
+            return obj.end_time.strftime(self.TIME_FORMAT_STR)
+        return None
+
+    def get_start_time(self, obj):
+        if obj.start_time is not None:
+            return obj.start_time.strftime(self.TIME_FORMAT_STR)
         return None
