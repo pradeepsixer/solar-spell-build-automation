@@ -54,23 +54,27 @@ class MakeBuildDirlayoutInfo extends React.Component{
         axios.post(url, {}, {
             responseType: 'json'
         }).then(function(response) {
-            if(response.data.message == "success"){
+            console.log(response.data)
+            if(response.data.status == "successful"){
                 currentInstance.setState({
                     message: 'Build started successfully',
                     messageType: 'info'
                 });
             }
-            else{
+
+        }).catch(function(error) {
+             if(error.response.data.status && error.response.data.status == "failure"){
                 currentInstance.setState({
-                    message: 'Another build in Progress. Please try again later.',
+                    message: error.response.data.message,
                     messageType: 'error'
                 });
             }
-        }).catch(function(error) {
-            currentInstance.setState({
-                    message: 'There is an error while starting the build',
-                    messageType: 'error'
-                });
+            else{
+                currentInstance.setState({
+                        message: 'There is an error while starting the build',
+                        messageType: 'error'
+                    });
+            }
         })
     }
 

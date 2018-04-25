@@ -2,11 +2,11 @@ import axios from 'axios';
 import React from 'react';
 
 import { AutoComplete } from 'material-ui';
-import Radio, { RadioGroup } from 'material-ui/Radio';
+import { FormLabel, FormControl, FormControlLabel, FormHelperText } from 'material-ui/Form';
 import Grid from 'material-ui/Grid';
 import ListSubheader from 'material-ui/List/ListSubheader';
 import List, { ListItem, ListItemIcon, ListItemText } from 'material-ui/List';
-import { FormLabel, FormControl, FormControlLabel, FormHelperText } from 'material-ui/Form';
+import Radio, { RadioGroup } from 'material-ui/Radio';
 
 import { APP_URLS } from './url.js';
 import MakeBuildDirlayoutInfo from './make_build_dirlayout.js';

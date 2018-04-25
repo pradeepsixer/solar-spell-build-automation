@@ -26,7 +26,9 @@ class ViewBuildComponent extends React.Component{
             hidden:"hidden",
             isLoaded: false,
             noOfBuilds: 0,
-            data: []
+            data: [],
+            isLoaded : false
+
         };
         this.handleCheckChange = this.handleCheckChange.bind(this)
     }
@@ -35,17 +37,13 @@ class ViewBuildComponent extends React.Component{
     }
 
     componentDidMount() {
-        this.timerID = setTimeout(
+          //  this.loadData();
+            this.timerID = setTimeout(
             () => this.loadData(),
             1000
         );
 
-        /*const that = this;
-        setTimeout(
-            () => that.show(),
-            that.props.built.loaded
-        );*/
-        setInterval(
+        this.intervalId = setInterval(
             () => this.loadData(),
             10000
         );
@@ -62,7 +60,7 @@ class ViewBuildComponent extends React.Component{
     }*/
 
     componentWillUnmount() {
-        clearTimeout(this.timerID);
+        clearInterval(this.intervalId);
     }
 
     handleCheckChange(){
@@ -76,29 +74,37 @@ class ViewBuildComponent extends React.Component{
         axios.get(APP_URLS.VIEW_BUILD, {
             responseType: 'json'
         }).then(function(response) {
+            console.log(response.data[0])
+            console.log(response.data.length)
+            currInstance.setState({isLoaded:true})
             if(response.data.length == 0){
                 currInstance.setState({
                     noOfBuilds : 0
                 })
             }
-            else if(response.data.task_state == 1){
+            else if(response.data[0].task_state == 1){
                 //building in process status message
                 currInstance.setState({
                    isLoaded : false,
                    noOfBuilds : -1
                 });
             }
-            else if(response.data.task_state == 2){
-                const latestBuild = response.data;
-                //currInstance.setState({latestBuild:latestBuild});
+            else if(response.data[0].task_state == 2){
+                const latestBuild = response.data[0];
+                currInstance.setState({latestBuild:latestBuild});
+                //console.log(response.data[0]);
                 //console.log(currInstance.state.latestBuild);
-                let file = decodeURI(currInstance.state.latestBuild.build_file)
-                let str = name.split(" ");
-                let name = str[str.length - 1];
-                const res = name.replace((/\d{4}[-]\d{1,2}[-]\d{1,2} \d{2}:\d{2}:\d{2}[.]\d{6}\.tar\.gz/i)," ");
+                let build_file = currInstance.state.latestBuild.build_file
+                //console.log(currInstance.state.latestBuild)
+                let build_split = build_file.split("/")
+                let file_name = build_split[build_split.length - 1]
+                let file = decodeURI(file_name)
+                console.log(file);
+
+                const res = file.replace((/ \d{4}[_]\d{2}[_]\d{2} \d{2}[_]\d{2}[_]\d{2}\.tar\.gz/i),"");
+                console.log(res)
 
                 currInstance.setState({
-                   latestBuild:latestBuild,
                    isLoaded : true,
                    noOfBuilds: 1,
                    name: res
@@ -111,6 +117,7 @@ class ViewBuildComponent extends React.Component{
                  currInstance.setState({
                    data:data
                 });
+                console.log(data)
                 const styles = {
                           block: {
                             maxWidth: 250,
@@ -121,8 +128,8 @@ class ViewBuildComponent extends React.Component{
                         };
                 const currBuild = (
                     <div>
-                        <Typography variant="display1" gutterBottom>
-                            {this.state.name}
+                        <Typography variant="headline" gutterBottom>
+                            {currInstance.state.name}
                         </Typography>
                     </div>
                 )
@@ -159,7 +166,7 @@ class ViewBuildComponent extends React.Component{
                 </Grid>
             )
         }
-        else if(this.state.noOfBuilds == 0){
+        else if(this.state.isLoaded && this.state.noOfBuilds == 0){
             elements = (
                 <div>
                    <Typography variant="display1" gutterBottom>
@@ -172,7 +179,7 @@ class ViewBuildComponent extends React.Component{
         else if(!this.state.isLoaded){
             elements = (
                 <div>
-                    Building...Please wait <CircularProgress/>
+                    Loading..
 
                 </div>
             )

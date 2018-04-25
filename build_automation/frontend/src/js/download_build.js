@@ -5,10 +5,11 @@ import Button from 'material-ui/Button';
 class DownloadBuild extends React.Component{
     constructor(props){
         super(props);
+
         this.state = {
             name: props.build.name,
-            currTime: props.build.end_time,
-            download: props.build.build_file
+            currTime: props.build.currTime,
+            download: props.build.download
         };
       //  this.handleDownloadBuild = this.handleDownloadBuild.bind(this);
     }
@@ -18,6 +19,14 @@ class DownloadBuild extends React.Component{
         console.log("Download");
     }*/
 
+    componentWillReceiveProps(props) {
+        console.log(props.build)
+        this.setState({
+            name: props.build.name,
+            currTime: props.build.currTime,
+            download: props.build.download
+        });
+    }
     render(){
 
         return(
@@ -25,26 +34,16 @@ class DownloadBuild extends React.Component{
                 <label>Name</label>
                 <TextField
                   id="name"
-                  value={this.state.name}
+                  value={this.state.name || ''}
                   fullWidth
-                  margin="normal"
-                />
-
-                <label>Description</label>
-                <TextField
-                  id="description"
-                  multiline
-                  fullWidth
-                  value={this.state.description}
                   margin="normal"
                 />
 
                 <label>Date Created</label>
                 <TextField
                   id="time"
-                  multiline
                   fullWidth
-                  value={this.state.currTime}
+                  value={this.state.currTime || ''}
                   margin="normal"
                 />
                 <Button variant="raised" color="primary" onClick={evt => window.open(this.state.download, "_blank")}>
