@@ -2,10 +2,12 @@ import datetime
 import hashlib
 import os
 import tarfile
+import tempfile
 
 from django.conf import settings
 from django.db.models import Q
 from django.utils import timezone
+from django.template.loader import render_to_string
 
 from content_management.models import Build, Content, Directory, DirectoryLayout
 from content_management.storage import CustomFileStorage
@@ -52,30 +54,58 @@ class LibraryVersionBuildUtil:
         tarfile_path = self.__get_tarfile_path(tarfile_name)
         self.__update_existing_build(directory_layout, None, Build.TaskState.RUNNING, None, True)
 
+        # Context for rendering the template
+        template_ctxt = {
+            'dirlayout_banner': os.path.basename(directory_layout.banner_file.path),
+        }
+        folder_list = []
+        menu_list = []
+
+
         top_dirs = Directory.objects.filter(dir_layout=directory_layout, parent=None)  # Get the top directories
-        try:
-            with tarfile.open(tarfile_path, "w:gz") as build_tar:
+        # try:
+        with tarfile.open(tarfile_path, "w:gz") as build_tar:
 
-                # Copy the directory layout's banner image.
-                banner_path = os.path.join("img", os.path.basename(directory_layout.banner_file.name))
-                build_tar.add(directory_layout.banner_file.path, arcname=banner_path)
+            # Copy the directory layout's banner image.
+            banner_path = os.path.join("img", os.path.basename(directory_layout.banner_file.name))
+            build_tar.add(directory_layout.banner_file.path, arcname=banner_path)
 
-                for each_top_dir in top_dirs:
-                    # Directory's Banner Image
-                    banner_path = os.path.join("img", os.path.basename(each_top_dir.banner_file.name))
-                    build_tar.add(each_top_dir.banner_file.path, arcname=banner_path)
-                    self.__build_files_list(each_top_dir, build_tar, self.CONTENT_PREFIX, self.ROOT_DIR_NAV_PREFIX)
-
-                self.__update_existing_build(
-                    directory_layout, tarfile_name, Build.TaskState.FINISHED, Build.BuildCompletionState.SUCCESS
+            for each_top_dir in top_dirs:
+                # Directory's Banner Image
+                banner_path = os.path.join("img", os.path.basename(each_top_dir.banner_file.name))
+                build_tar.add(each_top_dir.banner_file.path, arcname=banner_path)
+                current_menu = {
+                    'name': each_top_dir.name,
+                    'submenu_list': []
+                }
+                self.__build_files_list(
+                    each_top_dir, build_tar, self.CONTENT_PREFIX, self.ROOT_DIR_NAV_PREFIX, current_menu
                 )
-        except Exception as e:
-            print(e)  # TODO: Replace this with logger
-            if os.path.exists(tarfile_path):
-                os.remove(tarfile_path)
+                print(os.path.basename(each_top_dir.banner_file.path))
+                folder_list.append(
+                    {'name': each_top_dir.name, 'banner_file': os.path.basename(each_top_dir.banner_file.path)}
+                )
+                menu_list.append(current_menu)
+
+            template_ctxt['folder_list'] = folder_list
+            template_ctxt['menu_list'] = menu_list
+            rendered_output = render_to_string("spell_builds/index.html", context=template_ctxt)
+
+            with tempfile.NamedTemporaryFile() as out_file:
+                out_file.write(rendered_output.encode())
+                build_tar.add(out_file.name, arcname='index.html')
+
             self.__update_existing_build(
-                directory_layout, tarfile_name, Build.TaskState.FINISHED, Build.BuildCompletionState.FAILURE
+                directory_layout, tarfile_name, Build.TaskState.FINISHED, Build.BuildCompletionState.SUCCESS
             )
+        # except Exception as e:
+        #     print('Blah banner')
+        #     print(e)  # TODO: Replace this with logger
+        #     if os.path.exists(tarfile_path):
+        #         os.remove(tarfile_path)
+        #     self.__update_existing_build(
+        #         directory_layout, tarfile_name, Build.TaskState.FINISHED, Build.BuildCompletionState.FAILURE
+        #     )
 
     def __get_tarfile_path(self, tarfile_name):
         return os.path.join(os.path.abspath(settings.BUILDS_ROOT), tarfile_name)
@@ -106,7 +136,7 @@ class LibraryVersionBuildUtil:
 
         latest_build.save()
 
-    def __build_files_list(self, directory, build_file, dir_path, root_dir):
+    def __build_files_list(self, directory, build_file, dir_path, root_dir, menu=None):
         """
         Walk through the directory structure, and build the build file.
         :param directory: Directory to walk through.
@@ -118,7 +148,9 @@ class LibraryVersionBuildUtil:
         root_dir = os.path.join(root_dir, "..")
 
         for subdir in directory.subdirectories.all():
-            self.__build_files_list(subdir, build_file, dir_path, root_dir)
+            if menu is not None:
+                menu['submenu_list'].append({'name': subdir.name})
+            self.__build_files_list(subdir, build_file, dir_path, root_dir, None)
 
         individual_files = directory.individual_files.all()
         metadata_filter_criteria = self.__get_metadata_filter_criteria(directory)
