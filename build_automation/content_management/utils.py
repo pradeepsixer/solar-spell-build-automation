@@ -63,49 +63,65 @@ class LibraryVersionBuildUtil:
 
 
         top_dirs = Directory.objects.filter(dir_layout=directory_layout, parent=None)  # Get the top directories
-        # try:
-        with tarfile.open(tarfile_path, "w:gz") as build_tar:
+        try:
+            with tarfile.open(tarfile_path, "w:gz") as build_tar:
 
-            # Copy the directory layout's banner image.
-            banner_path = os.path.join("img", os.path.basename(directory_layout.banner_file.name))
-            build_tar.add(directory_layout.banner_file.path, arcname=banner_path)
+                # Copy the directory layout's banner image.
+                banner_path = os.path.join("img", os.path.basename(directory_layout.banner_file.name))
+                build_tar.add(directory_layout.banner_file.path, arcname=banner_path)
 
-            for each_top_dir in top_dirs:
-                # Directory's Banner Image
-                banner_path = os.path.join("img", os.path.basename(each_top_dir.banner_file.name))
-                build_tar.add(each_top_dir.banner_file.path, arcname=banner_path)
-                current_menu = {
-                    'name': each_top_dir.name,
-                    'submenu_list': []
-                }
-                self.__build_files_list(
-                    each_top_dir, build_tar, self.CONTENT_PREFIX, self.ROOT_DIR_NAV_PREFIX, current_menu
-                )
-                print(os.path.basename(each_top_dir.banner_file.path))
-                folder_list.append(
-                    {'name': each_top_dir.name, 'banner_file': os.path.basename(each_top_dir.banner_file.path)}
-                )
-                menu_list.append(current_menu)
+                for each_top_dir in top_dirs:
+                    # Directory's Banner Image
+                    banner_path = os.path.join("img", os.path.basename(each_top_dir.banner_file.name))
+                    build_tar.add(each_top_dir.banner_file.path, arcname=banner_path)
+                    current_menu = {
+                        'name': each_top_dir.name,
+                        'submenu_list': []
+                    }
+                    self.__build_files_list(
+                        each_top_dir, build_tar, self.CONTENT_PREFIX, self.ROOT_DIR_NAV_PREFIX, current_menu
+                    )
+                    folder_list.append(
+                        {'name': each_top_dir.name, 'banner_file': os.path.basename(each_top_dir.banner_file.path)}
+                    )
+                    menu_list.append(current_menu)
 
-            template_ctxt['folder_list'] = folder_list
-            template_ctxt['menu_list'] = menu_list
-            rendered_output = render_to_string("spell_builds/index.html", context=template_ctxt)
+                template_ctxt['folder_list'] = folder_list
+                template_ctxt['menu_list'] = menu_list
+                rendered_output = render_to_string("spell_builds/index.html", context=template_ctxt)
 
-            with tempfile.NamedTemporaryFile() as out_file:
+                out_file = tempfile.NamedTemporaryFile(delete=False)
                 out_file.write(rendered_output.encode())
+                out_file.close()
                 build_tar.add(out_file.name, arcname='index.html')
+                os.remove(out_file.name)
 
+                rendered_output = render_to_string("spell_builds/content/listr-template.html", context=template_ctxt)
+
+                out_file = tempfile.NamedTemporaryFile(delete=False)
+                out_file.write(rendered_output.encode())
+                out_file.close()
+                build_tar.add(out_file.name, arcname='content/listr-template.php')
+                os.remove(out_file.name)
+
+
+                # Need to comment this piece of code for the above inelegant one, because of stupid windows
+                # not allowing to open the file for a second time.
+                # with tempfile.NamedTemporaryFile() as out_file:
+                #     out_file.write(rendered_output.encode())
+                #     build_tar.add(out_file.name, arcname='index.html')
+
+                self.__update_existing_build(
+                    directory_layout, tarfile_name, Build.TaskState.FINISHED, Build.BuildCompletionState.SUCCESS
+                )
+        except Exception as e:
+            print('Exception occurred')
+            print(e)  # TODO: Replace this with logger
+            if os.path.exists(tarfile_path):
+                os.remove(tarfile_path)
             self.__update_existing_build(
-                directory_layout, tarfile_name, Build.TaskState.FINISHED, Build.BuildCompletionState.SUCCESS
+                directory_layout, tarfile_name, Build.TaskState.FINISHED, Build.BuildCompletionState.FAILURE
             )
-        # except Exception as e:
-        #     print('Blah banner')
-        #     print(e)  # TODO: Replace this with logger
-        #     if os.path.exists(tarfile_path):
-        #         os.remove(tarfile_path)
-        #     self.__update_existing_build(
-        #         directory_layout, tarfile_name, Build.TaskState.FINISHED, Build.BuildCompletionState.FAILURE
-        #     )
 
     def __get_date_suffixed_file_name(self, layout_name):
         current_time = datetime.datetime.now()
