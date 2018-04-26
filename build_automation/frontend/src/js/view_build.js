@@ -36,10 +36,7 @@ class ViewBuildComponent extends React.Component{
     }
 
     componentDidMount() {
-            this.timerID = setTimeout(
-            () => this.loadData(),
-            1000
-        );
+        this.loadData();
 
         this.intervalId = setInterval(
             () => this.loadData(),
@@ -119,9 +116,8 @@ class ViewBuildComponent extends React.Component{
             }
         }
 
-
         }).catch(function(error) {
-            console.log(error)
+            console.error(error)
         });
     };
 
