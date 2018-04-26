@@ -40,6 +40,7 @@ class MainScreen extends React.Component {
       };
 
     componentDidMount() {
+        this.showBadge();
         this.timerID = setInterval(
             () => this.showBadge(),1000*60*60
         );
