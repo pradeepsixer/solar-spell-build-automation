@@ -145,4 +145,4 @@ TEMP_EXTRACTION_DIR = "build_automation/temp"
 
 CONTENT_DIRECTORY = "content/_public"  #The location of the content files within the web server's root.
 
-BUILD_ASSETS_DIRECTORY = "build_automation/build-assets"
+BUILD_ASSETS_DIR = "build_automation/build-assets"

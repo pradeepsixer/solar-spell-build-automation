@@ -101,6 +101,9 @@ class LibraryVersionBuildUtil:
                     build_tar.add(out_file.name, arcname=rendered_file_in_tarfile)
                     os.remove(out_file.name)
 
+                # Add the assets to the root of the directory.
+                build_tar.add(settings.BUILD_ASSETS_DIR, arcname='')
+
                 # Need to comment this piece of code for the above inelegant one, because of stupid windows
                 # not allowing to open the file for a second time.
                 # with tempfile.NamedTemporaryFile() as out_file:
