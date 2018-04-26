@@ -22,7 +22,6 @@ class MakeBuildComponent extends React.Component{
     };
 
     this.handleClick = this.handleClick.bind(this)
-  //  this.handleData = this.handleData.bind(this)
     }
 
     componentDidMount() {
@@ -37,12 +36,9 @@ class MakeBuildComponent extends React.Component{
     }
 
     handleClick(layout, event){
-        console.log("clicked")
-        console.log(layout)
         this.setState({
             currentLayout: event.target.value,
             info:layout});
-       // console.log(this.state.info);
     }
 
     loadData() {
@@ -55,9 +51,7 @@ class MakeBuildComponent extends React.Component{
                 dirLayouts:dirLayouts,
                 isLoaded:true
             });
-            console.log(currInstance.state.dirLayouts);
         }).catch(function(error) {
-            console.log(error);
         });
     };
 
@@ -96,15 +90,6 @@ class MakeBuildComponent extends React.Component{
                 <div>Loading...</div>
             )
         }
-       /* return(
-            *//*<div className="container2">
-                <p> Directory Layouts </p>
-                <div className="container1">
-                    {this.state.dirLayouts}
-                </div>
-            </div>*//*
-
-        )*/
         return elements;
     }
 }

@@ -1,6 +1,7 @@
 import React from 'react';
-import TextField from 'material-ui/TextField';
+
 import Button from 'material-ui/Button';
+import TextField from 'material-ui/TextField';
 
 class DownloadBuild extends React.Component{
     constructor(props){
@@ -11,13 +12,6 @@ class DownloadBuild extends React.Component{
             currTime: props.build.currTime,
             download: props.build.download
         };
-      //  this.handleDownloadBuild = this.handleDownloadBuild.bind(this);
-    }
-
-    /*handleDownloadBuild(evt){
-        //call api
-        console.log("Download");
-    }*/
 
     componentWillReceiveProps(props) {
         console.log(props.build)

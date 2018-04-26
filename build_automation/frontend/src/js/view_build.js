@@ -1,12 +1,12 @@
 import axios from 'axios';
 import React from 'react';
 
+import Checkbox from 'material-ui/Checkbox';
+import { CircularProgress } from 'material-ui/Progress';
+import { FormGroup, FormControlLabel } from 'material-ui/Form';
 import Grid from 'material-ui/Grid';
 import ListSubheader from 'material-ui/List/ListSubheader';
 import List, { ListItem, ListItemIcon, ListItemText } from 'material-ui/List';
-import Checkbox from 'material-ui/Checkbox';
-import { FormGroup, FormControlLabel } from 'material-ui/Form';
-import { CircularProgress } from 'material-ui/Progress';
 import PropTypes from 'prop-types';
 import Typography from 'material-ui/Typography';
 
@@ -28,7 +28,6 @@ class ViewBuildComponent extends React.Component{
             noOfBuilds: 0,
             data: [],
             isLoaded : false
-
         };
         this.handleCheckChange = this.handleCheckChange.bind(this)
     }
@@ -37,7 +36,6 @@ class ViewBuildComponent extends React.Component{
     }
 
     componentDidMount() {
-          //  this.loadData();
             this.timerID = setTimeout(
             () => this.loadData(),
             1000
@@ -50,32 +48,18 @@ class ViewBuildComponent extends React.Component{
 
     }
 
-   /* show(){
-       console.log("show")
-       this.setState({
-           hidden : "",
-           isLoaded : true
-       });
-       console.log(this.state.isLoaded);
-    }*/
-
     componentWillUnmount() {
         clearInterval(this.intervalId);
     }
 
     handleCheckChange(){
-        console.log("clicked");
     }
 
-
     loadData() {
-        console.log("called every 10 seconds")
         const currInstance = this;
         axios.get(APP_URLS.VIEW_BUILD, {
             responseType: 'json'
         }).then(function(response) {
-            console.log(response.data[0])
-            console.log(response.data.length)
             currInstance.setState({isLoaded:true})
             if(response.data.length == 0){
                 currInstance.setState({
@@ -83,7 +67,6 @@ class ViewBuildComponent extends React.Component{
                 })
             }
             else if(response.data[0].task_state == 1){
-                //building in process status message
                 currInstance.setState({
                    isLoaded : false,
                    noOfBuilds : -1
@@ -92,17 +75,11 @@ class ViewBuildComponent extends React.Component{
             else if(response.data[0].task_state == 2){
                 const latestBuild = response.data[0];
                 currInstance.setState({latestBuild:latestBuild});
-                //console.log(response.data[0]);
-                //console.log(currInstance.state.latestBuild);
                 let build_file = currInstance.state.latestBuild.build_file
-                //console.log(currInstance.state.latestBuild)
                 let build_split = build_file.split("/")
                 let file_name = build_split[build_split.length - 1]
                 let file = decodeURI(file_name)
-                console.log(file);
-
                 const res = file.replace((/ \d{4}[_]\d{2}[_]\d{2} \d{2}[_]\d{2}[_]\d{2}\.tar\.gz/i),"");
-                console.log(res)
 
                 currInstance.setState({
                    isLoaded : true,
@@ -117,7 +94,6 @@ class ViewBuildComponent extends React.Component{
                  currInstance.setState({
                    data:data
                 });
-                console.log(data)
                 const styles = {
                           block: {
                             maxWidth: 250,
@@ -135,17 +111,14 @@ class ViewBuildComponent extends React.Component{
                 )
 
                     currInstance.setState({currBuild:currBuild});
-                    console.log(currInstance.state.currBuild);
             }
 
         }).catch(function(error) {
-            console.log(error);
         });
     };
 
     render(){
         var elements=null
-        //const { classes } = this.props;
         if(this.state.isLoaded){
             elements=(
                 <Grid container spacing={8}>
@@ -188,11 +161,5 @@ class ViewBuildComponent extends React.Component{
         return elements;
     }
 }
-
-/*
-ViewBuildComponent.propTypes = {
-      classes: PropTypes.object.isRequired,
-};
-*/
 
 module.exports = ViewBuildComponent
