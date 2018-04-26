@@ -151,13 +151,13 @@ class DiskSpace extends React.Component {
                     <h5 align="center">Hover over the Doughnut to view the values</h5>
                         <DoughnutChart data={[
                           {
-                            value: this.used/this.state.multiplier,
+                            value: (this.used/this.state.multiplier).toFixed(2),
                             color: '#F7464A',
                             highlight: '#FF5A5E',
                             label: 'Used (in' + this.unit + ')'
                           },
                           {
-                            value: this.avail/this.state.multiplier,
+                            value: (this.avail/this.state.multiplier).toFixed(2),
                             color: '#46BFBD',
                             highlight: '#5AD3D1',
                             label: 'Available (in' + this.unit + ')'
