@@ -55,7 +55,10 @@ class ViewBuildComponent extends React.Component{
         axios.get(APP_URLS.VIEW_BUILD, {
             responseType: 'json'
         }).then(function(response) {
-            currInstance.setState({isLoaded:true})
+            currInstance.setState({
+                isLoaded:true,
+                completionState:true
+            })
             if(response.data.length == 0){
                 currInstance.setState({
                     noOfBuilds : 0
