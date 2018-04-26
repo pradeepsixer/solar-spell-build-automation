@@ -1,6 +1,7 @@
 import os
 
 from django.conf import settings
+from pytz import timezone
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
 
@@ -385,10 +386,16 @@ class BuildSerializer(serializers.ModelSerializer):
 
     def get_end_time(self, obj):
         if obj.end_time is not None:
-            return obj.end_time.strftime(self.TIME_FORMAT_STR)
+            local_time = self.__get_as_local_time(obj.end_time)
+            return local_time.strftime(self.TIME_FORMAT_STR)
         return None
 
     def get_start_time(self, obj):
         if obj.start_time is not None:
-            return obj.start_time.strftime(self.TIME_FORMAT_STR)
+            local_time = self.__get_as_local_time(obj.start_time)
+            return local_time.strftime(self.TIME_FORMAT_STR)
         return None
+
+    def __get_as_local_time(self, datetime_obj):
+        local_time_zone = timezone(settings.TIME_ZONE)
+        return datetime_obj.astimezone(local_time_zone)
