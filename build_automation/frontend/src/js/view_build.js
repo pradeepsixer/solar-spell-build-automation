@@ -2,7 +2,6 @@ import axios from 'axios';
 import React from 'react';
 
 import Checkbox from 'material-ui/Checkbox';
-import { CircularProgress } from 'material-ui/Progress';
 import { FormGroup, FormControlLabel } from 'material-ui/Form';
 import Grid from 'material-ui/Grid';
 import ListSubheader from 'material-ui/List/ListSubheader';
