@@ -17,7 +17,7 @@ from content_management.serializers import (
     WorkareaSerializer
 )
 from content_management.tasks import start_dirlayout_build
-from content_management.utils import LibraryVersionBuildUtil
+from content_management.utils import DiskSpace, LibraryVersionBuildUtil
 
 
 class ContentApiViewset(ModelViewSet):
@@ -223,3 +223,13 @@ class BuildLibraryVersionViewSet(ViewSet, CreateModelMixin, RetrieveModelMixin):
         return Response([
             serializer.data
         ])
+
+
+class DiskSpaceViewSet(ViewSet):
+    def list(self, request):
+        dp = DiskSpace()
+        data = {
+            'available_space': dp.getfreespace()[0],
+            'total_space': dp.getfreespace()[1]
+        }
+        return Response(data)

@@ -2,22 +2,36 @@ import React from 'react';
 
 import DirectoryLayoutComponent from './directory_layout.js';
 import ContentManagement from './content_management.js';
+import DiskSpace from './diskspace.js';
 import TagManagement from './tag_management';
 
 import BuildProcessComponent from './build_process.js';
+import Badge from 'material-ui/Badge';
 import Grid from 'material-ui/Grid';
 import Paper from 'material-ui/Paper';
 import Tabs, { Tab } from 'material-ui/Tabs';
 import Typography from 'material-ui/Typography';
+import { withStyles } from 'material-ui/styles';
+import {APP_URLS} from "./url";
+import axios from 'axios';
+
+
 
 import solarSpellLogo from '../images/logo.png';
 import '../css/style.css';
+
+const styles = theme => ({
+    padding: {
+     padding: `0 ${theme.spacing.unit * 2}px`,
+   },
+});
 
 class MainScreen extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            currentTab: 'dirlayout'
+            currentTab: 'dirlayout',
+            showBadge: false
         };
         this.handleTabClick = this.handleTabClick.bind(this);
     }
@@ -26,8 +40,37 @@ class MainScreen extends React.Component {
         this.setState({ currentTab: selectedTab });
       };
 
+    componentDidMount() {
+        this.showBadge();
+        this.timerID = setInterval(
+            () => this.showBadge(),1000*60*60
+        );
+    }
+
+    componentWillUnmount() {
+        clearInterval(this.timerID);
+    }
+
+    showBadge() {
+        axios
+            .get(APP_URLS.DISKSPACE, {responseType: 'json'})
+            .then((response) => {
+                this.used = 100*(response.data.total_space-response.data.available_space)/response.data.total_space
+                const newState = ({completed: 100*(response.data.total_space-response.data.available_space)/response.data.total_space, showBadge: false});
+                if(newState.completed > 80) {
+                    newState.showBadge= true
+                }
+                this.setState(newState)
+            })
+            .catch((error) => {
+                console.error(error);
+                // TODO : Show the error message.
+            });
+    }
+
     render() {
         const currentTab = this.state.currentTab;
+        const { classes } = this.props;
 
         return (
             <React.Fragment>
@@ -54,7 +97,12 @@ class MainScreen extends React.Component {
                             <Tab value="contents" label="Contents" />
                             <Tab value="dirlayout" label="Library Versions" />
                             <Tab value="builds" label="Builds" />
-                            <Tab value="sysinfo" label="System Info" />
+                            { this.state.showBadge ? (<Tab value="sysinfo" label= {
+                                                    <Badge className= {classes.padding} color="secondary" badgeContent={'!'}>
+                                                    System Info
+                                                    </Badge>
+                                                }/>) : (<Tab value="sysinfo" label="System Info" />)
+                            }
                         </Tabs>
                     </Paper>
                 </Grid>
@@ -65,6 +113,7 @@ class MainScreen extends React.Component {
                     {currentTab == 'contents' && <ContentManagement />}
                     {currentTab == 'tags' && <TagManagement/>}
                     {currentTab == 'builds' && <BuildProcessComponent />}
+                    {currentTab == 'sysinfo' && <DiskSpace/>}
                 </Grid>
             </Grid>
             </React.Fragment>
@@ -72,4 +121,4 @@ class MainScreen extends React.Component {
     }
 }
 
-module.exports = MainScreen;
+export default withStyles(styles)(MainScreen);
