@@ -12,9 +12,8 @@ class DownloadBuild extends React.Component{
             currTime: props.build.currTime,
             download: props.build.download
         };
-
+    }
     componentWillReceiveProps(props) {
-        console.log(props.build)
         this.setState({
             name: props.build.name,
             currTime: props.build.currTime,

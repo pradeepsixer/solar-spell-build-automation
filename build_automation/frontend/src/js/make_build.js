@@ -52,6 +52,7 @@ class MakeBuildComponent extends React.Component{
                 isLoaded:true
             });
         }).catch(function(error) {
+            console.log(error)
         });
     };
 

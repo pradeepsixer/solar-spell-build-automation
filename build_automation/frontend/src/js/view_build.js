@@ -27,7 +27,7 @@ class ViewBuildComponent extends React.Component{
             isLoaded: false,
             noOfBuilds: 0,
             data: [],
-            isLoaded : false
+            completionState: true
         };
         this.handleCheckChange = this.handleCheckChange.bind(this)
     }
@@ -45,7 +45,6 @@ class ViewBuildComponent extends React.Component{
             () => this.loadData(),
             10000
         );
-
     }
 
     componentWillUnmount() {
@@ -68,58 +67,74 @@ class ViewBuildComponent extends React.Component{
             }
             else if(response.data[0].task_state == 1){
                 currInstance.setState({
-                   isLoaded : false,
+                   isLoaded : true,
                    noOfBuilds : -1
                 });
             }
             else if(response.data[0].task_state == 2){
-                const latestBuild = response.data[0];
-                currInstance.setState({latestBuild:latestBuild});
-                let build_file = currInstance.state.latestBuild.build_file
-                let build_split = build_file.split("/")
-                let file_name = build_split[build_split.length - 1]
-                let file = decodeURI(file_name)
-                const res = file.replace((/ \d{4}[_]\d{2}[_]\d{2} \d{2}[_]\d{2}[_]\d{2}\.tar\.gz/i),"");
+                if(response.data[0].completion_state == 1){
+                    const latestBuild = response.data[0];
+                    currInstance.setState({latestBuild:latestBuild});
+                    let build_file = currInstance.state.latestBuild.build_file
+                    let build_split = build_file.split("/")
+                    let file_name = build_split[build_split.length - 1]
+                    let file = decodeURI(file_name)
+                    const res = file.replace((/ \d{4}[_]\d{2}[_]\d{2} \d{2}[_]\d{2}[_]\d{2}\.tar\.gz/i),"");
 
-                currInstance.setState({
-                   isLoaded : true,
-                   noOfBuilds: 1,
-                   name: res
-                });
-                const data={
-                    name: currInstance.state.name,
-                    currTime: currInstance.state.latestBuild.end_time,
-                    download: currInstance.state.latestBuild.build_file
+                    currInstance.setState({
+                       isLoaded : true,
+                       noOfBuilds: 1,
+                       name: res
+                    });
+                    const data={
+                        name: currInstance.state.name,
+                        currTime: currInstance.state.latestBuild.end_time,
+                        download: currInstance.state.latestBuild.build_file
+                    }
+                     currInstance.setState({
+                       data:data
+                    });
+                    const styles = {
+                              block: {
+                                maxWidth: 250,
+                              },
+                              checkbox: {
+                                marginBottom: 16,
+                              },
+                            };
+                    const currBuild = (
+                        <div>
+                            <Typography variant="headline" gutterBottom>
+                                {currInstance.state.name}
+                            </Typography>
+                        </div>
+                    )
+
+                        currInstance.setState({currBuild:currBuild});
                 }
-                 currInstance.setState({
-                   data:data
-                });
-                const styles = {
-                          block: {
-                            maxWidth: 250,
-                          },
-                          checkbox: {
-                            marginBottom: 16,
-                          },
-                        };
-                const currBuild = (
-                    <div>
-                        <Typography variant="headline" gutterBottom>
-                            {currInstance.state.name}
-                        </Typography>
-                    </div>
-                )
-
-                    currInstance.setState({currBuild:currBuild});
+                else if(response.data[0].completion_state == 2){
+                    currInstance.setState({
+                        completionState:false
+                    })
             }
+        }
+
 
         }).catch(function(error) {
+            console.log(error)
         });
     };
 
     render(){
         var elements=null
-        if(this.state.isLoaded){
+        if(this.state.isLoaded && !this.state.completionState){
+            elements = (
+                <div>
+                    Build Failed. Please try building again..
+                </div>
+            )
+        }
+        else if(this.state.isLoaded && this.state.noOfBuilds > 0){
             elements=(
                 <Grid container spacing={8}>
                     <Grid item xs={3} style={{paddingLeft: '20px'}}>
@@ -149,11 +164,20 @@ class ViewBuildComponent extends React.Component{
                 </div>
             )
         }
+        else if(this.state.isLoaded && this.state.noOfBuilds == -1){
+            elements = (
+                <div>
+                   <Typography variant="display1" gutterBottom>
+                            Build in progress..
+                   </Typography>
+
+                </div>
+            )
+        }
         else if(!this.state.isLoaded){
             elements = (
                 <div>
                     Loading..
-
                 </div>
             )
         }

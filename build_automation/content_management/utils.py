@@ -5,6 +5,7 @@ import shutil
 import tarfile
 import tempfile
 import zipfile
+import time
 
 from django.conf import settings
 from django.db.models import Q
@@ -55,7 +56,7 @@ class LibraryVersionBuildUtil:
         tarfile_name = self.__get_date_suffixed_file_name(directory_layout.name)
         tarfile_path = self.__get_tarfile_path(tarfile_name)
         self.__update_existing_build(directory_layout, None, Build.TaskState.RUNNING, None, True)
-
+        print("I am here")
         # Context for rendering the template
         template_ctxt = {
             'dirlayout_banner': os.path.basename(directory_layout.banner_file.path),
@@ -67,6 +68,7 @@ class LibraryVersionBuildUtil:
         top_dirs = Directory.objects.filter(dir_layout=directory_layout, parent=None)  # Get the top directories
         try:
             with tarfile.open(tarfile_path, "w:gz") as build_tar:
+                raise Exception("Expection raise")
 
                 # Copy the directory layout's banner image.
                 banner_path = os.path.join("img", os.path.basename(directory_layout.banner_file.name))
