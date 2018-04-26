@@ -15,7 +15,8 @@ Including another URLconf
 """
 from django.conf import settings
 from django.conf.urls.static import static
-from django.urls import include, path
+from django.urls import include, path, re_path
+from django.views.static import serve
 from rest_framework import routers
 
 from content_management.api_views import (
@@ -53,3 +54,10 @@ urlpatterns = [
     ),
     path('api/builds/', BuildLibraryVersionViewSet.as_view({'get': 'list'}), name="build-list"),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
+if settings.DEBUG:
+    urlpatterns += [
+        re_path(r'builds/(?P<path>.*)$', serve, {
+            'document_root': settings.BUILDS_ROOT,
+        }),
+    ]
