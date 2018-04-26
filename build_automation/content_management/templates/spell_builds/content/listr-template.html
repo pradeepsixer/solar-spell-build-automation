@@ -28,7 +28,11 @@
                         <ul class="dropdown-menu" role="menu">
                             {% for submenu in menu.submenu_list %}
                             <li>
-                                <a href="/content/{{menu.name|urlencode}}/{{submenu.name|urlencode }}/">
+                                {% if submenu.files_at_root %}
+                                <a href="/{{submenu.path|urlencode }}/">
+                                {% else %}
+                                <a href="/content/{{submenu.path|urlencode }}/">
+                                {% endif %}
                                     {{submenu.name}}
                                 </a>
                             </li>
