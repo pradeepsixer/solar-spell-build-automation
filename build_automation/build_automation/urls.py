@@ -20,8 +20,8 @@ from rest_framework import routers
 
 from content_management.api_views import (
     AllTagsApiViewSet, BuildLibraryVersionViewSet, CatalogerViewSet, ContentApiViewset, CoverageViewSet,
-    CreatorViewSet, DirectoryCloneApiViewSet, DirectoryLayoutViewSet, DirectoryViewSet, DiskSpaceViewSet, KeywordViewSet,
-    LanguageViewSet, SubjectViewSet, WorkareaViewSet
+    CreatorViewSet, DirectoryCloneApiViewSet, DirectoryLayoutViewSet, DirectoryViewSet, DiskSpaceViewSet,
+    KeywordViewSet, LanguageViewSet, SubjectViewSet, WorkareaViewSet
 )
 
 router = routers.SimpleRouter()

@@ -62,8 +62,6 @@ class LibraryVersionBuildUtil:
         }
         folder_list = []
         menu_list = []
-
-
         top_dirs = Directory.objects.filter(dir_layout=directory_layout, parent=None)  # Get the top directories
         try:
             with tarfile.open(tarfile_path, "w:gz") as build_tar:
@@ -75,10 +73,6 @@ class LibraryVersionBuildUtil:
                 for each_top_dir in top_dirs:
                     # Directory's Banner Image
 
-                    current_menu = {
-                        'name': each_top_dir.name,
-                        'submenu_list': []
-                    }
                     self.__build_files_list(
                         each_top_dir, build_tar, '', self.ROOT_DIR_NAV_PREFIX,
                         folder_list, 1, menu_list
@@ -259,7 +253,7 @@ class LibraryVersionBuildUtil:
             link_path = os.path.join(settings.CONTENT_DIRECTORY, dir_path, original_file_name)
             dest_path = os.path.join(self.ALL_FILES_PREFIX, os.path.basename(actual_file_name))
 
-            build_file.add(content.content_file.path,arcname=dest_path)
+            build_file.add(content.content_file.path, arcname=dest_path)
             link_to_file = tarfile.TarInfo(link_path)
             link_to_file.type = tarfile.SYMTYPE
             link_to_file.linkname = os.path.join(root_dir, dest_path)
