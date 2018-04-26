@@ -1,8 +1,10 @@
 import datetime
 import hashlib
 import os
+import shutil
 import tarfile
 import tempfile
+import zipfile
 
 from django.conf import settings
 from django.db.models import Q
@@ -39,8 +41,8 @@ class LibraryVersionBuildUtil:
     """
 
     ROOT_DIR_NAV_PREFIX = "../.."
-    CONTENT_PREFIX = "content/_public"
     ALL_FILES_PREFIX = "all_files"
+    MAX_MENU_LEVELS = 2
 
     def get_latest_build(self):
         builds = Build.objects.all()
@@ -72,19 +74,15 @@ class LibraryVersionBuildUtil:
 
                 for each_top_dir in top_dirs:
                     # Directory's Banner Image
-                    banner_path = os.path.join("img", os.path.basename(each_top_dir.banner_file.name))
-                    build_tar.add(each_top_dir.banner_file.path, arcname=banner_path)
+
                     current_menu = {
                         'name': each_top_dir.name,
                         'submenu_list': []
                     }
                     self.__build_files_list(
-                        each_top_dir, build_tar, self.CONTENT_PREFIX, self.ROOT_DIR_NAV_PREFIX, current_menu
+                        each_top_dir, build_tar, '', self.ROOT_DIR_NAV_PREFIX,
+                        folder_list, 1, menu_list
                     )
-                    folder_list.append(
-                        {'name': each_top_dir.name, 'banner_file': os.path.basename(each_top_dir.banner_file.path)}
-                    )
-                    menu_list.append(current_menu)
 
                 template_ctxt['folder_list'] = folder_list
                 template_ctxt['menu_list'] = menu_list
@@ -139,7 +137,6 @@ class LibraryVersionBuildUtil:
         if task_state == Build.TaskState.RUNNING:
             latest_build.start_time = timezone.now()
 
-        latest_build.start_time = timezone.now()
         latest_build.task_state = task_state
         latest_build.completion_state = completion_state
 
@@ -157,7 +154,7 @@ class LibraryVersionBuildUtil:
 
         latest_build.save()
 
-    def __build_files_list(self, directory, build_file, dir_path, root_dir, menu=None):
+    def __build_files_list(self, directory, build_file, dir_path, root_dir, folder_list, menu_level, menu_list=None):
         """
         Walk through the directory structure, and build the build file.
         :param directory: Directory to walk through.
@@ -168,10 +165,39 @@ class LibraryVersionBuildUtil:
         dir_path = os.path.join(dir_path, directory.name)
         root_dir = os.path.join(root_dir, "..")
 
+        if (
+            directory.banner_file is not None and len(directory.banner_file.name) > 0 and
+            os.path.exists(directory.banner_file.path)
+        ):
+            banner_path = os.path.join("img", os.path.basename(directory.banner_file.name))
+            build_file.add(directory.banner_file.path, arcname=banner_path)
+
+            folder_list.append(
+                {
+                    'name': directory.name,
+                    'banner_file': os.path.basename(directory.banner_file.path),
+                    'path': dir_path,
+                    'files_at_root': False,
+                }
+            )
+
+        current_menu = None
+        if menu_level <= self.MAX_MENU_LEVELS:
+            current_menu = {
+                'name': directory.name,
+                'path': dir_path,
+                'submenu_list': [],
+                'files_at_root': False,
+            }
+            menu_list.append(current_menu)
+
         for subdir in directory.subdirectories.all():
-            if menu is not None:
-                menu['submenu_list'].append({'name': subdir.name})
-            self.__build_files_list(subdir, build_file, dir_path, root_dir, None)
+            if current_menu is None:
+                self.__build_files_list(subdir, build_file, dir_path, root_dir, folder_list, menu_level+1, None)
+            else:
+                self.__build_files_list(
+                    subdir, build_file, dir_path, root_dir, folder_list, menu_level+1, current_menu['submenu_list']
+                )
 
         individual_files = directory.individual_files.all()
         metadata_filter_criteria = self.__get_metadata_filter_criteria(directory)
@@ -194,7 +220,13 @@ class LibraryVersionBuildUtil:
             matching_contents = Content.objects.filter(entire_filter_criteria)
 
             for each_content in matching_contents:
-                self.__copy_content_file(build_file, each_content, dir_path, root_dir)
+                (is_zip_file, zip_file_name) = self.__copy_content_file(build_file, each_content, dir_path, root_dir)
+                if is_zip_file:
+                    folder_list[-1]['path'] = zip_file_name
+                    folder_list[-1]['files_at_root'] = True
+                    if current_menu is not None:
+                        current_menu['path'] = zip_file_name
+                        current_menu['files_at_root'] = True
 
     def __copy_content_file(self, build_file, content, dir_path, root_dir):
         # The name of the file as is in the filesystem.
@@ -207,17 +239,32 @@ class LibraryVersionBuildUtil:
             cfs = CustomFileStorage()
             original_file_name = cfs.get_original_file_name(actual_file_name)
 
-        link_path = os.path.join(dir_path, original_file_name)
-        dest_path = os.path.join(self.ALL_FILES_PREFIX, os.path.basename(actual_file_name))
+        (file_name_only, extension) = os.path.splitext(original_file_name)
+        is_zip_file = (extension == ".zip")
 
-        build_file.add(
-            content.content_file.path,
-            arcname=dest_path
-        )
-        link_to_file = tarfile.TarInfo(link_path)
-        link_to_file.type = tarfile.SYMTYPE
-        link_to_file.linkname = os.path.join(root_dir, dest_path)
-        build_file.addfile(link_to_file)
+        if extension == ".zip":
+            # Extract the file to a local folder and then copy it.
+            if os.path.exists(settings.TEMP_EXTRACTION_DIR):
+                shutil.rmtree(settings.TEMP_EXTRACTION_DIR)
+            os.makedirs(settings.TEMP_EXTRACTION_DIR)
+            with zipfile.ZipFile(content.content_file.path) as content_zip:
+                content_zip.extractall(path=settings.TEMP_EXTRACTION_DIR)
+            build_file.add(
+                settings.TEMP_EXTRACTION_DIR,
+                arcname=file_name_only
+            )
+            shutil.rmtree(settings.TEMP_EXTRACTION_DIR)
+        else:
+            link_path = os.path.join(settings.CONTENT_DIRECTORY, dir_path, original_file_name)
+            dest_path = os.path.join(self.ALL_FILES_PREFIX, os.path.basename(actual_file_name))
+
+            build_file.add(content.content_file.path,arcname=dest_path)
+            link_to_file = tarfile.TarInfo(link_path)
+            link_to_file.type = tarfile.SYMTYPE
+            link_to_file.linkname = os.path.join(root_dir, dest_path)
+            build_file.addfile(link_to_file)
+
+        return (is_zip_file, file_name_only)
 
     def __get_metadata_filter_criteria(self, directory):
         creators = directory.creators.all()
