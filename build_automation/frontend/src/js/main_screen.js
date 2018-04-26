@@ -63,7 +63,7 @@ class MainScreen extends React.Component {
                 this.setState(newState)
             })
             .catch((error) => {
-                console.log(error);
+                console.error(error);
                 // TODO : Show the error message.
             });
     }

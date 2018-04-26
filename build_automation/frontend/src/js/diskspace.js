@@ -77,7 +77,7 @@ class DiskSpace extends React.Component {
                 this.setState({completed: 100*(response.data.total_space-response.data.available_space)/response.data.total_space});
             })
             .catch((error) => {
-                console.log(error);
+                console.error(error);
                 // TODO : Show the error message.
             });
     }
