@@ -86,22 +86,20 @@ class LibraryVersionBuildUtil:
 
                 template_ctxt['folder_list'] = folder_list
                 template_ctxt['menu_list'] = menu_list
-                rendered_output = render_to_string("spell_builds/index.html", context=template_ctxt)
 
-                out_file = tempfile.NamedTemporaryFile(delete=False)
-                out_file.write(rendered_output.encode())
-                out_file.close()
-                build_tar.add(out_file.name, arcname='index.html')
-                os.remove(out_file.name)
+                template_rendered_files_map = [
+                    ('spell_builds/index.html', 'index.html'),
+                    ('spell_builds/content/listr-template.html', 'content/listr-template.php'),
+                    ('spell_builds/aboutus.html', 'aboutus.html')
+                ]
+                for (template_file, rendered_file_in_tarfile) in template_rendered_files_map:
+                    rendered_output = render_to_string(template_file, context=template_ctxt)
 
-                rendered_output = render_to_string("spell_builds/content/listr-template.html", context=template_ctxt)
-
-                out_file = tempfile.NamedTemporaryFile(delete=False)
-                out_file.write(rendered_output.encode())
-                out_file.close()
-                build_tar.add(out_file.name, arcname='content/listr-template.php')
-                os.remove(out_file.name)
-
+                    out_file = tempfile.NamedTemporaryFile(delete=False)
+                    out_file.write(rendered_output.encode())
+                    out_file.close()
+                    build_tar.add(out_file.name, arcname=rendered_file_in_tarfile)
+                    os.remove(out_file.name)
 
                 # Need to comment this piece of code for the above inelegant one, because of stupid windows
                 # not allowing to open the file for a second time.
