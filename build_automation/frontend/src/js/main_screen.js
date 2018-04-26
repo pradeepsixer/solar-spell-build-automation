@@ -56,18 +56,16 @@ class MainScreen extends React.Component {
             .get(APP_URLS.DISKSPACE, {responseType: 'json'})
             .then((response) => {
                 this.used = 100*(response.data.total_space-response.data.available_space)/response.data.total_space
-                this.setState({completed: 100*(response.data.total_space-response.data.available_space)/response.data.total_space});
+                const newState = ({completed: 100*(response.data.total_space-response.data.available_space)/response.data.total_space, showBadge: false});
+                if(newState.completed > 80) {
+                    newState.showBadge= true
+                }
+                this.setState(newState)
             })
             .catch((error) => {
                 console.log(error);
                 // TODO : Show the error message.
             });
-        if(this.used > 80) {
-            this.setState({showBadge: true})
-        }
-        else {
-            this.setState({showBadge: false})
-        }
     }
 
     render() {
