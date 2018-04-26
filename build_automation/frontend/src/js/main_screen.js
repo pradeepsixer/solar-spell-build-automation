@@ -5,6 +5,7 @@ import ContentManagement from './content_management.js';
 import DiskSpace from './diskspace.js';
 import TagManagement from './tag_management';
 
+import BuildProcessComponent from './build_process.js';
 import Badge from 'material-ui/Badge';
 import Grid from 'material-ui/Grid';
 import Paper from 'material-ui/Paper';
@@ -113,6 +114,7 @@ class MainScreen extends React.Component {
                     {currentTab == 'dirlayout' && <DirectoryLayoutComponent />}
                     {currentTab == 'contents' && <ContentManagement />}
                     {currentTab == 'tags' && <TagManagement/>}
+                    {currentTab == 'builds' && <BuildProcessComponent />}
                     {currentTab == 'sysinfo' && <DiskSpace/>}
                 </Grid>
             </Grid>

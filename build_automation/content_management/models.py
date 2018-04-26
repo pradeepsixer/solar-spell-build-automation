@@ -97,6 +97,11 @@ class Cataloger(AbstractTag):
 
 
 class Content(models.Model):
+
+    def set_original_name(self, file_name):
+        self.original_file_name = file_name
+        return os.path.join("contents", file_name)
+
     """
     A content is the representation of a file.
     """
@@ -105,7 +110,7 @@ class Content(models.Model):
     description = models.TextField()
 
     # The Actual File
-    content_file = models.FileField("File")
+    content_file = models.FileField("File", upload_to=set_original_name)
 
     updated_time = models.DateField(
         "Content updated on",
@@ -135,6 +140,10 @@ class Content(models.Model):
     workareas = models.ManyToManyField(Workarea)
     language = models.ForeignKey(Language, on_delete=models.SET_NULL, null=True)
     cataloger = models.ForeignKey(Cataloger, on_delete=models.SET_NULL, null=True)
+    original_file_name = models.CharField(max_length=300, null=True)
+    source = models.CharField(max_length=2000, null=True)
+    copyright = models.CharField(max_length=100, null=True)
+    rights_statement = models.TextField(null=True)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -216,6 +225,40 @@ class Directory(models.Model):
 
     def __str__(self):
         return "Directory[{}]".format(self.name)
+
+    class Meta:
+        ordering = ['pk']
+
+
+class Build(models.Model):
+    """
+    Representation of the build of library version. Only one record will be present, since we need to have only the
+    latest build.
+    """
+    class TaskState:
+        RUNNING = 1
+        FINISHED = 2
+
+    class BuildCompletionState:
+        SUCCESS = 1
+        FAILURE = 2
+
+    TASK_STATES = (
+        (TaskState.RUNNING, 'Running'),
+        (TaskState.FINISHED, 'Finished'),
+    )
+
+    BUILD_COMPLETION_STATES = (
+        (BuildCompletionState.SUCCESS, 'Success'),
+        (BuildCompletionState.FAILURE, 'Failure'),
+    )
+
+    task_state = models.IntegerField(choices=TASK_STATES)
+    build_file = models.CharField(max_length=400, null=True)
+    dir_layout = models.ForeignKey(DirectoryLayout, on_delete=models.SET_NULL, null=True)
+    completion_state = models.IntegerField(choices=BUILD_COMPLETION_STATES, null=True)
+    start_time = models.DateTimeField()
+    end_time = models.DateTimeField(null=True)
 
     class Meta:
         ordering = ['pk']

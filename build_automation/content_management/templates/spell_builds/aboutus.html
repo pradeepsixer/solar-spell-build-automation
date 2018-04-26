@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <!-- <link rel="icon" href="/img/favicon.ico"> -->
+
+    <title>SPELL</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="/css/bootstrap.css" rel="stylesheet">
+
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+    <link href="/css/ie10-viewport-bug-workaround.css" rel="stylesheet">
+
+    <!-- Custom styles for this template -->
+    <link href="/css/starter-template.css" rel="stylesheet">
+
+    <script src="/js/ie-emulation-modes-warning.js"></script>
+</head>
+
+<body>
+    <nav class="navbar navbar-default navbar-fixed-top">
+        <div class="container">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                   <span class="sr-only">Toggle navigation</span>
+                   <span class="icon-bar"></span>
+                   <span class="icon-bar"></span>
+                   <span class="icon-bar"></span>
+                 </button>
+
+            <a class="navbar-brand" href="/index.html" style="padding:5px 5px; margin-left:0px">
+                    <img alt="Brand" href="/index.html" src="/img/SPELLWebsite-header_revised.png" style="max-height:40px">
+                </a>
+            </div>
+            <div id="navbar" class="collapse navbar-collapse">
+                <ul class="nav navbar-nav">
+                    {% for menu in menu_list %}
+                    <li class="dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">{{ menu.name }}<span class="caret"></span></a>
+                        <ul class="dropdown-menu" role="menu">
+                            {% for submenu in menu.submenu_list %}
+                            <li>
+                                {% if submenu.files_at_root %}
+                                <a href="/{{submenu.path|urlencode }}/">
+                                {% else %}
+                                <a href="/content/{{submenu.path|urlencode }}/">
+                                {% endif %}
+                                    {{submenu.name}}
+                                </a>
+                            </li>
+                            {% if not forloop.last %}
+                            <li class="divider"></li>
+                            {% endif %}
+                            {% endfor %}
+                        </ul>
+                    </li>
+                    {% endfor %}
+                </ul> 
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <h1>About Us</h1>
+        <p>
+            SPELL is a Solar Powered Educational Learning Library: a digital library over an off-line WiFi hotspot,
+            designed to simulate an online experience. Making use of open educational resources and ever-smaller
+            and more efficient technology, SPELL provides an all-in-one, self-powered plug-and-play kit, ready to be
+            deployed with absolute minimal training or maintenance required for start-up and continued operation.
+        </p>
+        <br />
+
+        <a href="/about_us_subtitled.mp4"><img src="/img/about_us_thumbnail.jpg" style="max-height:270px"></a>
+        <p>
+            <em>Click the image above to watch a short video about the SPELL project and the people behind it</em>
+        </p>
+
+        <h2>Want to learn more about the SPELL?</h2>
+        <p>
+            Visit us online at: <a href="http://solarspell.org/">solarspell.org</a>
+        </p>
+        <p>
+            Contact us at: <a href="mailto:team@solarspell.org?subject=SPELL">team@solarspell.org</a>
+        </p>
+	   <hr />
+
+        <h3>About ASU Libraries</h3>
+        <p>
+            Arizona State University Libraries, among the top 40 research libraries in North America, is recognized for the strength of its collections. Included with the physical library locations is an extensive online repository of resources and research tools, including the ASU's catalog as well as links to hundreds of online databases and catalogs of library materials.
+        </p>
+	   <img src="/img/ASU_Libraries_Team.jpg" alt="ASU Libraries Team" class="img-responsive">
+            <p>
+            <em>Fall 2016 ASU Libraries Hackathon Team - Arizona State University Tempe, AZ, USA.</em>
+            </p>
+
+        <br />
+        <img src="/img/Libraries_eLogo_mb.jpg" alt="ASU logo" class="img-responsive">
+<br />
+	   <hr />
+
+        <h3>Cal Poly Team</h3>
+        <p>
+
+        <img src="/img/Spring2015LAESClass.jpg" alt="Photo of Spring 2015 LAES 411 Class at Cal Poly" class="img-responsive">
+        <p>
+            <em>Spring 2015 LAES 411 Class at California Polytechnic State University (Cal Poly) in San Luis Obispo, CA, USA</em>
+        </p>
+
+        <br />
+        <img src="/img/Winter2016LAESClass.jpg" alt="Photo of Winter 2016 LAES 411 Class at Cal Poly" class="img-responsive">
+        <p>
+            <em>Winter 2016 LAES 411 Class at California Polytechnic State University (Cal Poly) in San Luis Obispo, CA, USA</em>
+        </p>
+
+    </div>
+
+    <!-- Bootstrap core JavaScript -->
+    <!-- Placed at the end of the document so the pages load faster -->
+
+    <script src="/js/jquery.min.js"></script>
+    <script src="/js/bootstrap.js"></script>
+
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+    <script src="/js/ie10-viewport-bug-workaround.js"></script>
+</body>
+
+</html>

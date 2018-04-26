@@ -3,6 +3,10 @@ import Typography from 'material-ui/Typography';
 import Chip from 'material-ui/Chip';
 import Button from 'material-ui/Button';
 import Menu, { MenuItem } from 'material-ui/Menu';
+import Snackbar from 'material-ui/Snackbar';
+import { TableCell, TableRow } from 'material-ui/Table';
+import AutoCompleteFilter from './autocomplete_filter.js';
+import Input from 'material-ui/Input';
 import Dialog, { DialogActions, DialogContent, DialogContentText, DialogTitle } from 'material-ui/Dialog';
 import axios from 'axios';
 import { APP_URLS, get_url } from './url.js';
@@ -27,6 +31,9 @@ var __tagIdsTagsMap = {};
 
 function ChippedTagsFormatter(input) {
     const {row, column, value} = input;
+    if (!value){
+        return "";
+    }
     const allChips = [];
     if (typeof(value)=='number') {
         allChips.push(<Chip key={row.id + '_' + column['name'] + '_' + value} label={__tagIdsTagsMap[column['name']
@@ -45,6 +52,19 @@ function ChippedTagsTypeProvider(props) {
     return (<DataTypeProvider formatterComponent={ChippedTagsFormatter} {...props} />);
 }
 
+function filterThroughArray(value, filter) {
+    if ( value && filter && Array.isArray(filter.value)) {
+        if(!Array.isArray(value)) {
+            value = [value];
+        }
+        let allTagsPresent = true;
+        filter.value.forEach(eachFilterTag => {
+            allTagsPresent = allTagsPresent && (value.indexOf(eachFilterTag) != -1);
+        });
+        return allTagsPresent;
+    }
+}
+
 class FileListComponent extends React.Component {
     constructor(props) {
         super(props);
@@ -57,13 +77,35 @@ class FileListComponent extends React.Component {
             confirmDelete: false,
             selectedFile: null
         };
-        console.log(props);
         __tagIdsTagsMap = props.tagIdsTagsMap;
+        this.columns = [
+            {name: 'name', title: 'Name', filterType: 'textfield'},
+            {name: 'description', title: 'Description', filterType: 'textfield'},
+            {name: 'updated_time', title: 'Updated on', filterType: 'textfield'},
+            {name: 'creators', title: 'Creators', filterType: 'autocomplete', tagKey: 'creators'},
+            {name: 'coverage', title: 'Coverage', filterType: 'autocomplete', tagKey: 'coverages'},
+            {name: 'subjects', title: 'Subjects', filterType: 'autocomplete', tagKey: 'subjects'},
+            {name: 'keywords', title: 'Keywords', filterType: 'autocomplete', tagKey: 'keywords'},
+            {name: 'workareas', title: 'Workareas', filterType: 'autocomplete', tagKey: 'workareas'},
+            {name: 'language', title: 'Language', filterType: 'autocomplete', tagKey: 'languages'},
+            {name: 'cataloger', title: 'Cataloger', filterType: 'autocomplete', tagKey: 'catalogers'},
+        ];
         this.deleteCallback = props.onDelete;
         this.editCallback = props.onEdit;
         this.closeConfirmDialog = this.closeConfirmDialog.bind(this);
         this.deleteFile = this.deleteFile.bind(this);
         this.handleFilesRightClick = this.handleFilesRightClick.bind(this);
+        this.handleCloseSnackbar = this.handleCloseSnackbar.bind(this);
+        this.getFilterCellComponent = this.getFilterCellComponent.bind(this);
+        this.filterExtensions = [
+            {columnName: 'creators', predicate: filterThroughArray},
+            {columnName: 'coverage', predicate: filterThroughArray},
+            {columnName: 'subjects', predicate: filterThroughArray},
+            {columnName: 'keywords', predicate: filterThroughArray},
+            {columnName: 'workareas', predicate: filterThroughArray},
+            {columnName: 'language', predicate: filterThroughArray},
+            {columnName: 'cataloger', predicate: filterThroughArray},
+        ];
     }
 
     componentWillReceiveProps(props) {
@@ -72,7 +114,6 @@ class FileListComponent extends React.Component {
     }
 
     handleFilesRightClick(evt, row, menuName) {
-        console.log(menuName, row, 'This is the value!');
         this.setState({
             [menuName]: {
                 selectedFile: row,
@@ -119,6 +160,27 @@ class FileListComponent extends React.Component {
         this.setState({confirmDelete: false})
     }
 
+    getFilterCellComponent(props) {
+        const {filter, onFilter, column, filteringEnabled} = props;
+        if (column.filterType === "autocomplete") {
+            const { tagKey } = column;
+            return (
+                <TableCell style={{paddingLeft: '10px', paddingRight: '5px'}}>
+                    <AutoCompleteFilter filter={filter} suggestions={this.props.tags[tagKey]} onFilter={onFilter} />
+                </TableCell>
+            );
+        }
+        return (
+            <TableCell style={{paddingLeft: '10px', paddingRight: '5px'}}>
+                <Input
+                    fullWidth
+                    value={filter ? filter.value : ''}
+                    placeholder='Filter...'
+                    onChange={evt => onFilter(evt.target.value ? { value: evt.target.value } : null)}
+                />
+            </TableCell>
+        );
+    }
 
 
     render() {
@@ -129,38 +191,29 @@ class FileListComponent extends React.Component {
                 </Typography>
                 <Grid
                     rows={this.props.allFiles}
-                    columns={[
-                        { name: 'name', title: 'Name' },
-                        { name: 'description', title: 'Description' },
-                        { name: 'creators', title: 'Creators' },
-                        { name: 'coverage', title: 'Coverage' },
-                        { name: 'subjects', title: 'Subjects' },
-                        { name: 'keywords', title: 'Keywords' },
-                        { name: 'workareas', title: 'Workareas' },
-                        { name: 'language', title: 'Language' },
-                        { name: 'cataloger', title: 'Cataloger' },
-                    ]}
+                    columns={this.columns}
                 >
                     <ChippedTagsTypeProvider for={['creators', 'coverage', 'subjects', 'keywords', 'workareas', 'language', 'cataloger']} />
                     <FilteringState defaultFilters={[]} columnExtensions={[{columnName: 'content_file', filteringEnabled: false}]} />
-                    <IntegratedFiltering />
+                    <IntegratedFiltering columnExtensions={this.filterExtensions} />
                     <PagingState defaultCurrentPage={0} defaultPageSize={10} />
                     <IntegratedPaging />
                     <Table rowComponent={obj => {return this.tableRowComponent(obj, 'allFilesMenu')}} />
                     <TableColumnResizing
                         defaultColumnWidths={[
                             { columnName: 'name', width: 230 },
-                            { columnName: 'description', width: 250 },
-                            { columnName: 'creators', width: 420 },
-                            { columnName: 'coverage', width: 420 },
-                            { columnName: 'subjects', width: 420 },
-                            { columnName: 'keywords', width: 420 },
-                            { columnName: 'workareas', width: 420 },
+                            { columnName: 'description', width: 420 },
+                            { columnName: 'creators', width: 160 },
+                            { columnName: 'coverage', width: 160 },
+                            { columnName: 'subjects', width: 160 },
+                            { columnName: 'keywords', width: 160 },
+                            { columnName: 'workareas', width: 160 },
                             { columnName: 'language', width: 80 },
                             { columnName: 'cataloger', width: 80 },
+                            { columnName: 'updated_time', width: 80 },
                         ]} />
                     <TableHeaderRow />
-                    <TableFilterRow />
+                    <TableFilterRow cellComponent={this.getFilterCellComponent}/>
                     <PagingPanel pageSizes={[5, 10, 20]} />
                 </Grid>
                 <Menu
@@ -168,12 +221,10 @@ class FileListComponent extends React.Component {
                     anchorPosition={this.state.allFilesMenu.AnchorPos}
                     anchorReference={'anchorPosition'}
                     open={Boolean(this.state.allFilesMenu.AnchorPos)}
-                    onClose={evt => { console.log(evt); this.handleMenuClose(evt, 'allFilesMenu');}}
+                    onClose={evt => { this.handleMenuClose(evt, 'allFilesMenu');}}
                 >
                     <MenuItem
                         onClick={evt => {
-                            // this.handleMenuClose(evt, 'allFilesMenu');
-                            console.log('What the heck!');
                             this.editCallback(this.state.selectedFile);
                         }}
                     >
@@ -217,8 +268,30 @@ class FileListComponent extends React.Component {
                         </Button>
                     </DialogActions>
                 </Dialog>
+                <Snackbar
+                    anchorOrigin={{
+                        vertical: 'bottom',
+                        horizontal: 'left',
+                    }}
+                    open={Boolean(this.state.message)}
+                    onClose={this.handleCloseSnackbar}
+                    message={<span>{this.state.message}</span>}
+                    SnackbarContentProps={{
+                        "style": this.getErrorClass()
+                    }}
+                />
             </React.Fragment>
         );
+    }
+    getErrorClass() {
+        return this.state.messageType === "error" ? {backgroundColor: '#B71C1C', fontWeight: 'normal'} : {};
+    }
+
+    handleCloseSnackbar() {
+        this.setState({
+            message: null,
+            messageType: 'info'
+        })
     }
 }
 module.exports = FileListComponent;

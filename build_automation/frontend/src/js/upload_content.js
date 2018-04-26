@@ -7,6 +7,7 @@ import AutoCompleteWithChips from './autocomplete.js';
 import TextField from 'material-ui/TextField';
 import { DatePicker } from 'material-ui-pickers';
 import {APP_URLS, get_url} from "./url";
+import Snackbar from 'material-ui/Snackbar';
 import DateFnsUtils from 'material-ui-pickers/utils/date-fns-utils';
 import MuiPickersUtilsProvider from 'material-ui-pickers/utils/MuiPickersUtilsProvider';
 import {ChevronLeft, ChevronRight} from 'material-ui-icons';
@@ -55,7 +56,9 @@ class UploadContent extends React.Component{
             contentFile: null,
             contentFileName: props.content.originalFileName ? props.content.originalFileName : '',
         };
+        this.tags = props.allTags;
         this.tagNameTagMap = this.buildTagNameTagMap(props.allTags);
+        this.handleCloseSnackbar = this.handleCloseSnackbar.bind(this);
         this.handleDateChange=this.handleDateChange.bind(this);
         this.handleTagAddition=this.handleTagAddition.bind(this);
         this.handleCreatorAddition=this.handleCreatorAddition.bind(this);
@@ -75,6 +78,7 @@ class UploadContent extends React.Component{
         this.handleCatalogerDeletion=this.handleCatalogerDeletion.bind(this);
         this.handleFileSelection=this.handleFileSelection.bind(this);
         this.saveContent=this.saveContent.bind(this);
+        this.saveTag=this.saveTag.bind(this);
         this.saveCallback=props.onSave.bind(this);
     }
     buildTagIdTagsMap(tags) {
@@ -93,7 +97,6 @@ class UploadContent extends React.Component{
         return tagNameTagMap;
     }
     getAutoCompleteLabelsFromTagIds(boardInfo, tagIdsTagsMap) {
-        console.log('getautocomplete', boardInfo, tagIdsTagsMap)
         const retval = {};
         Object.keys(tagIdsTagsMap).forEach(eachTagType => {
             const selectedTagsForDir = boardInfo[eachTagType];
@@ -118,7 +121,7 @@ class UploadContent extends React.Component{
                 tags: response.data
             })
         }).catch(function (error) {
-            console.log(error);
+            console.error(error);
             // TODO : Show the error message.
         });
     }
@@ -137,24 +140,20 @@ class UploadContent extends React.Component{
         this.setState({ selectedDate: date });
     };
     handleTagAddition(tag, tagType){
-        console.log('Oh No!!!!!');
         this.setState((prevState, props) => {
             const selectedTags = prevState[tagType];
             const fieldErrors = prevState.fieldErrors;
             selectedTags.push(tag.name);
             fieldErrors[tagType] = null;
             const value = {[tagType]: selectedTags, fieldErrors};
-            console.log('Here\'s the value of \'value!', value);
             return value;
         })
     }
     handleTagDeletion(tag, tagType){
-        console.log('Oh No!!!!!');
         this.setState((prevState, props) => {
             const selectedTags = prevState[tagType];
-            selectedTags.splice(tag.name, 1);
+            selectedTags.splice(selectedTags.indexOf(tag.name), 1);
             const value = {[tagType]: selectedTags};
-            console.log('Here\'s the value of \'value!', value);
             return value;
         })
     }
@@ -232,7 +231,7 @@ class UploadContent extends React.Component{
     }
     formatDate(input) {
         const year = input.getFullYear();
-        let month = input.getMonth();
+        let month = input.getMonth()+1;
         if (month < 10) {
             month = '0' + month;
         }
@@ -249,19 +248,21 @@ class UploadContent extends React.Component{
         }
         var targetUrl = APP_URLS.CONTENTS_LIST;
         const selectedTags = this.getSelectedTags();
-        console.log(selectedTags);
         const payload = new FormData();
         payload.append('name', this.state.name);
         payload.append('description', this.state.description);
         selectedTags.creators.forEach(creator => {payload.append('creators', creator)});
-        payload.append('coverage', selectedTags.coverages[0]);
+        selectedTags.coverages.length>0 && payload.append('coverage', selectedTags.coverages[0]);
         selectedTags.subjects.forEach(subject => {payload.append('subjects', subject)});
         selectedTags.keywords.forEach(keyword => {payload.append('keywords', keyword)});
         selectedTags.workareas.forEach(workarea => {payload.append('workareas', workarea)});
-        payload.append('language', selectedTags.languages[0]);
-        payload.append('cataloger', selectedTags.catalogers[0]);
+        selectedTags.languages.length>0 && payload.append('language', selectedTags.languages[0]);
+        selectedTags.catalogers.length>0 && payload.append('cataloger', selectedTags.catalogers[0]);
         payload.append('updated_time', this.formatDate(this.state.selectedDate));
         Boolean(this.state.contentFile) && payload.append('content_file', this.state.contentFile);
+        Boolean(this.state.source) && payload.append('source', this.state.source);
+        Boolean(this.state.copyright) && payload.append('copyright', this.state.copyright);
+        Boolean(this.state.rightsStatement) && payload.append('rights_statement', this.state.rightsStatement);
         const currInstance = this;
         if (this.state.id > 0) {
             // Update an existing directory.
@@ -272,12 +273,9 @@ class UploadContent extends React.Component{
             }).then(function(response) {
                 currInstance.saveCallback(response.data, true);
             }).catch(function(error) {
-                console.error("Error in updating the directory", error);
+                console.error("Error in updating the content", error);
                 console.error(error.response.data);
-                let errorMsg = 'Error in updating the folder';
-                if (!(JSON.stringify(error.response.data).indexOf('DUPLICATE_DIRECTORY') === -1)) {
-                    errorMsg = (<React.Fragment><b>ERROR:</b> There is another folder under the same name within the current folder. Please change the name, and try again.</React.Fragment>);
-                }
+                let errorMsg = 'Error in updating the content';
                 currInstance.setState({
                     message: errorMsg,
                     messageType: 'error'
@@ -290,12 +288,9 @@ class UploadContent extends React.Component{
             }).then(function(response) {
                 currInstance.saveCallback(response.data, false);
             }).catch(function(error) {
-                console.error("Error in creating a new directory", error);
+                console.error("Error in uploading the content", error);
                 console.error(error.response.data);
-                let errorMsg = 'Error in creating the folder';
-                if (!(JSON.stringify(error.response.data).indexOf('DUPLICATE_DIRECTORY') === -1)) {
-                    errorMsg = (<React.Fragment><b>ERROR:</b> There is another folder under the same name within the current folder. Please change the name, and try again.</React.Fragment>);
-                }
+                let errorMsg = 'Error in uploading the content';
                 currInstance.setState({
                     message: errorMsg,
                     messageType: 'error'
@@ -318,6 +313,36 @@ class UploadContent extends React.Component{
             };
             newState.fieldErrors['file'] = null;
             return newState;
+        });
+    }
+
+    saveTag(tagName, url, tagType){
+        const payload = {name: tagName, description: tagName};
+        const currentInstance = this;
+        axios.post(url, payload, {responseType: 'json'}).then(function(response) {
+            currentInstance.tags[tagType].push(response.data);
+            currentInstance.tagIdsTagsMap[tagType][response.data.id] = response.data;
+            currentInstance.tagNameTagMap[tagType][response.data.name] = response.data;
+            currentInstance.setState((prevState, props) => {
+                const newState = {
+                    [tagType]: prevState[tagType],
+                    message: 'Metadata created',
+                    messageType: 'info',
+                };
+                newState[tagType].push(tagName);
+                return newState;
+            })
+        }).catch(function(error) {
+            console.error("Error in creating a new directory", error);
+            console.error(error.response.data);
+            let errorMsg = 'Error in creating the folder';
+            if (!(JSON.stringify(error.response.data).indexOf('DUPLICATE_DIRECTORY') === -1)) {
+                errorMsg = (<React.Fragment><b>ERROR:</b> There is another folder under the same name within the current folder. Please change the name, and try again.</React.Fragment>);
+            }
+            currInstance.setState({
+                message: errorMsg,
+                messageType: 'error'
+            });
         });
     }
 
@@ -358,9 +383,8 @@ class UploadContent extends React.Component{
                 </label>
                 <TextField
                     id="name"
-                    label="Name"
+                    label="Name *"
                     value={this.state.name}
-                    required={true}
                     error={this.state.fieldErrors.name ? true : false}
                     onChange={evt => this.handleTextFieldUpdate('name', evt)}
                     fullWidth
@@ -368,10 +392,9 @@ class UploadContent extends React.Component{
                 />
                 <TextField
                     id="description"
-                    label="Description"
+                    label="Description *"
                     multiline
                     fullWidth
-                    required={true}
                     error={this.state.fieldErrors.description ? true : false}
                     value={this.state.description}
                     onChange={evt => this.handleTextFieldUpdate('description', evt)}
@@ -393,7 +416,7 @@ class UploadContent extends React.Component{
                     Creator(s)
                 </Typography>
                 <span>
-                            <AutoCompleteWithChips suggestions={this.props.allTags['creators']}
+                            <AutoCompleteWithChips onAddNew={tag => this.saveTag(tag, APP_URLS.CREATORS_LIST, 'creators')} suggestions={this.props.allTags['creators']}
                                                    searchKey={'name'} selectedItem={this.state.creators}
                                                    onAddition={this.handleCreatorAddition} onDeletion={this.handleCreatorDeletion}/>
                         </span>
@@ -402,7 +425,7 @@ class UploadContent extends React.Component{
                     Coverage
                 </Typography>
                 <span>
-                            <AutoCompleteWithChips suggestions={this.props.allTags['coverages']}
+                            <AutoCompleteWithChips maxChips={1} suggestions={this.props.allTags['coverages']}
                                                    searchKey={'name'} selectedItem={this.state.coverages}
                                                    onAddition={this.handleCoverageAddition} onDeletion={this.handleCoverageDeletion}/>
                         </span>
@@ -420,7 +443,7 @@ class UploadContent extends React.Component{
                     Keywords
                 </Typography>
                 <span>
-                            <AutoCompleteWithChips suggestions={this.props.allTags['keywords']}
+                            <AutoCompleteWithChips onAddNew={tag => this.saveTag(tag, APP_URLS.KEYWORDS_LIST, 'keywords')} suggestions={this.props.allTags['keywords']}
                                                    searchKey={'name'} selectedItem={this.state.keywords}
                                                    onAddition={this.handleKeywordAddition} onDeletion={this.handleKeywordDeletion}/>
                         </span>
@@ -438,7 +461,7 @@ class UploadContent extends React.Component{
                     Language
                 </Typography>
                 <span>
-                            <AutoCompleteWithChips suggestions={this.props.allTags['languages']}
+                            <AutoCompleteWithChips maxChips={1} suggestions={this.props.allTags['languages']}
                                                    searchKey={'name'} selectedItem={this.state.languages}
                                                    onAddition={this.handleLanguageAddition} onDeletion={this.handleLanguageDeletion}/>
                         </span>
@@ -447,15 +470,14 @@ class UploadContent extends React.Component{
                     Cataloger
                 </Typography>
                 <span>
-                            <AutoCompleteWithChips suggestions={this.props.allTags['catalogers']} searchKey={'name'}
+                            <AutoCompleteWithChips maxChips={1} suggestions={this.props.allTags['catalogers']} searchKey={'name'}
                                                    selectedItem={this.state.catalogers}
                                                    onAddition={this.handleCatalogerAddition} onDeletion={this.handleCatalogerDeletion}/>
                         </span>
                 <TextField
                     id="source"
-                    label="Source"
+                    label="Source *"
                     value={this.state.source}
-                    required={true}
                     error={this.state.fieldErrors.source ? true : false}
                     onChange={evt => this.handleTextFieldUpdate('source', evt)}
                     fullWidth
@@ -463,9 +485,8 @@ class UploadContent extends React.Component{
                 />
                 <TextField
                     id="copyright"
-                    label="Copyright"
+                    label="Copyright *"
                     value={this.state.copyright}
-                    required={true}
                     error={this.state.fieldErrors.copyright ? true : false}
                     onChange={evt => this.handleTextFieldUpdate('copyright', evt)}
                     fullWidth
@@ -473,9 +494,8 @@ class UploadContent extends React.Component{
                 />
                 <TextField
                     id="rightsStatement"
-                    label="Rights Statement"
+                    label="Rights Statement *"
                     value={this.state.rightsStatement}
-                    required={true}
                     error={this.state.fieldErrors.rightsStatement ? true : false}
                     onChange={evt => this.handleTextFieldUpdate('rightsStatement', evt)}
                     fullWidth
@@ -486,9 +506,30 @@ class UploadContent extends React.Component{
                 </Button>
 
                 <div style={{marginTop: '20px'}}> </div>
-
+                <Snackbar
+                    anchorOrigin={{
+                        vertical: 'bottom',
+                        horizontal: 'left',
+                    }}
+                    open={Boolean(this.state.message)}
+                    onClose={this.handleCloseSnackbar}
+                    message={<span>{this.state.message}</span>}
+                    SnackbarContentProps={{
+                        "style": this.getErrorClass()
+                    }}
+                />
             </Grid>
         )
+    }
+    getErrorClass() {
+        return this.state.messageType === "error" ? {backgroundColor: '#B71C1C', fontWeight: 'normal'} : {};
+    }
+
+    handleCloseSnackbar() {
+        this.setState({
+            message: null,
+            messageType: 'info'
+        })
     }
 }
 module.exports = UploadContent;

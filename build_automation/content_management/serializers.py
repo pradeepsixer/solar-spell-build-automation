@@ -1,8 +1,11 @@
+import os
+
+from django.conf import settings
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
 
 from content_management.models import (
-    Cataloger, Content, Coverage, Creator, Directory, DirectoryLayout, Keyword, Language, Subject, Workarea
+    Build, Cataloger, Content, Coverage, Creator, Directory, DirectoryLayout, Keyword, Language, Subject, Workarea
 )
 
 
@@ -40,13 +43,17 @@ class ContentSerializer(serializers.ModelSerializer):
         content.name = validated_data.get('name', content.name)
         content.description = validated_data.get('description', content.description)
         content.content_file = validated_data.get('content_file', content.content_file)
-        content.creators.set(validated_data.get('creators', content.creators.all()))
+        content.creators.set(validated_data.get('creators', []))
         content.coverage = (validated_data.get('coverage', content.coverage))
-        content.subjects.set(validated_data.get('subjects', content.subjects.all()))
-        content.keywords.set(validated_data.get('keywords', content.keywords.all()))
-        content.workareas.set(validated_data.get('workareas', content.workareas.all()))
+        content.subjects.set(validated_data.get('subjects', []))
+        content.keywords.set(validated_data.get('keywords', []))
+        content.workareas.set(validated_data.get('workareas', []))
         content.language = (validated_data.get('language', content.language))
         content.cataloger = (validated_data.get('cataloger', content.cataloger))
+        content.updated_time = (validated_data.get('updated_time', content.updated_time))
+        content.source = (validated_data.get('source', content.source))
+        content.copyright = (validated_data.get('copyright', content.copyright))
+        content.rights_statement = (validated_data.get('rights_statement', content.rights_statement))
 
         return self.__create_update(content)
 
@@ -60,7 +67,9 @@ class ContentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Content
         fields = ('url', 'id', 'name', 'description', 'content_file', 'updated_time', 'last_uploaded_time', 'creators',
-                  'coverage', 'subjects', 'keywords', 'workareas', 'language', 'cataloger')
+                  'coverage', 'subjects', 'keywords', 'workareas', 'language', 'cataloger', 'original_file_name',
+                  'source', 'copyright', 'rights_statement')
+        read_only_fields = ('original_file_name',)
         extra_kwargs = {
             'url': {'lookup_field': 'pk'},
         }
@@ -252,6 +261,7 @@ class DirectoryLayoutSerializer(serializers.ModelSerializer):
 
 
 class DirectoryNameUniqueValidator(object):
+    # TODO : Move this class to a separate file.
     def __call__(self, directory):
         dir_name = directory.get('name')
         parent = directory.get('parent')
@@ -352,3 +362,33 @@ class DirectorySerializer(serializers.ModelSerializer):
         extra_kwargs = {
             'url': {'lookup_field': 'pk'},
         }
+
+
+class BuildSerializer(serializers.ModelSerializer):
+    build_file = serializers.SerializerMethodField()
+    end_time = serializers.SerializerMethodField()
+    start_time = serializers.SerializerMethodField()
+
+    TIME_FORMAT_STR = '%d %b %Y %I:%M:%S %p'
+
+    class Meta:
+        model = Build
+        fields = '__all__'
+        read_only_fields = ('build_file',)
+
+    def get_build_file(self, obj):
+        if obj.build_file is not None:
+            request = self.context['request']
+            file_url = os.path.join(settings.BUILDS_URL, obj.build_file)
+            return request.build_absolute_uri(file_url)
+        return None
+
+    def get_end_time(self, obj):
+        if obj.end_time is not None:
+            return obj.end_time.strftime(self.TIME_FORMAT_STR)
+        return None
+
+    def get_start_time(self, obj):
+        if obj.start_time is not None:
+            return obj.start_time.strftime(self.TIME_FORMAT_STR)
+        return None

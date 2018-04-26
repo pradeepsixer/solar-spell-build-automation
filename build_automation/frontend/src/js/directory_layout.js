@@ -235,72 +235,53 @@ class DirectoryLayoutComponent extends React.Component {
         });
 
         return retval;
-    };
-
-    buildFileIdFileMap(filesList) {
-        const fileIdFileMap = {};
-        filesList.forEach(eachFile => {
-            fileIdFileMap[eachFile.id] = eachFile;
-        });
-        return fileIdFileMap;
     }
 
     loadData() {
         const currInstance = this;
-        axios.get(APP_URLS.ALLTAGS_LIST, {
-            responseType: 'json'
-        }).then(function(response) {
-            currInstance.setState({
-                tags: response.data
-            })
-        }).catch(function(error) {
-            console.error(error);
-            console.error(error.response.data);
-        });
-        axios.get(APP_URLS.CONTENTS_LIST, {
-            responseType: 'json'
-        }).then(function(response) {
-            const fileIdFileMap = currInstance.buildFileIdFileMap(response.data);
-            currInstance.setState({
-                allFiles: response.data,
-                fileIdFileMap: fileIdFileMap
-            })
-        }).catch(function(error) {
-            console.error(error);
-            console.error(error.response.data);
-        });
-        axios.get(APP_URLS.DIRLAYOUT_LIST, {
-                responseType: 'json',
-            })
-            .then(function(response) {
-                const dirLayouts = response.data;
+        const allRequests = [];
+        allRequests.push(axios.get(APP_URLS.ALLTAGS_LIST, {responseType: 'json'}).then(function(response) {
+            return response;
+        }));
+        allRequests.push(axios.get(APP_URLS.CONTENTS_LIST, {responseType: 'json'}).then(function(response) {
+            const fileIdFileMap = buildMapFromArray(response.data, 'id');
+            return {
+                fileIdFileMap,
+                allFiles: response.data
+            };
+        }));
+        allRequests.push(axios.get(APP_URLS.DIRLAYOUT_LIST, {responseType: 'json'}));
+        allRequests.push(axios.get(APP_URLS.DIRECTORY_LIST, {responseType: 'json'}).then(function(response) {
+            currInstance.directoryIdDirectoryMap = buildMapFromArray(response.data, 'id');
+            return response;
+        }));
 
-                axios.get(APP_URLS.DIRECTORY_LIST, {
-                    responseType: 'json',
-                }).then(function(response) {
-                    const directories = response.data;
-                    currInstance.directoryIdDirectoryMap = buildMapFromArray(response.data, 'id');
-                    const transformedData = currInstance.transformDirectoriesToTreeData(dirLayouts, directories);
-                    dirLayouts.forEach(eachDirLayout => {
-                        eachDirLayout.isOpen = false;
-                    });
-                    currInstance.setState((prevState, props) => ({
-                        isLoaded: true,
-                        accordionData: dirLayouts,
-                        treeData: transformedData,
-                        infoBoardType: BOARD_TYPES.NONE,
-                        infoBoardData: {},
-                        breadCrumb: []
-                    }));
-                }).catch(function(error) {
-                    console.error('Error has occurred when trying to get the directories', error);
-                })
-
-            })
-            .catch(function(error) {
-                console.error('Error has occurred when trying to get the directory layouts.', error);
+        Promise.all(allRequests).then(function(values){
+            const tags = values[0].data;
+            const allFiles = values[1].allFiles;
+            const fileIdFileMap = values[1].fileIdFileMap;
+            const dirLayouts = values[2].data;
+            const directories = values[3].data;
+            const transformedData = currInstance.transformDirectoriesToTreeData(dirLayouts, directories);
+            dirLayouts.forEach(eachDirLayout => {
+                eachDirLayout.isOpen = false;
             });
-    };
+            currInstance.setState({
+                tags: tags,
+                allFiles: allFiles,
+                fileIdFileMap: fileIdFileMap,
+                isLoaded: true,
+                accordionData: dirLayouts,
+                treeData: transformedData,
+                infoBoardType: BOARD_TYPES.NONE,
+                infoBoardData: {},
+                breadCrumb: []
+            })
+        }).catch(function(error) {
+            console.error(error);
+            console.error(error.response.data);
+        });
+    }
 
     handleDirectoryLayoutClick(targetDirLayout, evt) {
         this.setState((prevState, props) => {

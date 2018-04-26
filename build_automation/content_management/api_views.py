@@ -2,20 +2,22 @@ import os
 
 from django.core.files.base import ContentFile
 from rest_framework import filters, status
-from rest_framework.mixins import CreateModelMixin, ListModelMixin
+from rest_framework.mixins import CreateModelMixin, ListModelMixin, RetrieveModelMixin
 from rest_framework.response import Response
 from rest_framework.reverse import reverse
 from rest_framework.viewsets import ModelViewSet, ViewSet
 
 from content_management.exceptions import DuplicateContentFileException
 from content_management.models import (
-    Cataloger, Content, Coverage, Creator, Directory, DirectoryLayout, Keyword, Language, Subject, Workarea
+    Build, Cataloger, Content, Coverage, Creator, Directory, DirectoryLayout, Keyword, Language, Subject, Workarea
 )
 from content_management.serializers import (
-    CatalogerSerializer, ContentSerializer, CoverageSerializer, CreatorSerializer, DirectoryLayoutSerializer,
-    DirectorySerializer, KeywordSerializer, LanguageSerializer, SubjectSerializer, WorkareaSerializer
+    BuildSerializer, CatalogerSerializer, ContentSerializer, CoverageSerializer, CreatorSerializer,
+    DirectoryLayoutSerializer, DirectorySerializer, KeywordSerializer, LanguageSerializer, SubjectSerializer,
+    WorkareaSerializer
 )
-from content_management.utils import DiskSpace
+from content_management.tasks import start_dirlayout_build
+from content_management.utils import DiskSpace, LibraryVersionBuildUtil
 
 
 class ContentApiViewset(ModelViewSet):
@@ -131,7 +133,7 @@ class DirectoryCloneApiViewSet(ViewSet, CreateModelMixin):
         self.__clone_directory_tree(None, cloned_layout, dir_queryset, None)
 
         serializer = DirectoryLayoutSerializer(cloned_layout, context={'request': request})
-        return Response(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def get_queryset(self, **kwargs):
         queryset = DirectoryLayout.objects.get(id=self.kwargs['id'])
@@ -184,6 +186,43 @@ class AllTagsApiViewSet(ViewSet, ListModelMixin):
             'catalogers': Cataloger.objects.all().values(),
         }
         return Response(response_data, status=status.HTTP_200_OK)
+
+
+class BuildLibraryVersionViewSet(ViewSet, CreateModelMixin, RetrieveModelMixin):
+    """
+    Start the build process on the
+    """
+
+    def create(self, request, *args, **kwargs):
+        build_util = LibraryVersionBuildUtil()
+        latest_build = build_util.get_latest_build()
+        if latest_build is None or latest_build.task_state == Build.TaskState.FINISHED:
+            dir_layout_id = self.kwargs['id']
+            start_dirlayout_build.delay(dir_layout_id)
+            return Response(
+                {
+                    'status': 'successful',
+                    'message': 'Build process has been successfully started'
+                }
+            )
+        else:
+            return Response(
+                {
+                    'status': 'failure',
+                    'message': 'Another build is already in progress. Please wait until it completes'
+                },
+                status=status.HTTP_409_CONFLICT
+            )
+
+    def list(self, request, *args, **kwargs):
+        build_util = LibraryVersionBuildUtil()
+        latest_build = build_util.get_latest_build()
+        if latest_build is None:
+            return Response([])
+        serializer = BuildSerializer(latest_build, context={'request': request})
+        return Response([
+            serializer.data
+        ])
 
 
 class DiskSpaceViewSet(ViewSet):
