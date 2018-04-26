@@ -4,6 +4,7 @@ import DirectoryLayoutComponent from './directory_layout.js';
 import ContentManagement from './content_management.js';
 import TagManagement from './tag_management';
 
+import BuildProcessComponent from './build_process.js';
 import Grid from 'material-ui/Grid';
 import Paper from 'material-ui/Paper';
 import Tabs, { Tab } from 'material-ui/Tabs';
@@ -63,6 +64,7 @@ class MainScreen extends React.Component {
                     {currentTab == 'dirlayout' && <DirectoryLayoutComponent />}
                     {currentTab == 'contents' && <ContentManagement />}
                     {currentTab == 'tags' && <TagManagement/>}
+                    {currentTab == 'builds' && <BuildProcessComponent />}
                 </Grid>
             </Grid>
             </React.Fragment>
