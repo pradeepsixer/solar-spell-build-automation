@@ -1,0 +1,170 @@
+{
+  "general": {
+    "root_dir": "./_public/",
+    "locale": "en_US",
+    "text_direction": "ltr",
+    "local_assets": true,
+    "concat_assets": false,
+    "enable_sort": true,
+    "enable_viewer": true,
+    "enable_search": true,
+    "enable_highlight": false,
+    "auto_highlight": false,
+    "autofocus_search": false,
+    "share_button": false,
+    "share_icons": false,
+    "hide_dotfiles": true,
+    "hide_extension": false,
+    "virtual_files": false,
+    "virtual_maxsize": 256,
+    "custom_title": "SPELL Content",
+    "read_chunks": false,
+    "enable_checksums": false,
+    "truncate_checksums": 8,
+    "give_kudos": false
+  },
+  "assets": {
+    "jquery_js": "assets/js/jquery.min.js",
+    "jquery_map": "assets/js/jquery.min.map",
+    "bootstrap_css": "assets/css/bootstrap.min.css",
+    "bootstrap_js": "assets/js/bootstrap.min.js",
+    "bootswatch_css": "assets/css/bootswatch.css",
+    "font_awesome": "assets/css/font-awesome.min.css",
+    "google_font": null,
+    "stupid_table": "assets/js/stupidtable.min.js",
+    "jquery_searcher": "assets/js/jquery.searcher.min.js",
+    "highlight_js": "assets/js/highlight.min.js",
+    "highlight_css": "assets/css/highlight.min.css",
+    "bootlint": "assets/js/bootlint.min.js",
+    "append_css": [
+      null
+    ],
+    "append_js": [
+      null
+    ]
+  },
+  "bootstrap": {
+    "fluid_grid": false,
+    "body_style": null,
+    "container_style": null,
+    "table_style": "table-hover",
+    "navbar_style": null,
+    "responsive_table": true,
+    "modal_style": "modal-lg",
+    "button_primary": "btn-primary",
+    "button_default": "btn-default",
+    "button_highlight": "btn-link",
+    "input_size": null,
+    "tablerow_folder": null,
+    "tablerow_links": null,
+    "tablerow_files": null,
+    "hidden_files_row": "text-muted",
+    "hidden_files_link": "text-muted",
+    "checksum_label": "label-default",
+    "alert_404": "alert-warning",
+    "theme": "cerulean",
+    "icons": "fa",
+    "fontawesome_style": ""
+  },
+  "viewer": {
+    "alt_load": false,
+    "audio": "m4a,mp3,oga,ogg,webma,wav",
+    "image": "gif,ico,jpe,jpeg,jpg,png,svg,webp",
+    "pdf": "pdf",
+    "quicktime": "3g2,3gp,3gp2,3gpp,mov,qt",
+    "source": "atom,bat,cmd,coffee,css,hml,js,json,less,markdown,md,php,pl,py,rb,rss,sass,scpt,scss,sh,ts,xml,yml",
+    "text": "diz,nfo,txt",
+    "video": "mp4,m4v,ogv,webm",
+    "virtual": "flickr,soundcloud,vimeo,youtube",
+    "website": "htm,html,mhtm,mhtml,xhtm,xhtml"
+  },
+  "highlight": {
+    "theme": "github",
+    "languages": [
+      "applescript",
+      "bash",
+      "coffeescript",
+      "css",
+      "dos",
+      "haml",
+      "javascript",
+      "json",
+      "less",
+      "markdown",
+      "perl",
+      "php",
+      "python",
+      "ruby",
+      "scss",
+      "typescript",
+      "xml",
+      "yaml"
+    ]
+  },
+  "keys": {
+    "dropbox": null,
+    "google_analytics": null
+  },
+  "icons": {
+    "fav_icon": null,
+    "iphone": null,
+    "iphone_retina": null,
+    "ipad": null,
+    "ipad_retina": null,
+    "metro_tile_color": null,
+    "metro_tile_image": null
+  },
+  "opengraph": {
+    "title": null,
+    "description": null,
+    "site_name": null,
+    "type": null,
+    "image": null
+  },
+  "columns": {
+    "count": true,
+    "size": true,
+    "age": false
+  },
+  "ignored_files": [
+    ".bzr",
+    ".DAV",
+    ".DS_Store",
+    ".git",
+    ".hg",
+    ".htaccess",
+    ".htpasswd",
+    ".listr",
+    ".Spotlight-V100",
+    ".svn",
+    "__MACOSX",
+    "ehthumbs.db",
+    "robots.txt",
+    "Thumbs.db",
+    "thumbs.tps"
+  ],
+  "hidden_files": [
+    ".bzrignore",
+    ".bzrtags",
+    ".gitattributes",
+    ".gitignore",
+    ".gitmodules",
+    ".hgignore",
+    ".hgtags",
+    ".htaccess",
+    ".htpasswd",
+    ".jshintrc",
+    ".npmignore"
+  ],
+  "checksum_files": [
+    "shasum",
+    "sha1sum",
+    "sha224sum",
+    "sha256sum",
+    "sha384sum",
+    "sha512sum"
+  ],
+  "debug": {
+    "bootlint": false
+  }
+}

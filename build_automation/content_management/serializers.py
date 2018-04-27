@@ -1,8 +1,12 @@
+import os
+
+from django.conf import settings
+from pytz import timezone
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
 
 from content_management.models import (
-    Cataloger, Content, Coverage, Creator, Directory, DirectoryLayout, Keyword, Language, Subject, Workarea
+    Build, Cataloger, Content, Coverage, Creator, Directory, DirectoryLayout, Keyword, Language, Subject, Workarea
 )
 
 
@@ -258,6 +262,7 @@ class DirectoryLayoutSerializer(serializers.ModelSerializer):
 
 
 class DirectoryNameUniqueValidator(object):
+    # TODO : Move this class to a separate file.
     def __call__(self, directory):
         dir_name = directory.get('name')
         parent = directory.get('parent')
@@ -358,3 +363,39 @@ class DirectorySerializer(serializers.ModelSerializer):
         extra_kwargs = {
             'url': {'lookup_field': 'pk'},
         }
+
+
+class BuildSerializer(serializers.ModelSerializer):
+    build_file = serializers.SerializerMethodField()
+    end_time = serializers.SerializerMethodField()
+    start_time = serializers.SerializerMethodField()
+
+    TIME_FORMAT_STR = '%d %b %Y %I:%M:%S %p'
+
+    class Meta:
+        model = Build
+        fields = '__all__'
+        read_only_fields = ('build_file',)
+
+    def get_build_file(self, obj):
+        if obj.build_file is not None:
+            request = self.context['request']
+            file_url = os.path.join(settings.BUILDS_URL, obj.build_file)
+            return request.build_absolute_uri(file_url)
+        return None
+
+    def get_end_time(self, obj):
+        if obj.end_time is not None:
+            local_time = self.__get_as_local_time(obj.end_time)
+            return local_time.strftime(self.TIME_FORMAT_STR)
+        return None
+
+    def get_start_time(self, obj):
+        if obj.start_time is not None:
+            local_time = self.__get_as_local_time(obj.start_time)
+            return local_time.strftime(self.TIME_FORMAT_STR)
+        return None
+
+    def __get_as_local_time(self, datetime_obj):
+        local_time_zone = timezone(settings.TIME_ZONE)
+        return datetime_obj.astimezone(local_time_zone)

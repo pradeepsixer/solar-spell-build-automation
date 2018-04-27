@@ -128,7 +128,21 @@ STATIC_ROOT = env.str('STATIC_ROOT')
 MEDIA_ROOT = env.str('MEDIA_ROOT')
 MEDIA_URL = '/media/'
 
+BUILDS_ROOT = 'build_automation/builds'
+BUILDS_URL = '/builds/'
+
 DEFAULT_FILE_STORAGE = 'content_management.storage.CustomFileStorage'
 FILE_DUPLICATION_MARKER = 'spell-cms-dup'
 
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+# Celery settings
+
+CELERY_BROKER_URL = "amqp://localhost//"
+
+# SolarSPELL LMS Settings
+TEMP_EXTRACTION_DIR = "build_automation/temp"
+
+CONTENT_DIRECTORY = "content/_public"  # The location of the content files within the web server's root.
+
+BUILD_ASSETS_DIR = "build_automation/build-assets"

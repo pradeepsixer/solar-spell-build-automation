@@ -1,8 +1,4 @@
 const APP_URLS = {
-    KEYWORDS_LIST:'/api/keywords/',
-    KEYWORDS_DETAIL:'/api/keywords/${id}/',
-    CREATORS_LIST:'/api/creators/',
-    CREATORS_DETAIL:'/api/creators/${id}/',
     CONTENTS_LIST: '/api/contents/',
     CONTENT_DETAIL: '/api/contents/${id}/',
     DIRLAYOUT_LIST: '/api/dirlayouts/',
@@ -24,7 +20,10 @@ const APP_URLS = {
     LANGUAGES_LIST:'/api/languages/',
     LANGUAGES_DETAIL:'/api/languages/${id}/',
     CATALOGERS_LIST:'/api/catalogers/',
-    CATALOGERS_DETAIL:'/api/catalogers/${id}/'
+    CATALOGERS_DETAIL:'/api/catalogers/${id}/',
+    START_BUILD: '/api/dirlayouts/${id}/build/',
+    VIEW_BUILD: '/api/builds/',
+    DISKSPACE: '/api/diskspace/'
 };
 
 function get_url(templateStringLiteral, context) {
