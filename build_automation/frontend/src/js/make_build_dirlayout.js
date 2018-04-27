@@ -28,49 +28,40 @@ class MakeBuildDirlayoutInfo extends React.Component{
     }
 
      componentWillReceiveProps(props) {
-        /*const data={
-            id: props.info.id,
-            name: props.info.name,
-            description: props.info.description,
-            currTime: new Date().toLocaleString(),
-            loaded: 6000,
-        }*/
         this.setState({
             id: props.info.id,
             name: props.info.name,
             description: props.info.description,
             confirmBuild: false,
-           // info: props.info
-           // data:data
         });
     }
 
     buildHandler(evt){
-        //call api
-       // evt.preventDefault();
-       // this.props.handlerFromParent(this.state.data)
         const url = get_url(APP_URLS.START_BUILD, {id: this.state.id});
         const currentInstance = this;
         axios.post(url, {}, {
             responseType: 'json'
         }).then(function(response) {
-            if(response.data.message == "success"){
+            if(response.data.status == "successful"){
                 currentInstance.setState({
                     message: 'Build started successfully',
                     messageType: 'info'
                 });
             }
-            else{
+
+        }).catch(function(error) {
+             if(error.response.data.status && error.response.data.status == "failure"){
                 currentInstance.setState({
-                    message: 'Another build in Progress. Please try again later.',
+                    message: error.response.data.message,
                     messageType: 'error'
                 });
             }
-        }).catch(function(error) {
-            currentInstance.setState({
-                    message: 'There is an error while starting the build',
-                    messageType: 'error'
-                });
+            else{
+                currentInstance.setState({
+                        message: 'There is an error while starting the build',
+                        messageType: 'error'
+                    });
+            }
         })
     }
 

@@ -2,11 +2,11 @@ import axios from 'axios';
 import React from 'react';
 
 import { AutoComplete } from 'material-ui';
-import Radio, { RadioGroup } from 'material-ui/Radio';
+import { FormLabel, FormControl, FormControlLabel, FormHelperText } from 'material-ui/Form';
 import Grid from 'material-ui/Grid';
 import ListSubheader from 'material-ui/List/ListSubheader';
 import List, { ListItem, ListItemIcon, ListItemText } from 'material-ui/List';
-import { FormLabel, FormControl, FormControlLabel, FormHelperText } from 'material-ui/Form';
+import Radio, { RadioGroup } from 'material-ui/Radio';
 
 import { APP_URLS } from './url.js';
 import MakeBuildDirlayoutInfo from './make_build_dirlayout.js';
@@ -22,7 +22,6 @@ class MakeBuildComponent extends React.Component{
     };
 
     this.handleClick = this.handleClick.bind(this)
-  //  this.handleData = this.handleData.bind(this)
     }
 
     componentDidMount() {
@@ -37,12 +36,9 @@ class MakeBuildComponent extends React.Component{
     }
 
     handleClick(layout, event){
-        console.log("clicked")
-        console.log(layout)
         this.setState({
             currentLayout: event.target.value,
             info:layout});
-       // console.log(this.state.info);
     }
 
     loadData() {
@@ -55,9 +51,8 @@ class MakeBuildComponent extends React.Component{
                 dirLayouts:dirLayouts,
                 isLoaded:true
             });
-            console.log(currInstance.state.dirLayouts);
         }).catch(function(error) {
-            console.log(error);
+            console.error(error)
         });
     };
 
@@ -96,15 +91,6 @@ class MakeBuildComponent extends React.Component{
                 <div>Loading...</div>
             )
         }
-       /* return(
-            *//*<div className="container2">
-                <p> Directory Layouts </p>
-                <div className="container1">
-                    {this.state.dirLayouts}
-                </div>
-            </div>*//*
-
-        )*/
         return elements;
     }
 }

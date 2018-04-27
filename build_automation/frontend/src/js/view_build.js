@@ -1,12 +1,11 @@
 import axios from 'axios';
 import React from 'react';
 
+import Checkbox from 'material-ui/Checkbox';
+import { FormGroup, FormControlLabel } from 'material-ui/Form';
 import Grid from 'material-ui/Grid';
 import ListSubheader from 'material-ui/List/ListSubheader';
 import List, { ListItem, ListItemIcon, ListItemText } from 'material-ui/List';
-import Checkbox from 'material-ui/Checkbox';
-import { FormGroup, FormControlLabel } from 'material-ui/Form';
-import { CircularProgress } from 'material-ui/Progress';
 import PropTypes from 'prop-types';
 import Typography from 'material-ui/Typography';
 
@@ -26,7 +25,8 @@ class ViewBuildComponent extends React.Component{
             hidden:"hidden",
             isLoaded: false,
             noOfBuilds: 0,
-            data: []
+            data: [],
+            completionState: true
         };
         this.handleCheckChange = this.handleCheckChange.bind(this)
     }
@@ -35,111 +35,104 @@ class ViewBuildComponent extends React.Component{
     }
 
     componentDidMount() {
-        this.timerID = setTimeout(
-            () => this.loadData(),
-            1000
-        );
+        this.loadData();
 
-        /*const that = this;
-        setTimeout(
-            () => that.show(),
-            that.props.built.loaded
-        );*/
-        setInterval(
+        this.intervalId = setInterval(
             () => this.loadData(),
             10000
         );
-
     }
 
-   /* show(){
-       console.log("show")
-       this.setState({
-           hidden : "",
-           isLoaded : true
-       });
-       console.log(this.state.isLoaded);
-    }*/
-
     componentWillUnmount() {
-        clearTimeout(this.timerID);
+        clearInterval(this.intervalId);
     }
 
     handleCheckChange(){
-        console.log("clicked");
     }
 
-
     loadData() {
-        console.log("called every 10 seconds")
         const currInstance = this;
         axios.get(APP_URLS.VIEW_BUILD, {
             responseType: 'json'
         }).then(function(response) {
+            currInstance.setState({
+                isLoaded:true,
+                completionState:true
+            })
             if(response.data.length == 0){
                 currInstance.setState({
                     noOfBuilds : 0
                 })
             }
-            else if(response.data.task_state == 1){
-                //building in process status message
+            else if(response.data[0].task_state == 1){
                 currInstance.setState({
-                   isLoaded : false,
+                   isLoaded : true,
                    noOfBuilds : -1
                 });
             }
-            else if(response.data.task_state == 2){
-                const latestBuild = response.data;
-                //currInstance.setState({latestBuild:latestBuild});
-                //console.log(currInstance.state.latestBuild);
-                let file = decodeURI(currInstance.state.latestBuild.build_file)
-                let str = name.split(" ");
-                let name = str[str.length - 1];
-                const res = name.replace((/\d{4}[-]\d{1,2}[-]\d{1,2} \d{2}:\d{2}:\d{2}[.]\d{6}\.tar\.gz/i)," ");
+            else if(response.data[0].task_state == 2){
+                if(response.data[0].completion_state == 1){
+                    const latestBuild = response.data[0];
+                    currInstance.setState({latestBuild:latestBuild});
+                    let build_file = currInstance.state.latestBuild.build_file
+                    let build_split = build_file.split("/")
+                    let file_name = build_split[build_split.length - 1]
+                    let file = decodeURI(file_name)
+                    const res = file.replace((/ \d{4}[_]\d{2}[_]\d{2} \d{2}[_]\d{2}[_]\d{2}\.tar\.gz/i),"");
 
-                currInstance.setState({
-                   latestBuild:latestBuild,
-                   isLoaded : true,
-                   noOfBuilds: 1,
-                   name: res
-                });
-                const data={
-                    name: currInstance.state.name,
-                    currTime: currInstance.state.latestBuild.end_time,
-                    download: currInstance.state.latestBuild.build_file
+                    currInstance.setState({
+                       isLoaded : true,
+                       noOfBuilds: 1,
+                       name: res
+                    });
+                    const data={
+                        name: currInstance.state.name,
+                        currTime: currInstance.state.latestBuild.end_time,
+                        download: currInstance.state.latestBuild.build_file
+                    }
+                     currInstance.setState({
+                       data:data
+                    });
+                    const styles = {
+                              block: {
+                                maxWidth: 250,
+                              },
+                              checkbox: {
+                                marginBottom: 16,
+                              },
+                            };
+                    const currBuild = (
+                        <div>
+                            <Typography variant="headline" gutterBottom>
+                                {currInstance.state.name}
+                            </Typography>
+                        </div>
+                    )
+
+                        currInstance.setState({currBuild:currBuild});
                 }
-                 currInstance.setState({
-                   data:data
-                });
-                const styles = {
-                          block: {
-                            maxWidth: 250,
-                          },
-                          checkbox: {
-                            marginBottom: 16,
-                          },
-                        };
-                const currBuild = (
-                    <div>
-                        <Typography variant="display1" gutterBottom>
-                            {this.state.name}
-                        </Typography>
-                    </div>
-                )
-
-                    currInstance.setState({currBuild:currBuild});
-                    console.log(currInstance.state.currBuild);
+                else if(response.data[0].completion_state == 2){
+                    currInstance.setState({
+                        completionState:false
+                    })
             }
+        }
 
         }).catch(function(error) {
-            console.log(error);
+            console.error(error)
         });
     };
 
     render(){
         var elements=null
-        //const { classes } = this.props;
-        if(this.state.isLoaded){
+        if(this.state.isLoaded && !this.state.completionState){
+            elements = (
+                <div>
+                    Build Failed. Please try building again..
+                </div>
+            )
+        }
+        else if(this.state.isLoaded && this.state.noOfBuilds > 0){
             elements=(
                 <Grid container spacing={8}>
                     <Grid item xs={3} style={{paddingLeft: '20px'}}>
@@ -159,7 +152,7 @@ class ViewBuildComponent extends React.Component{
                 </Grid>
             )
         }
-        else if(this.state.noOfBuilds == 0){
+        else if(this.state.isLoaded && this.state.noOfBuilds == 0){
             elements = (
                 <div>
                    <Typography variant="display1" gutterBottom>
@@ -169,11 +162,20 @@ class ViewBuildComponent extends React.Component{
                 </div>
             )
         }
+        else if(this.state.isLoaded && this.state.noOfBuilds == -1){
+            elements = (
+                <div>
+                   <Typography variant="display1" gutterBottom>
+                            Build in progress..
+                   </Typography>
+
+                </div>
+            )
+        }
         else if(!this.state.isLoaded){
             elements = (
                 <div>
-                    Building...Please wait <CircularProgress/>
-
+                    Loading..
                 </div>
             )
         }
@@ -181,11 +183,5 @@ class ViewBuildComponent extends React.Component{
         return elements;
     }
 }
-
-/*
-ViewBuildComponent.propTypes = {
-      classes: PropTypes.object.isRequired,
-};
-*/
 
 module.exports = ViewBuildComponent
