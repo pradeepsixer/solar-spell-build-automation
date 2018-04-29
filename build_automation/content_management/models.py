@@ -5,14 +5,15 @@ from django.urls import reverse  # Used to generate URLs by reversing the URL pa
 
 
 class AbstractTag(models.Model):
-    name = models.CharField(max_length=50, unique=True)
-    description = models.CharField(max_length=200, null=True)
+    name = models.CharField(max_length=100, unique=True)
+    description = models.CharField(max_length=2000, null=True)
 
     class Meta:
         abstract = True
 
 
 class Creator(AbstractTag):
+    name = models.CharField(max_length=300, unique=True)
 
     def get_absolute_url(self):
         return reverse('creator-detail', args=[str(self.id)])
@@ -105,7 +106,7 @@ class Content(models.Model):
     """
     A content is the representation of a file.
     """
-    name = models.CharField(max_length=50)
+    name = models.CharField(max_length=300)
 
     description = models.TextField()
 
@@ -142,7 +143,7 @@ class Content(models.Model):
     cataloger = models.ForeignKey(Cataloger, on_delete=models.SET_NULL, null=True)
     original_file_name = models.CharField(max_length=300, null=True)
     source = models.CharField(max_length=2000, null=True)
-    copyright = models.CharField(max_length=100, null=True)
+    copyright = models.CharField(max_length=500, null=True)
     rights_statement = models.TextField(null=True)
 
     def __init__(self, *args, **kwargs):
@@ -168,8 +169,8 @@ class DirectoryLayout(models.Model):
     """
     The Directory Layout for each build.
     """
-    name = models.CharField(max_length=50, unique=True)
-    description = models.CharField(max_length=200, null=True)
+    name = models.CharField(max_length=100, unique=True)
+    description = models.CharField(max_length=2000, null=True)
     banner_file = models.FileField(upload_to=set_original_name)
     original_file_name = models.CharField(max_length=200, null=True)
 
@@ -195,7 +196,7 @@ class Directory(models.Model):
     """
     Representation of the directory for each build.
     """
-    name = models.CharField(max_length=50)
+    name = models.CharField(max_length=100)
     dir_layout = models.ForeignKey(DirectoryLayout, related_name='directories', on_delete=models.CASCADE)
     parent = models.ForeignKey('self', related_name='subdirectories', on_delete=models.CASCADE, null=True)
     banner_file = models.FileField(upload_to=set_original_name, null=True)
