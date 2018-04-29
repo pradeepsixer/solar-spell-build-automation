@@ -214,13 +214,13 @@ class Directory(models.Model):
 
     # Whether All of the specificed tags should be present in the content, or atleast one is needed.
     # Represent ALL or ANY of the UI state.
-    creators_need_all = models.BooleanField(default=True)
-    coverages_need_all = models.BooleanField(default=True)
-    subjects_need_all = models.BooleanField(default=True)
-    keywords_need_all = models.BooleanField(default=True)
-    workareas_need_all = models.BooleanField(default=True)
-    languages_need_all = models.BooleanField(default=True)
-    catalogers_need_all = models.BooleanField(default=True)
+    creators_need_all = models.BooleanField(default=False)
+    coverages_need_all = models.BooleanField(default=False)
+    subjects_need_all = models.BooleanField(default=False)
+    keywords_need_all = models.BooleanField(default=False)
+    workareas_need_all = models.BooleanField(default=False)
+    languages_need_all = models.BooleanField(default=False)
+    catalogers_need_all = models.BooleanField(default=False)
 
     banner_file_uploaded = False
 
