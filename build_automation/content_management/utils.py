@@ -70,12 +70,14 @@ class LibraryVersionBuildUtil:
                 banner_path = os.path.join("img", os.path.basename(directory_layout.banner_file.name))
                 build_tar.add(directory_layout.banner_file.path, arcname=banner_path)
 
+                copied_files = set()
+
                 for each_top_dir in top_dirs:
                     # Directory's Banner Image
 
                     self.__build_files_list(
                         each_top_dir, build_tar, '', self.ROOT_DIR_NAV_PREFIX,
-                        folder_list, 1, menu_list
+                        folder_list, 1, menu_list, copied_files
                     )
 
                 template_ctxt['folder_list'] = folder_list
@@ -149,7 +151,9 @@ class LibraryVersionBuildUtil:
 
         latest_build.save()
 
-    def __build_files_list(self, directory, build_file, dir_path, root_dir, folder_list, menu_level, menu_list=None):
+    def __build_files_list(
+        self, directory, build_file, dir_path, root_dir, folder_list, menu_level, menu_list, copied_files
+    ):
         """
         Walk through the directory structure, and build the build file.
         :param directory: Directory to walk through.
@@ -188,10 +192,13 @@ class LibraryVersionBuildUtil:
 
         for subdir in directory.subdirectories.all():
             if current_menu is None:
-                self.__build_files_list(subdir, build_file, dir_path, root_dir, folder_list, menu_level+1, None)
+                self.__build_files_list(
+                    subdir, build_file, dir_path, root_dir, folder_list, menu_level+1, None, copied_files
+                )
             else:
                 self.__build_files_list(
-                    subdir, build_file, dir_path, root_dir, folder_list, menu_level+1, current_menu['submenu_list']
+                    subdir, build_file, dir_path, root_dir, folder_list, menu_level+1,
+                    current_menu['submenu_list'], copied_files
                 )
 
         individual_files = directory.individual_files.all()
@@ -215,7 +222,9 @@ class LibraryVersionBuildUtil:
             matching_contents = Content.objects.filter(entire_filter_criteria)
 
             for each_content in matching_contents:
-                (is_zip_file, zip_file_name) = self.__copy_content_file(build_file, each_content, dir_path, root_dir)
+                (is_zip_file, zip_file_name) = self.__copy_content_file(
+                    build_file, each_content, dir_path, root_dir, copied_files
+                )
                 if is_zip_file:
                     folder_list[-1]['path'] = zip_file_name
                     folder_list[-1]['files_at_root'] = True
@@ -223,7 +232,7 @@ class LibraryVersionBuildUtil:
                         current_menu['path'] = zip_file_name
                         current_menu['files_at_root'] = True
 
-    def __copy_content_file(self, build_file, content, dir_path, root_dir):
+    def __copy_content_file(self, build_file, content, dir_path, root_dir, copied_files):
         # The name of the file as is in the filesystem.
         actual_file_name = content.content_file.name
 
@@ -253,7 +262,10 @@ class LibraryVersionBuildUtil:
             link_path = os.path.join(settings.CONTENT_DIRECTORY, dir_path, original_file_name)
             dest_path = os.path.join(self.ALL_FILES_PREFIX, os.path.basename(actual_file_name))
 
-            build_file.add(content.content_file.path, arcname=dest_path)
+            if content.checksum not in copied_files:
+                build_file.add(content.content_file.path, arcname=dest_path)
+                copied_files.add(content.checksum)
+
             link_to_file = tarfile.TarInfo(link_path)
             link_to_file.type = tarfile.SYMTYPE
             link_to_file.linkname = os.path.join(root_dir, dest_path)
