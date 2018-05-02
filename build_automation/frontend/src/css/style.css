@@ -27,8 +27,7 @@ body {
 }
 
 .spellLogo {
-    width: 125px;
-    height: 65px;
+    height: 55px;
 }
 
 /* React Sortable Tree - Display hand pointer when hovering over the row. */

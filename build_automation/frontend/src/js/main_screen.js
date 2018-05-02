@@ -76,7 +76,7 @@ class MainScreen extends React.Component {
             <React.Fragment>
             <Grid container style={{backgroundColor: '#2196f3', height: '100px', flexGrow: 1, overflow: 'hidden'}} justify="center">
                 <Grid item xs={12}>
-                    <Grid container justify="center" alignItems="flex-end" style={{height: '100%'}}>
+                    <Grid container justify="center" alignItems="center" style={{height: '100%'}}>
                         <Grid item>
                             <img src={solarSpellLogo} className="spellLogo" />
                         </Grid>
