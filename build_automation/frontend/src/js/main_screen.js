@@ -96,7 +96,7 @@ class MainScreen extends React.Component {
                             <Tab value="tags" label="Metadata" />
                             <Tab value="contents" label="Contents" />
                             <Tab value="dirlayout" label="Library Versions" />
-                            <Tab value="builds" label="Builds" />
+                            <Tab value="images" label="SolarSPELL Images" />
                             { this.state.showBadge ? (<Tab value="sysinfo" label= {
                                                     <Badge className= {classes.padding} color="secondary" badgeContent={'!'}>
                                                     System Info
@@ -112,7 +112,7 @@ class MainScreen extends React.Component {
                     {currentTab == 'dirlayout' && <DirectoryLayoutComponent />}
                     {currentTab == 'contents' && <ContentManagement />}
                     {currentTab == 'tags' && <TagManagement/>}
-                    {currentTab == 'builds' && <BuildProcessComponent />}
+                    {currentTab == 'images' && <BuildProcessComponent />}
                     {currentTab == 'sysinfo' && <DiskSpace/>}
                 </Grid>
             </Grid>

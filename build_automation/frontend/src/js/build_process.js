@@ -32,8 +32,8 @@ class BuildProcessComponent extends React.Component{
                             value={currentTab}
                             onChange={this.handleTabClick}
                         >
-                            <Tab value="makebuild" label="Make Build" />
-                            <Tab value="viewbuild" label="View Build" />
+                            <Tab value="makebuild" label="Make Image" />
+                            <Tab value="viewbuild" label="View Latest Image" />
                         </Tabs>
                     </Paper>
                 </Grid>
