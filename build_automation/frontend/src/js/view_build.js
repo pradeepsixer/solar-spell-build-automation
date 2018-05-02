@@ -128,7 +128,7 @@ class ViewBuildComponent extends React.Component{
         if(this.state.isLoaded && !this.state.completionState){
             elements = (
                 <div>
-                    Build Failed. Please try building again..
+                    Image Creation Failed. Please try again..
                 </div>
             )
         }
@@ -137,7 +137,7 @@ class ViewBuildComponent extends React.Component{
                 <Grid container spacing={8}>
                     <Grid item xs={3} style={{paddingLeft: '20px'}}>
                         <List component="nav">
-                                <ListSubheader disableSticky component="div">Current Build</ListSubheader>
+                                <ListSubheader disableSticky component="div">Latest Image Created</ListSubheader>
                                     <div className="container1">
                                         {this.state.currBuild}
                                     </div>
@@ -156,7 +156,7 @@ class ViewBuildComponent extends React.Component{
             elements = (
                 <div>
                    <Typography variant="display1" gutterBottom>
-                            No Builds are currently available.
+                            No Images are currently available.
                    </Typography>
 
                 </div>
@@ -166,7 +166,7 @@ class ViewBuildComponent extends React.Component{
             elements = (
                 <div>
                    <Typography variant="display1" gutterBottom>
-                            Build in progress..
+                            Image Creation in progress..
                    </Typography>
 
                 </div>

@@ -40,7 +40,7 @@ class DownloadBuild extends React.Component{
                   margin="normal"
                 />
                 <Button variant="raised" color="primary" onClick={evt => window.open(this.state.download, "_blank")}>
-                    Download Build
+                    Download Image
                 </Button>
             </div>
         )
