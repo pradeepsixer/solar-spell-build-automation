@@ -1,0 +1,34 @@
+# Names of nodes to start
+#   most people will only start one node:
+CELERYD_NODES="worker1"
+
+# Absolute or relative path to the 'celery' command:
+CELERY_BIN="/opt/solarspell-lms/venv/bin/celery"
+
+# App instance to use
+CELERY_APP="content_management.tasks:app"
+
+# Where to chdir at start.
+CELERYD_CHDIR="/opt/solarspell-lms/build_automation/"
+
+# Extra command-line arguments to the worker
+CELERYD_OPTS="--time-limit=300 --concurrency=8"
+# Configure node-specific settings by appending node name to arguments:
+#CELERYD_OPTS="--time-limit=300 -c 8 -c:worker2 4 -c:worker3 2 -Ofair:worker1"
+
+# Set logging level to DEBUG
+#CELERYD_LOG_LEVEL="DEBUG"
+
+# %n will be replaced with the first part of the nodename.
+CELERYD_LOG_FILE="/var/log/celery/%n%I.log"
+CELERYD_PID_FILE="/var/run/celery/%n.pid"
+
+# Workers should run as an unprivileged user.
+#   You need to create this user manually (or you can choose
+#   a user/group combination that already exists (e.g., nobody).
+CELERYD_USER="solarspell"
+CELERYD_GROUP="solarspell"
+
+# If enabled pid and log directories will be created if missing,
+# and owned by the userid/group configured.
+CELERY_CREATE_DIRS=1
