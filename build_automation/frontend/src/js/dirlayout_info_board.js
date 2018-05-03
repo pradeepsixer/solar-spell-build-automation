@@ -282,7 +282,7 @@ class DirlayoutInfoBoard extends React.Component {
                     <DialogTitle id="alert-dialog-title">{"Confirm Delete?"}</DialogTitle>
                     <DialogContent>
                         <DialogContentText id="alert-dialog-description">
-                            Are you sure you want to delete the directory layout {this.state.name}?
+                            Are you sure you want to delete the library version <b> {this.state.name} </b>?
                         </DialogContentText>
                     </DialogContent>
                     <DialogActions>

@@ -596,7 +596,7 @@ class DirectoryInfoBoard extends React.Component {
                     <DialogTitle id="alert-dialog-title">{"Confirm Delete?"}</DialogTitle>
                     <DialogContent>
                         <DialogContentText id="alert-dialog-description">
-                            Are you sure you want to delete the directory {this.state.name}?
+                            Are you sure you want to delete the folder <b>{this.state.name}</b>?
                         </DialogContentText>
                     </DialogContent>
                     <DialogActions>
