@@ -224,6 +224,10 @@ class Directory(models.Model):
 
     banner_file_uploaded = False
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.existing_banner_file = self.banner_file
+
     def __str__(self):
         return "Directory[{}]".format(self.name)
 

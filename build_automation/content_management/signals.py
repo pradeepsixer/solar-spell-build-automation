@@ -5,7 +5,7 @@ from django.dispatch import receiver
 from django.utils import timezone
 
 from .exceptions import DuplicateContentFileException
-from .models import Content, DirectoryLayout
+from .models import Content, Directory, DirectoryLayout
 from .utils import HashUtil
 
 
@@ -82,7 +82,7 @@ def delete_banner_file_after_model_deletion(sender, **kwargs):
         os.remove(dir_layout.banner_file.path)
 
 
-@receiver(pre_save, sender=DirectoryLayout)
+@receiver(pre_save, sender=Directory)
 def delete_dir_banner_file_on_change(sender, **kwargs):
     """
     Delete the Directory's existing banner file, when a new banner is uploaded.
@@ -100,7 +100,7 @@ def delete_dir_banner_file_on_change(sender, **kwargs):
                 os.remove(current_banner_path)
 
 
-@receiver(post_delete, sender=DirectoryLayout)
+@receiver(post_delete, sender=Directory)
 def delete_dir_banner_file_after_model_deletion(sender, **kwargs):
     """
     Delete the model file after the Directory has been deleted.
