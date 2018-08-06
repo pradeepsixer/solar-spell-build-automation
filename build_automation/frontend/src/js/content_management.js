@@ -2,6 +2,7 @@ import React from 'react';
 import Button from 'material-ui/Button';
 import Grid from 'material-ui/Grid';
 import UploadContent from './upload_content';
+import UploadCSV from './upload_csv';
 import Snackbar from 'material-ui/Snackbar';
 import FileListComponent from './file_list_component';
 import {buildMapFromArray} from './utils';
@@ -44,6 +45,7 @@ class ContentManagement extends React.Component{
         this.tagIdTagsMap = {};
         this.handleFileDelete = this.handleFileDelete.bind(this);
         this.saveContentCallback = this.saveContentCallback.bind(this);
+        this.saveCSVCallback = this.saveCSVCallback.bind(this);
         this.uploadNewFile = this.uploadNewFile.bind(this);
         this.handleContentEdit = this.handleContentEdit.bind(this);
         this.handleCloseSnackbar = this.handleCloseSnackbar.bind(this);
@@ -134,6 +136,31 @@ class ContentManagement extends React.Component{
             console.error(error);
         });
     }
+
+    saveCSVCallback(content, updated){
+        const currInstance = this;
+
+        console.log("Save callack called");
+        axios.get(APP_URLS.ALLTAGS_LIST, {
+            responseType: 'json'
+        }).then(function (response) {
+            currInstance.tagIdTagsMap=currInstance.buildTagIdTagsMap(response.data);
+            currInstance.setState((prevState, props)=>{
+                    files.push(content);
+
+                return {
+                    message: 'Save Successful',
+                    messageType: 'info',
+                    currentView: 'manage',
+                    files,
+                    tags: response.data
+                }
+            })
+        }).catch(function (error) {
+            console.error(error);
+        });
+    }
+
     uploadNewFile(){
         this.setState({
             currentView: 'upload',
@@ -156,6 +183,30 @@ class ContentManagement extends React.Component{
             }
         })
     }
+
+    uploadNewSpreadsheet(){
+        this.setState({
+            currentView: 'uploadcsv',
+            content: {
+                id: -1,
+                name: "",
+                description: "",
+                creators: [],
+                coverages: [],
+                subjects: [],
+                keywords: [],
+                workareas: [],
+                languages: [],
+                catalogers: [],
+                updatedDate: new Date(),
+                source: "",
+                copyright: "",
+                rightsStatement: "",
+                originalFileName: ""
+            }
+        })
+    }
+
     handleContentEdit(content){
         this.setState({
             currentView: 'upload',
@@ -195,6 +246,10 @@ class ContentManagement extends React.Component{
                         <Button variant="raised" color="primary" onClick={e => {this.uploadNewFile()}}>
                             Add Content
                         </Button>
+                        <div style={{marginTop: '20px'}}> </div>
+                        <Button variant="raised" color="primary" onClick={e => {this.uploadNewSpreadsheet()}}>
+                        	  Upload Spreadsheet
+                        </Button>
                     </Grid>
 
                     <Grid item xs={8}>
@@ -202,6 +257,9 @@ class ContentManagement extends React.Component{
                                                                                                      onDelete={this.handleFileDelete} allFiles={this.state.files}
                                                                                                      tagIdsTagsMap={this.tagIdTagsMap} />}
                         {this.state.isLoaded && this.state.currentView=='upload'&&<UploadContent onSave={this.saveContentCallback}
+                                                                                                 tagIdsTagsMap={this.tagIdTagsMap} allTags={this.state.tags}
+                                                                                                 content={this.state.content}/>}
+                        {this.state.isLoaded && this.state.currentView=='uploadcsv'&&<UploadCSV onSave={this.saveCSVCallback}
                                                                                                  tagIdsTagsMap={this.tagIdTagsMap} allTags={this.state.tags}
                                                                                                  content={this.state.content}/>}
                         {!this.state.isLoaded && 'loading'}
