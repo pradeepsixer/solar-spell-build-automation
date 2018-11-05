@@ -1,17 +1,21 @@
 import axios from 'axios';
 import React from 'react';
 
-import Button from 'material-ui/Button';
-import Dialog, { DialogActions, DialogContent, DialogContentText, DialogTitle } from 'material-ui/Dialog';
-import Divider from 'material-ui/Divider';
-import Grid from 'material-ui/Grid';
-import { MenuItem } from 'material-ui/Menu';
-import Select from 'material-ui/Select';
-import Snackbar from 'material-ui/Snackbar';
-import TextField from 'material-ui/TextField';
-import Typography from 'material-ui/Typography';
+import Button from '@material-ui/core/Button';
+import Dialog from '@material-ui/core/Dialog';
+import DialogActions from '@material-ui/core/DialogActions';
+import DialogContent from '@material-ui/core/DialogContent';
+import DialogContentText from '@material-ui/core/DialogContentText';
+import DialogTitle from '@material-ui/core/DialogTitle';
+import Divider from '@material-ui/core/Divider';
+import Grid from '@material-ui/core/Grid';
+import MenuItem from '@material-ui/core/MenuItem';
+import Select from '@material-ui/core/Select';
+import Snackbar from '@material-ui/core/Snackbar';
+import TextField from '@material-ui/core/TextField';
+import Typography from '@material-ui/core/Typography';
 
-import OpenInNew from 'material-ui-icons/OpenInNew';
+import OpenInNew from '@material-ui/icons/OpenInNew';
 
 import SortableTree from 'react-sortable-tree';
 
@@ -361,12 +365,12 @@ class DirectoryInfoBoard extends React.Component {
         return (
             <Grid container spacing={24}>
                 <Grid item xs={12}>
-                    <Button variant="raised" color="primary" onClick={this.saveDirectory}>
+                    <Button variant="contained" color="primary" onClick={this.saveDirectory}>
                         Save
                     </Button>
                     {
                         this.state.id > 0 &&
-                        <Button variant="raised" color="secondary" onClick={this.confirmDeleteDirectory}>
+                        <Button variant="contained" color="secondary" onClick={this.confirmDeleteDirectory}>
                         Delete
                         </Button>
                     }
@@ -399,7 +403,7 @@ class DirectoryInfoBoard extends React.Component {
                         onChange={ this.handleBannerSelection }
                      />
                     <label htmlFor="raised-button-file">
-                        <Button variant="raised" component="span">
+                        <Button variant="contained" component="span">
                             Browse
                         </Button>
                     </label>
@@ -409,7 +413,7 @@ class DirectoryInfoBoard extends React.Component {
                                 className="handPointer" title="Open in new window"/>
                     }
                     <p></p>
-                    <Typography gutterBottom variant="headline" component="h2">
+                    <Typography gutterBottom variant="h5" component="h2">
                         Filter by Metadata
                     </Typography>
                     <Typography>
@@ -571,7 +575,7 @@ class DirectoryInfoBoard extends React.Component {
                     </Grid>
                     {
                         /*
-                    <Typography gutterBottom variant="subheading" style={{marginTop: '10px'}}>
+                    <Typography gutterBottom variant="subtitle1" style={{marginTop: '10px'}}>
                         Work Areas
                     </Typography>
                     <Typography>
@@ -616,7 +620,7 @@ class DirectoryInfoBoard extends React.Component {
                     open={Boolean(this.state.message)}
                     onClose={this.handleCloseSnackbar}
                     message={<span>{this.state.message}</span>}
-                    SnackbarContentProps={{
+                    ContentProps={{
                         "style": this.getErrorClass()
                     }}
                 />
@@ -649,4 +653,4 @@ class DirectoryInfoBoard extends React.Component {
     }
 }
 
-module.exports = DirectoryInfoBoard;
+export default DirectoryInfoBoard;

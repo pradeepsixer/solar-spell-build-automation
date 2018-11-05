@@ -34,7 +34,7 @@ function get_url(templateStringLiteral, context) {
     return templateStringLiteral;
 }
 
-module.exports = {
-    APP_URLS: APP_URLS,
-    get_url: get_url
+export {
+    APP_URLS,
+    get_url
 };

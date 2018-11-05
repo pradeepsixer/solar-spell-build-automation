@@ -4,11 +4,11 @@ import React from 'react';
 import Downshift from 'downshift';
 import keycode from 'keycode';
 
-import Chip from 'material-ui/Chip';
-import { MenuItem } from 'material-ui/Menu';
-import Paper from 'material-ui/Paper';
-import TextField from 'material-ui/TextField';
-import { withStyles } from 'material-ui/styles';
+import Chip from '@material-ui/core/Chip';
+import MenuItem from '@material-ui/core/MenuItem';
+import Paper from '@material-ui/core/Paper';
+import TextField from '@material-ui/core/TextField';
+import { withStyles } from '@material-ui/core/styles';
 
 
 const MAX_COUNT = 10;

@@ -1,16 +1,18 @@
 import React from 'react';
 import {APP_URLS} from "./url";
 import axios from 'axios';
-import LinearProgress from 'material-ui/Progress/LinearProgress';
-import Grid from 'material-ui/Grid';
-import { withStyles } from "material-ui/styles";
-import Select from 'material-ui/Select';
-import { FormControl, FormControlLabel } from 'material-ui/Form';
-import { InputLabel } from 'material-ui/Input';
-import { MenuItem } from 'material-ui/Menu';
-import Paper from 'material-ui/Paper';
-import Radio, { RadioGroup } from 'material-ui/Radio';
+import LinearProgress from '@material-ui/core/LinearProgress';
+import Grid from '@material-ui/core/Grid';
+import { withStyles } from '@material-ui/core/styles';
+import Select from '@material-ui/core/Select';
+import { FormControl, FormControlLabel } from '@material-ui/core';
+import InputLabel from '@material-ui/core/InputLabel';
+import MenuItem from '@material-ui/core/MenuItem';
+import Paper from '@material-ui/core/Paper';
+import Radio from '@material-ui/core/Radio';
+import RadioGroup from '@material-ui/core/RadioGroup';
 import Chart from 'chart.js';
+import {Doughnut} from 'react-chartjs-2';
 
 
 const styles = {
@@ -31,8 +33,6 @@ const styles = {
       fontWeight: 'bold',
     }
 };
-
-var DoughnutChart = require("react-chartjs").Doughnut;
 
 class DiskSpace extends React.Component {
     constructor(props) {
@@ -149,7 +149,7 @@ class DiskSpace extends React.Component {
                     <Grid item xs/>
                     <Grid item xs={6}>
                     <h5 align="center">Hover over the Doughnut to view the values</h5>
-                        <DoughnutChart data={[
+                        <Doughnut data={[
                           {
                             value: (this.used/this.state.multiplier).toFixed(2),
                             color: '#F7464A',

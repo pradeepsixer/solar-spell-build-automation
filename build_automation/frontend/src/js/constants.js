@@ -20,7 +20,7 @@ const DIRLAYOUT_SAVE_TYPE = Object.freeze(__DIRLAYOUT_SAVE_TYPE);
 const HTTP_STATUS = Object.freeze(__HTTP_STATUS);
 const TAG_SAVE_TYPE = Object.freeze(__TAG_SAVE_TYPE);
 
-module.exports = {
+export {
     DIRLAYOUT_SAVE_TYPE,
     HTTP_STATUS,
     TAG_SAVE_TYPE,

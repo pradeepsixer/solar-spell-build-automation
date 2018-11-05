@@ -1,13 +1,13 @@
 import axios from 'axios';
 import React from 'react';
 
-import Checkbox from 'material-ui/Checkbox';
-import { FormGroup, FormControlLabel } from 'material-ui/Form';
-import Grid from 'material-ui/Grid';
-import ListSubheader from 'material-ui/List/ListSubheader';
-import List, { ListItem, ListItemIcon, ListItemText } from 'material-ui/List';
+import Checkbox from '@material-ui/core/Checkbox';
+import { FormGroup, FormControlLabel } from '@material-ui/core';
+import Grid from '@material-ui/core/Grid';
+import ListSubheader from '@material-ui/core/ListSubheader';
+import { List, ListItem, ListItemIcon, ListItemText } from '@material-ui/core';
 import PropTypes from 'prop-types';
-import Typography from 'material-ui/Typography';
+import Typography from '@material-ui/core/Typography';
 
 import { APP_URLS } from './url.js';
 import DownloadBuild from './download_build.js';
@@ -103,7 +103,7 @@ class ViewBuildComponent extends React.Component{
                             };
                     const currBuild = (
                         <div>
-                            <Typography variant="headline" gutterBottom>
+                            <Typography variant="h5" gutterBottom>
                                 {currInstance.state.name}
                             </Typography>
                         </div>
@@ -155,7 +155,7 @@ class ViewBuildComponent extends React.Component{
         else if(this.state.isLoaded && this.state.noOfBuilds == 0){
             elements = (
                 <div>
-                   <Typography variant="display1" gutterBottom>
+                   <Typography variant="h4" gutterBottom>
                             No Images are currently available.
                    </Typography>
 
@@ -165,7 +165,7 @@ class ViewBuildComponent extends React.Component{
         else if(this.state.isLoaded && this.state.noOfBuilds == -1){
             elements = (
                 <div>
-                   <Typography variant="display1" gutterBottom>
+                   <Typography variant="h4" gutterBottom>
                             Image Creation in progress..
                    </Typography>
 
@@ -184,4 +184,4 @@ class ViewBuildComponent extends React.Component{
     }
 }
 
-module.exports = ViewBuildComponent
+export default ViewBuildComponent;

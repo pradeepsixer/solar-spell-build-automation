@@ -1,6 +1,6 @@
 import React from 'react';
 
-import Typography from 'material-ui/Typography';
+import Typography from '@material-ui/core/Typography';
 
 import {
     DataTypeProvider,
@@ -21,13 +21,15 @@ import {
     PagingPanel,
 } from '@devexpress/dx-react-grid-material-ui';
 
-import { TableCell, TableRow } from 'material-ui/Table';
+import TableCell from '@material-ui/core/TableCell';
+import TableRow from '@material-ui/core/TableRow';
 
-import Chip from 'material-ui/Chip';
-import Menu, { MenuItem } from 'material-ui/Menu';
-import Input from 'material-ui/Input';
+import Chip from '@material-ui/core/Chip';
+import Menu from '@material-ui/core/Menu';
+import MenuItem from '@material-ui/core/MenuItem';
+import Input from '@material-ui/core/Input';
 
-import OpenInNew from 'material-ui-icons/OpenInNew';
+import OpenInNew from '@material-ui/icons/OpenInNew';
 
 import AutoCompleteFilter from './autocomplete_filter.js';
 
@@ -214,7 +216,7 @@ class FileSelectionComponent extends React.Component {
     render() {
         return (
             <React.Fragment>
-                <Typography gutterBottom variant="headline" component="h2">
+                <Typography gutterBottom variant="h5" component="h2">
                     Select individual files
                 </Typography>
                 <Grid rows={this.props.allFiles} columns={this.columns}>
@@ -258,7 +260,7 @@ class FileSelectionComponent extends React.Component {
                     </MenuItem>
                 </Menu>
                 <div style={{marginTop: '20px'}}></div>
-                <Typography gutterBottom variant="headline" component="h2">
+                <Typography gutterBottom variant="h5" component="h2">
                     Selected Files
                 </Typography>
                 <Grid rows={this.state.selectedFiles} columns={this.columns}>
@@ -306,4 +308,4 @@ class FileSelectionComponent extends React.Component {
     }
 }
 
-module.exports = FileSelectionComponent;
+export default FileSelectionComponent;

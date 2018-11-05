@@ -1,10 +1,14 @@
 import axios from 'axios';
 import React from 'react';
 
-import Button from 'material-ui/Button';
-import Dialog, { DialogActions, DialogContent, DialogContentText, DialogTitle } from 'material-ui/Dialog';
-import TextField from 'material-ui/TextField';
-import Snackbar from 'material-ui/Snackbar';
+import Button from '@material-ui/core/Button';
+import Dialog from '@material-ui/core/Dialog';
+import DialogActions from '@material-ui/core/DialogActions';
+import DialogContent from '@material-ui/core/DialogContent';
+import DialogContentText from '@material-ui/core/DialogContentText';
+import DialogTitle from '@material-ui/core/DialogTitle';
+import TextField from '@material-ui/core/TextField';
+import Snackbar from '@material-ui/core/Snackbar';
 
 import { APP_URLS, get_url } from './url.js';
 
@@ -93,7 +97,7 @@ class MakeBuildDirlayoutInfo extends React.Component{
                   value={this.state.description || ''}
                   margin="normal"
                 />
-                <Button variant="raised" color="primary" onClick={this.confirmBuildDirectory}>
+                <Button variant="contained" color="primary" onClick={this.confirmBuildDirectory}>
                     Start Build
                 </Button>
                 <Dialog
@@ -125,7 +129,7 @@ class MakeBuildDirlayoutInfo extends React.Component{
                     open={Boolean(this.state.message)}
                     onClose={this.handleCloseSnackbar}
                     message={<span>{this.state.message}</span>}
-                    SnackbarContentProps={{
+                    ContentProps={{
                         "style": this.getErrorClass()
                     }}
                 />
@@ -145,4 +149,4 @@ class MakeBuildDirlayoutInfo extends React.Component{
     }
 }
 
-module.exports = MakeBuildDirlayoutInfo
+export default MakeBuildDirlayoutInfo;

@@ -1,16 +1,16 @@
 import React from 'react';
-import Button from 'material-ui/Button';
-import Grid from 'material-ui/Grid';
-import AppBar from 'material-ui/AppBar';
-import Typography from 'material-ui/Typography';
+import Button from '@material-ui/core/Button';
+import Grid from '@material-ui/core/Grid';
+import AppBar from '@material-ui/core/AppBar';
+import Typography from '@material-ui/core/Typography';
 import AutoCompleteWithChips from './autocomplete.js';
-import TextField from 'material-ui/TextField';
+import TextField from '@material-ui/core/TextField';
 import { DatePicker } from 'material-ui-pickers';
 import {APP_URLS, get_url} from "./url";
-import Snackbar from 'material-ui/Snackbar';
+import Snackbar from '@material-ui/core/Snackbar';
 import DateFnsUtils from 'material-ui-pickers/utils/date-fns-utils';
-import MuiPickersUtilsProvider from 'material-ui-pickers/utils/MuiPickersUtilsProvider';
-import {ChevronLeft, ChevronRight} from 'material-ui-icons';
+import {MuiPickersUtilsProvider} from 'material-ui-pickers';
+import {ChevronLeft, ChevronRight} from '@material-ui/icons';
 import axios from 'axios';
 import {buildMapFromArray} from "./utils";
 
@@ -350,7 +350,7 @@ class UploadContent extends React.Component{
         return (
             <Grid item xs={8}>
                 <AppBar position="static" style={{ height: '50px', margin: 'auto'}}>
-                    <Typography gutterBottom variant="subheading" style={{color: '#ffffff'}}>
+                    <Typography gutterBottom variant="subtitle1" style={{color: '#ffffff'}}>
 
                     </Typography>
                 </AppBar>
@@ -370,14 +370,14 @@ class UploadContent extends React.Component{
                 <input
                     accept="*"
                     className={'hidden'}
-                    id="raised-button-file"
+                    id="upload-file"
                     multiple
                     type="file"
                     ref={input => {this.fileInput = input;}}
                     onChange={this.handleFileSelection}
                 />
-                <label htmlFor="raised-button-file">
-                    <Button variant="raised" component="span">
+                <label htmlFor="upload-file">
+                    <Button variant="contained" component="span">
                         Browse
                     </Button>
                 </label>
@@ -412,7 +412,7 @@ class UploadContent extends React.Component{
                     />
                 </MuiPickersUtilsProvider>
                 <div style={{marginTop: '20px'}}> </div>
-                <Typography gutterBottom variant="subheading">
+                <Typography gutterBottom variant="subtitle1">
                     Creator(s)
                 </Typography>
                 <span>
@@ -421,7 +421,7 @@ class UploadContent extends React.Component{
                                                    onAddition={this.handleCreatorAddition} onDeletion={this.handleCreatorDeletion}/>
                         </span>
                 <div style={{marginTop: '20px'}}> </div>
-                <Typography gutterBottom variant="subheading">
+                <Typography gutterBottom variant="subtitle1">
                     Coverage
                 </Typography>
                 <span>
@@ -430,7 +430,7 @@ class UploadContent extends React.Component{
                                                    onAddition={this.handleCoverageAddition} onDeletion={this.handleCoverageDeletion}/>
                         </span>
                 <div style={{marginTop: '20px'}}> </div>
-                <Typography gutterBottom variant="subheading">
+                <Typography gutterBottom variant="subtitle1">
                     Subject(s)
                 </Typography>
                 <span>
@@ -439,7 +439,7 @@ class UploadContent extends React.Component{
                                                    onAddition={this.handleSubjectAddition} onDeletion={this.handleSubjectDeletion}/>
                         </span>
                 <div style={{marginTop: '20px'}}> </div>
-                <Typography gutterBottom variant="subheading">
+                <Typography gutterBottom variant="subtitle1">
                     Keywords
                 </Typography>
                 <span>
@@ -448,7 +448,7 @@ class UploadContent extends React.Component{
                                                    onAddition={this.handleKeywordAddition} onDeletion={this.handleKeywordDeletion}/>
                         </span>
                 <div style={{marginTop: '20px'}}> </div>
-                <Typography gutterBottom variant="subheading">
+                <Typography gutterBottom variant="subtitle1">
                     Work Area(s)
                 </Typography>
                 <span>
@@ -457,7 +457,7 @@ class UploadContent extends React.Component{
                                                    onAddition={this.handleWorkareaAddition} onDeletion={this.handleWorkareaDeletion}/>
                         </span>
                 <div style={{marginTop: '20px'}}> </div>
-                <Typography gutterBottom variant="subheading">
+                <Typography gutterBottom variant="subtitle1">
                     Language
                 </Typography>
                 <span>
@@ -466,7 +466,7 @@ class UploadContent extends React.Component{
                                                    onAddition={this.handleLanguageAddition} onDeletion={this.handleLanguageDeletion}/>
                         </span>
                 <div style={{marginTop: '20px'}}> </div>
-                <Typography gutterBottom variant="subheading">
+                <Typography gutterBottom variant="subtitle1">
                     Cataloger
                 </Typography>
                 <span>
@@ -501,7 +501,7 @@ class UploadContent extends React.Component{
                     fullWidth
                     margin="normal"
                 />
-                <Button variant="raised" component="span" onClick={this.saveContent}>
+                <Button variant="contained" component="span" onClick={this.saveContent}>
                     Save
                 </Button>
 
@@ -514,7 +514,7 @@ class UploadContent extends React.Component{
                     open={Boolean(this.state.message)}
                     onClose={this.handleCloseSnackbar}
                     message={<span>{this.state.message}</span>}
-                    SnackbarContentProps={{
+                    ContentProps={{
                         "style": this.getErrorClass()
                     }}
                 />
@@ -532,4 +532,4 @@ class UploadContent extends React.Component{
         })
     }
 }
-module.exports = UploadContent;
+export default UploadContent;
