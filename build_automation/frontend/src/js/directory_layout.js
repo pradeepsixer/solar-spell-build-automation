@@ -2,19 +2,23 @@ import axios from 'axios';
 import React from 'react';
 import cloneDeep from 'lodash/fp/cloneDeep';
 
-import AppBar from 'material-ui/AppBar';
-import Button from 'material-ui/Button';
-import ChevronRight from 'material-ui-icons/ChevronRight';
-import Collapse from 'material-ui/transitions/Collapse';
-import ExpandLess from 'material-ui-icons/ExpandLess';
-import ExpandMore from 'material-ui-icons/ExpandMore';
-import Grid from 'material-ui/Grid';
-import ListSubheader from 'material-ui/List/ListSubheader';
-import List, { ListItem, ListItemIcon, ListItemText } from 'material-ui/List';
-import Menu, { MenuItem } from 'material-ui/Menu';
-import Snackbar from 'material-ui/Snackbar';
-import Typography from 'material-ui/Typography';
-import Divider from 'material-ui/Divider';
+import AppBar from '@material-ui/core/AppBar';
+import Button from '@material-ui/core/Button';
+import ChevronRight from '@material-ui/icons/ChevronRight';
+import Collapse from '@material-ui/core/Collapse';
+import ExpandLess from '@material-ui/icons/ExpandLess';
+import ExpandMore from '@material-ui/icons/ExpandMore';
+import Grid from '@material-ui/core/Grid';
+import ListSubheader from '@material-ui/core/ListSubheader';
+import List from '@material-ui/core/List';
+import ListItem from '@material-ui/core/ListItem';
+import ListItemIcon from '@material-ui/core/ListItemIcon';
+import ListItemText from '@material-ui/core/ListItemText';
+import Menu from '@material-ui/core/Menu';
+import MenuItem from '@material-ui/core/MenuItem';
+import Snackbar from '@material-ui/core/Snackbar';
+import Typography from '@material-ui/core/Typography';
+import Divider from '@material-ui/core/Divider';
 
 import SortableTree from 'react-sortable-tree';
 
@@ -412,7 +416,7 @@ class DirectoryLayoutComponent extends React.Component {
                 { eachDirLayout.isOpen ? <ExpandLess /> : <ExpandMore /> }
                 </ListItem>);
                 accordionItems.push(<Collapse key={'collapse-' + eachDirLayout.id} in={eachDirLayout.isOpen} timeout="auto" unmountOnExit>
-                <Button variant="raised" color="primary" onClick={evt => {this.createDirectory(eachDirLayout, null); }} style={{display: 'block', marginLeft: 'auto', marginRight: 'auto'}}>
+                <Button variant="contained" color="primary" onClick={evt => {this.createDirectory(eachDirLayout, null); }} style={{display: 'block', marginLeft: 'auto', marginRight: 'auto'}}>
                         New Top Folder
                 </Button>
                 <div className={'autoScrollX'}>
@@ -450,7 +454,7 @@ class DirectoryLayoutComponent extends React.Component {
             elements = (
                 <Grid container spacing={8}>
                     <Grid item xs={3} style={{paddingLeft: '20px'}}>
-                        <Button variant="raised" color="primary" onClick={this.createDirectoryLayout} style={{display: 'block', marginLeft: 'auto', marginRight: 'auto'}}>
+                        <Button variant="contained" color="primary" onClick={this.createDirectoryLayout} style={{display: 'block', marginLeft: 'auto', marginRight: 'auto'}}>
                             New Library Version
                         </Button>
                         <List component="nav">
@@ -462,7 +466,7 @@ class DirectoryLayoutComponent extends React.Component {
                     </Grid>
                     <Grid item xs={8}>
                         <AppBar position="static" style={{ minHeight: '50px', margin: 'auto', padding: '13px 0px 7px 10px'}}>
-                            <Typography gutterBottom variant="subheading" style={{color: '#ffffff'}}>
+                            <Typography gutterBottom variant="subtitle1" style={{color: '#ffffff'}}>
                             {
                                 breadCrumbItems
                             }
@@ -767,4 +771,4 @@ class DirectoryLayoutComponent extends React.Component {
     }
 }
 
-module.exports = DirectoryLayoutComponent;
+export default DirectoryLayoutComponent;

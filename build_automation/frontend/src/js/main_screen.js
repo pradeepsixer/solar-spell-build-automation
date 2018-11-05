@@ -6,16 +6,15 @@ import DiskSpace from './diskspace.js';
 import TagManagement from './tag_management';
 
 import BuildProcessComponent from './build_process.js';
-import Badge from 'material-ui/Badge';
-import Grid from 'material-ui/Grid';
-import Paper from 'material-ui/Paper';
-import Tabs, { Tab } from 'material-ui/Tabs';
-import Typography from 'material-ui/Typography';
-import { withStyles } from 'material-ui/styles';
+import Badge from '@material-ui/core/Badge';
+import Grid from '@material-ui/core/Grid';
+import Paper from '@material-ui/core/Paper';
+import Tabs from '@material-ui/core/Tabs';
+import Tab from '@material-ui/core/Tab';
+import Typography from '@material-ui/core/Typography';
+import { withStyles } from '@material-ui/core/styles';
 import {APP_URLS} from "./url";
 import axios from 'axios';
-
-
 
 import solarSpellLogo from '../images/logo.png';
 import '../css/style.css';

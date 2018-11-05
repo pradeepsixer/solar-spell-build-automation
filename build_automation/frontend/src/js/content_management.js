@@ -1,8 +1,8 @@
 import React from 'react';
-import Button from 'material-ui/Button';
-import Grid from 'material-ui/Grid';
+import Button from '@material-ui/core/Button';
+import Grid from '@material-ui/core/Grid';
 import UploadContent from './upload_content';
-import Snackbar from 'material-ui/Snackbar';
+import Snackbar from '@material-ui/core/Snackbar';
 import FileListComponent from './file_list_component';
 import {buildMapFromArray} from './utils';
 import {APP_URLS} from "./url";
@@ -188,11 +188,11 @@ class ContentManagement extends React.Component{
                 <Grid container spacing={8} style={{paddingLeft: '20px'}}>
                     <Grid item xs={3} style={{paddingLeft: '20px'}}>
                         <h3>Content Management</h3>
-                        <Button variant="raised" color="primary" onClick={e => {this.setCurrentView('manage')}}>
+                        <Button variant="contained" color="primary" onClick={e => {this.setCurrentView('manage')}}>
                             Manage Content
                         </Button>
                         <div style={{marginTop: '20px'}}> </div>
-                        <Button variant="raised" color="primary" onClick={e => {this.uploadNewFile()}}>
+                        <Button variant="contained" color="primary" onClick={e => {this.uploadNewFile()}}>
                             Add Content
                         </Button>
                     </Grid>
@@ -215,7 +215,7 @@ class ContentManagement extends React.Component{
                     open={Boolean(this.state.message)}
                     onClose={this.handleCloseSnackbar}
                     message={<span>{this.state.message}</span>}
-                    SnackbarContentProps={{
+                    ContentProps={{
                         "style": this.getErrorClass()
                     }}
                 />
@@ -234,4 +234,4 @@ class ContentManagement extends React.Component{
         })
     }
 }
-module.exports = ContentManagement;
+export default ContentManagement;

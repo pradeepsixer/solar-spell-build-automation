@@ -1,13 +1,19 @@
 import React from 'react';
-import Typography from 'material-ui/Typography';
-import Chip from 'material-ui/Chip';
-import Button from 'material-ui/Button';
-import Menu, { MenuItem } from 'material-ui/Menu';
-import Snackbar from 'material-ui/Snackbar';
-import { TableCell, TableRow } from 'material-ui/Table';
+import Typography from '@material-ui/core/Typography';
+import Chip from '@material-ui/core/Chip';
+import Button from '@material-ui/core/Button';
+import Menu from '@material-ui/core/Menu';
+import MenuItem from '@material-ui/core/MenuItem';
+import Snackbar from '@material-ui/core/Snackbar';
+import TableCell from '@material-ui/core/TableCell';
+import TableRow from '@material-ui/core/TableRow';
 import AutoCompleteFilter from './autocomplete_filter.js';
-import Input from 'material-ui/Input';
-import Dialog, { DialogActions, DialogContent, DialogContentText, DialogTitle } from 'material-ui/Dialog';
+import Input from '@material-ui/core/Input';
+import Dialog from '@material-ui/core/Dialog';
+import DialogActions from '@material-ui/core/DialogActions';
+import DialogContent from '@material-ui/core/DialogContent';
+import DialogContentText from '@material-ui/core/DialogContentText';
+import DialogTitle from '@material-ui/core/DialogTitle';
 import axios from 'axios';
 import { APP_URLS, get_url } from './url.js';
 
@@ -186,7 +192,7 @@ class FileListComponent extends React.Component {
     render() {
         return (
             <React.Fragment>
-                <Typography gutterBottom variant="headline" component="h2">
+                <Typography gutterBottom variant="h5" component="h2">
                     Select individual files
                 </Typography>
                 <Grid
@@ -276,7 +282,7 @@ class FileListComponent extends React.Component {
                     open={Boolean(this.state.message)}
                     onClose={this.handleCloseSnackbar}
                     message={<span>{this.state.message}</span>}
-                    SnackbarContentProps={{
+                    ContentProps={{
                         "style": this.getErrorClass()
                     }}
                 />
@@ -294,4 +300,4 @@ class FileListComponent extends React.Component {
         })
     }
 }
-module.exports = FileListComponent;
+export default FileListComponent;

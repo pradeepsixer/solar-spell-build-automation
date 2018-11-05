@@ -1,12 +1,15 @@
 import axios from 'axios';
 import React from 'react';
 
-import { AutoComplete } from 'material-ui';
-import { FormLabel, FormControl, FormControlLabel, FormHelperText } from 'material-ui/Form';
-import Grid from 'material-ui/Grid';
-import ListSubheader from 'material-ui/List/ListSubheader';
-import List, { ListItem, ListItemIcon, ListItemText } from 'material-ui/List';
-import Radio, { RadioGroup } from 'material-ui/Radio';
+import { FormLabel, FormControl, FormControlLabel, FormHelperText } from '@material-ui/core';
+import Grid from '@material-ui/core/Grid';
+import ListSubheader from '@material-ui/core/ListSubheader';
+import List from '@material-ui/core/List';
+import ListItem from '@material-ui/core/ListItem';
+import ListItemIcon from '@material-ui/core/ListItemIcon';
+import ListItemText from '@material-ui/core/ListItemText';
+import Radio from '@material-ui/core/Radio';
+import RadioGroup from '@material-ui/core/RadioGroup';
 
 import { APP_URLS } from './url.js';
 import MakeBuildDirlayoutInfo from './make_build_dirlayout.js';
@@ -95,4 +98,4 @@ class MakeBuildComponent extends React.Component{
     }
 }
 
-module.exports = MakeBuildComponent;
+export default MakeBuildComponent;

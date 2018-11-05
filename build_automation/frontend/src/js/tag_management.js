@@ -2,18 +2,21 @@ import axios from 'axios';
 import React from 'react';
 import TagCreation from './addTag'
 
-import Dialog, { DialogActions, DialogContent, DialogContentText, DialogTitle } from 'material-ui/Dialog';
-import Snackbar from 'material-ui/Snackbar';
-import OpenInNew from 'material-ui-icons/OpenInNew';
+import Dialog from '@material-ui/core/Dialog';
+import DialogActions from '@material-ui/core/DialogActions';
+import DialogContent from '@material-ui/core/DialogContent';
+import DialogContentText from '@material-ui/core/DialogContentText';
+import DialogTitle from '@material-ui/core/DialogTitle';
+import Snackbar from '@material-ui/core/Snackbar';
+import OpenInNew from '@material-ui/icons/OpenInNew';
 
-
-import Button from 'material-ui/Button';
-import TextField from 'material-ui/TextField';
-import Grid from 'material-ui/Grid';
+import Button from '@material-ui/core/Button';
+import TextField from '@material-ui/core/TextField';
+import Grid from '@material-ui/core/Grid';
 import ExpansionPanel, {
     ExpansionPanelDetails,
     ExpansionPanelSummary,
-} from 'material-ui/ExpansionPanel';
+} from '@material-ui/core/ExpansionPanel';
 
 import {
     DataTypeProvider,
@@ -23,20 +26,19 @@ import {
     PagingState,
 } from '@devexpress/dx-react-grid';
 import {
-    
     Grid as DataGrid,
     Table,
     TableHeaderRow,
     TableFilterRow,
     TableColumnResizing,
-    
     PagingPanel,
 } from '@devexpress/dx-react-grid-material-ui';
 
-import { TableRow } from 'material-ui/Table';
-import Menu, { MenuItem } from 'material-ui/Menu';
-import Typography from 'material-ui/Typography';
-import ExpandMoreIcon from 'material-ui-icons/ExpandMore';
+import TableRow from '@material-ui/core/TableRow';
+import Menu from '@material-ui/core/Menu';
+import MenuItem from '@material-ui/core/MenuItem';
+import Typography from '@material-ui/core/Typography';
+import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import { APP_URLS, get_url } from "./url";
 import cloneDeep from 'lodash/fp/cloneDeep';
 import { TAG_SAVE_TYPE } from './constants.js';
@@ -205,7 +207,7 @@ class TagManagementComponent extends React.Component {
             }
         });
         evt.preventDefault();
-        
+
     }
 
 
@@ -311,7 +313,7 @@ class TagManagementComponent extends React.Component {
         return (
             <Grid container spacing={0}>
                 <Grid item xs={4}>
-                    {/* <Button variant="raised" color="primary" onClick={e => {this.setCurrentView('manage')}}>
+                    {/* <Button variant="contained" color="primary" onClick={e => {this.setCurrentView('manage')}}>
             Manage MetaData
             </Button> */}
 
@@ -339,8 +341,6 @@ class TagManagementComponent extends React.Component {
                                             <IntegratedPaging />
                                             <Table rowComponent={obj => { return this.tableRowComponent(obj, 'selectedTagsMenu') }} />
                                             <TableHeaderRow />
-                                            
-                                            
                                             <TableFilterRow />
                                             <PagingPanel pageSizes={[5, 10, 20]} />
 
@@ -355,7 +355,7 @@ class TagManagementComponent extends React.Component {
                                 <ExpansionPanelDetails>
                                     <Grid container>
                                         <Grid item>
-                                            <Button variant="raised" color="primary" onClick={e => { this.addNewTag('Coverages') }}>
+                                            <Button variant="contained" color="primary" onClick={e => { this.addNewTag('Coverages') }}>
                                                 Add New
             </Button>
                                         </Grid>
@@ -369,8 +369,8 @@ class TagManagementComponent extends React.Component {
                                             <IntegratedPaging />
                                             <Table rowComponent={obj => { return this.tableRowComponent(obj, 'selectedTagsMenu') }} />
                                             <TableHeaderRow />
-                                            
-                                            
+
+
                                             <TableFilterRow />
                                             <PagingPanel pageSizes={[5, 10, 20]} />
                                         </DataGrid>
@@ -384,7 +384,7 @@ class TagManagementComponent extends React.Component {
                                 <ExpansionPanelDetails>
                                     <Grid container>
                                         <Grid item>
-                                            <Button variant="raised" color="primary" onClick={e => { this.addNewTag('Subjects') }}>
+                                            <Button variant="contained" color="primary" onClick={e => { this.addNewTag('Subjects') }}>
                                                 Add New
             </Button>
                                         </Grid>
@@ -398,8 +398,6 @@ class TagManagementComponent extends React.Component {
                                             <IntegratedPaging />
                                             <Table rowComponent={obj => { return this.tableRowComponent(obj, 'selectedTagsMenu') }} />
                                             <TableHeaderRow />
-                                            
-                                            
                                             <TableFilterRow />
                                             <PagingPanel pageSizes={[5, 10, 20]} />
                                         </DataGrid>
@@ -425,8 +423,6 @@ class TagManagementComponent extends React.Component {
                                             <IntegratedPaging />
                                             <Table rowComponent={obj => { return this.tableRowComponent(obj, 'selectedTagsMenu') }} />
                                             <TableHeaderRow />
-                                            
-                                            
                                             <TableFilterRow />
                                             <PagingPanel pageSizes={[5, 10, 20]} />
 
@@ -441,7 +437,7 @@ class TagManagementComponent extends React.Component {
                                 <ExpansionPanelDetails>
                                     <Grid container>
                                         <Grid item>
-                                            <Button variant="raised" color="primary" onClick={e => { this.addNewTag('Work Areas') }}>
+                                            <Button variant="contained" color="primary" onClick={e => { this.addNewTag('Work Areas') }}>
                                                 Add New
             </Button>
                                         </Grid>
@@ -455,8 +451,6 @@ class TagManagementComponent extends React.Component {
                                             <IntegratedPaging />
                                             <Table rowComponent={obj => { return this.tableRowComponent(obj, 'selectedTagsMenu') }} />
                                             <TableHeaderRow />
-                                            
-                                            
                                             <TableFilterRow />
                                             <PagingPanel pageSizes={[5, 10, 20]} />
                                         </DataGrid>
@@ -470,7 +464,7 @@ class TagManagementComponent extends React.Component {
                                 <ExpansionPanelDetails>
                                     <Grid container>
                                         <Grid item>
-                                            <Button variant="raised" color="primary" onClick={e => { this.addNewTag('Languages') }}>
+                                            <Button variant="contained" color="primary" onClick={e => { this.addNewTag('Languages') }}>
                                                 Add New
             </Button>
                                         </Grid>
@@ -484,8 +478,6 @@ class TagManagementComponent extends React.Component {
                                             <IntegratedPaging />
                                             <Table rowComponent={obj => { return this.tableRowComponent(obj, 'selectedTagsMenu') }} />
                                             <TableHeaderRow />
-
-                                            
                                             <TableFilterRow />
                                             <PagingPanel pageSizes={[5, 10, 20]} />
                                         </DataGrid>
@@ -498,7 +490,7 @@ class TagManagementComponent extends React.Component {
                                 </ExpansionPanelSummary>
                                 <ExpansionPanelDetails>
                                     <Grid container>
-                                        <Grid item><Button variant="raised" color="primary" onClick={e => { this.addNewTag('Catalogers') }}>
+                                        <Grid item><Button variant="contained" color="primary" onClick={e => { this.addNewTag('Catalogers') }}>
                                             Add New
             </Button>
                                         </Grid>
@@ -512,8 +504,6 @@ class TagManagementComponent extends React.Component {
                                             <IntegratedPaging />
                                             <Table rowComponent={obj => { return this.tableRowComponent(obj, 'selectedTagsMenu') }} />
                                             <TableHeaderRow />
-                                            
-                                           
                                             <TableFilterRow />
                                             <PagingPanel pageSizes={[5, 10, 20]} />
                                         </DataGrid>
@@ -574,7 +564,7 @@ class TagManagementComponent extends React.Component {
                             open={Boolean(this.state.message)}
                             onClose={this.handleCloseSnackbar}
                             message={<span>{this.state.message}</span>}
-                            SnackbarContentProps={{
+                            ContentProps={{
                                 "style": this.getErrorClass()
                             }}
                         />
@@ -585,7 +575,7 @@ class TagManagementComponent extends React.Component {
                 )}
                 {
                     this.state.currentView == 'addTag' &&
-                    <TagCreation tag={this.state.selectedTag} title={this.state.currentTitle} onSave={this.saveTagCallback} 
+                    <TagCreation tag={this.state.selectedTag} title={this.state.currentTitle} onSave={this.saveTagCallback}
                         onCancel={() => this.setCurrentView('manage')} listUrl={this.state.listUrl}
                         detailUrl={this.state.detailUrl} />
                 }
@@ -604,4 +594,4 @@ class TagManagementComponent extends React.Component {
     }
 }
 
-module.exports = TagManagementComponent;
+export default TagManagementComponent;

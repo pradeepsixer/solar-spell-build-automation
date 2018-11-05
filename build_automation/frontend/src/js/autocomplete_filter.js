@@ -63,4 +63,4 @@ AutoCompleteFilter.defaultProps = {
     filterKey: 'id',
 }
 
-module.exports = AutoCompleteFilter;
+export default AutoCompleteFilter;
